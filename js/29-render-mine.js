@@ -126,7 +126,7 @@ function drawHellBackdrop(g,W,H,cam,bi,T,shift){
       g.globalAlpha=0.18*(1-ph);g.fillStyle='#c8ff4a';g.beginPath();g.arc(x<0?x+W:x,H*(1-ph),4+ph*8,0,TAU);g.fill();}
     g.globalCompositeOperation='source-over';
   }else if(bi===8){
-    /* костяные катакомбы: дальняя стена-оссуарий с нишами и черепами, ближе -- колонны с арками */
+    /* костяные катакомбы: дальняя стена-оссуарий с нишами и черепами, ближе — колонны с арками */
     const px=shift(0.12,280);
     g.globalAlpha=0.22;
     for(let i=-1;i<Math.ceil(W/70)+2;i++)for(let r=0;r<3;r++){
@@ -243,7 +243,7 @@ function drawBackdrop(g,W,H,cam,depth,bi,B){
 
 /* Декор биомов: корни, сталактиты, грибы, кристаллы, крепь штолен, трещины магмы... */
 let _dg=null;
-/* паутина в углу: (cx,cy) -- угол, dx -- направление от стены */
+/* паутина в углу: (cx,cy) — угол, dx — направление от стены */
 function drawCobweb(g,cx,cy,dx,sz){
   g.strokeStyle='rgba(215,220,230,.32)';g.lineWidth=0.6;g.beginPath();
   const n=4;for(let k=0;k<=n;k++){const a=(k/n)*Math.PI/2;g.moveTo(cx,cy);g.lineTo(cx+dx*Math.cos(a)*sz,cy+Math.sin(a)*sz);}
@@ -251,7 +251,7 @@ function drawCobweb(g,cx,cy,dx,sz){
     if(k===0)g.moveTo(cx+dx*Math.cos(a0)*rr,cy+Math.sin(a0)*rr);g.quadraticCurveTo(cx+dx*Math.cos(am)*sag,cy+Math.sin(am)*sag,cx+dx*Math.cos(a1)*rr,cy+Math.sin(a1)*rr);}}
   g.stroke();
 }
-/* галереи Катакомб: колонны со сводами, фонари душ, саркофаги и надгробия; true -- клетку больше не украшать */
+/* галереи Катакомб: колонны со сводами, фонари душ, саркофаги и надгробия; true — клетку больше не украшать */
 function catCryptDecor(g,x,y,tx,ty,h,up,dn,time,gl){
   const c=catBand(ty);if(c.row<1||c.row>3||tx<c.x0||tx>c.x1)return false;
   const rel=tx-c.x0,span=c.x1-c.x0;
@@ -473,7 +473,7 @@ function drawBiomeDecor(g,tx0,tx1,ty0,ty1){
         if(bi>=5){hellAirDecor(g,x,y,tx,ty,bi,h,up,dn,time,gl,solid);continue;}
         const gk=(bi===2)?geodeAt(tx,ty):0;
         if(gk===1){
-          /* внутри геоды -- крупные светящиеся кристаллы */
+          /* внутри геоды — крупные светящиеся кристаллы */
           if(h%3!==0){
             const col=PAL4[(h>>>3)%4];
             g.fillStyle=col;g.globalAlpha=0.92;
@@ -755,7 +755,7 @@ function drawStructWalls(g,tx0,tx1,ty0,ty1){
         const t=getTile(wx,wy);
         if(t!==T_AIR&&!isLiq(t)&&t!==T_LADDER)continue;
         drawStructWall(g,style,wx*TILE,wy*TILE,wx,wy,isSolid(wx,wy-1));
-        /* колонны и арки на задней стене -- глубина интерьера */
+        /* колонны и арки на задней стене — глубина интерьера */
         if(q.tw>=9&&(c-3)%6===0&&c>1&&c<q.tw-2)drawStructColumn(g,style,wx*TILE,wy*TILE,isSolid(wx,wy-1),isSolid(wx,wy+1));
       }
     }

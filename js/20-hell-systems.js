@@ -78,7 +78,7 @@ const MOB_LORE={
   devourer:'Страж Ключа Бездны. Три фазы: сферы, луч, шипы, спираль, метеоры.'
 };
 
-/* точка под потолком пещеры над уровнем игрока; null -- если там сплошная порода или низкий тоннель */
+/* точка под потолком пещеры над уровнем игрока; null — если там сплошная порода или низкий тоннель */
 function skyAbove(x){const y0=player.y-player.h;if(solidAtPx(x,y0))return null;const cy=ceilAbove(x,y0);if(player.y-cy<3.2*TILE)return null;return cy+6;}
 function findTornadoSpot(){
   const ptx=Math.floor(player.x/TILE),pty=Math.floor((player.y-4)/TILE);
@@ -91,7 +91,7 @@ function findTornadoSpot(){
 }
 function spawnTornado(dur){const p=findTornadoSpot()||{x:clamp(player.x+(Math.random()<0.5?-1:1)*300,3*TILE,(MW-3)*TILE),y:player.y};
   hellFx.push({type:'tornado',x:p.x,y:p.y,t:0,warn:0,life:dur,dir:p.x<player.x?1:-1,hitT:0,born:0});}
-/* пол пещеры у точки x примерно на уровне игрока (null -- там сплошная порода) */
+/* пол пещеры у точки x примерно на уровне игрока (null — там сплошная порода) */
 function floorNear(x){const tx=Math.floor(x/TILE);let ty=Math.floor((player.y-16)/TILE);
   if(isSolid(tx,ty)){let k=0;while(k++<4&&isSolid(tx,ty))ty--;if(isSolid(tx,ty))return null;}
   let k=0;while(k++<8&&!isSolid(tx,ty+1))ty++;if(!isSolid(tx,ty+1))return null;return (ty+1)*TILE;}
@@ -109,7 +109,7 @@ function drawEvNotice(W,H){
   ctx.save();ctx.globalAlpha=a;ctx.textAlign='left';
   ctx.font='800 11px system-ui,sans-serif';
   let tw=ctx.measureText(title).width;
-  /* подзаголовок -- до двух строк мелким шрифтом */
+  /* подзаголовок — до двух строк мелким шрифтом */
   const lines=[];
   if(!N.end&&N.sub){ctx.font='600 9.5px system-ui,sans-serif';const words=N.sub.split(' ');let cur='';
     for(const w of words){const t2=cur?cur+' '+w:w;if(ctx.measureText(t2).width>maxW-22&&cur){lines.push(cur);cur=w;if(lines.length===2)break;}else cur=t2;}
@@ -144,7 +144,7 @@ function rainDrop(kind,spd){
   const aimed=kind!=='cold'&&Math.random()<0.35;
   const x=aimed?player.x+rnd(-60,60):G.cam.x+rnd(-hw,hw);let y=G.cam.y-hh-10;
   if(kind!=='cold'){if(solidAtPx(x,player.y-player.h))return;const cy=ceilAbove(x,player.y-player.h);
-    if(player.y-cy<3.5*TILE)return;               /* в низких тоннелях дождь не достаёт -- там можно укрыться */
+    if(player.y-cy<3.5*TILE)return;               /* в низких тоннелях дождь не достаёт — там можно укрыться */
     if(cy>y)y=cy+2;}
   hellFx.push({type:'drop',kind:kind,x:x,y:y,vy:spd||rnd(520,700),vx:kind==='cold'?(ashEv&&ashEv.dir||1)*rnd(220,320):rnd(-20,20),t:0,warn:0});
 }
@@ -255,7 +255,7 @@ function updAshFx(f,dt){ /* true -> удалить */
     return false;}
   if(f.type==='tornado'){
     /* смерч идёт по полу пещеры, упирается в стены, не действует сквозь породу,
-       а поймав игрока -- подбрасывает и выкидывает в сторону, а не держит на месте */
+       а поймав игрока — подбрасывает и выкидывает в сторону, а не держит на месте */
     const sp=62,dxp=player.x-f.x,sameLvl=Math.abs(player.y-f.y)<4*TILE;
     if(sameLvl&&Math.abs(dxp)>40)f.dir=Math.sign(dxp);
     else if(Math.random()<dt*0.3)f.dir=-f.dir;
@@ -263,8 +263,8 @@ function updAshFx(f,dt){ /* true -> удалить */
     if(solidAtPx(nx+f.dir*18,f.y-20)||solidAtPx(nx+f.dir*18,f.y-48))f.dir=-f.dir;
     else f.x=clamp(nx,3*TILE,(MW-3)*TILE);
     {let ty=Math.floor((f.y-6)/TILE);const tx=Math.floor(f.x/TILE);let k=0;
-      while(k++<6&&isSolid(tx,ty))ty--;                       /* въехал в ступеньку -- поднимается */
-      k=0;while(k++<10&&!isSolid(tx,ty+1))ty++;                 /* обрыв -- спускается на пол */
+      while(k++<6&&isSolid(tx,ty))ty--;                       /* въехал в ступеньку — поднимается */
+      k=0;while(k++<10&&!isSolid(tx,ty+1))ty++;                 /* обрыв — спускается на пол */
       const gy=(ty+1)*TILE;f.y+= (gy-f.y)*Math.min(1,dt*8);}
     const dx=player.x-f.x,dy=f.y-player.y,see=Math.abs(dy)<5*TILE&&lineClear(f.x,f.y-30,player.x,player.y-player.h*0.5);
     if(f.throwT>0)f.throwT-=dt;
@@ -277,7 +277,7 @@ function updAshFx(f,dt){ /* true -> удалить */
     for(const m of mobs){if(!m.alive||m.def.boss)continue;const mx=m.x-f.x;if(Math.abs(mx)<44&&Math.abs(m.y-f.y)<120){m.vx-=Math.sign(mx)*260*dt;m.tdT=(m.tdT||0)-dt;if(m.tdT<=0){m.tdT=0.5;damageMob(m,40,0);m.burn=Math.max(m.burn||0,2);}}}
     if(settings.quality!=='low'&&Math.random()<0.6)spawnPart(f.x+rnd(-24,24),f.y-rnd(0,170),rnd(-70,70),rnd(-140,-40),0.7,Math.random()<0.5?'#ff8a30':'#ffd060',2.4,-60);
     if(settings.quality!=='low'&&Math.random()<0.4)spawnPart(f.x+rnd(-16,16),f.y-2,rnd(-90,90),rnd(-60,-10),0.5,'#5a4a44',2.4,200);
-    /* ушёл далеко -- рассеивается и возникает рядом снова */
+    /* ушёл далеко — рассеивается и возникает рядом снова */
     if(Math.abs(player.y-f.y)>9*TILE||Math.abs(dx)>900){f.gone=(f.gone||0)+dt;if(f.gone>3){const left=f.life-f.t;if(left>4){const nf=findTornadoSpot();if(nf){f.x=nf.x;f.y=nf.y;f.gone=0;f.born=f.t;}}}}
     else f.gone=0;
     return f.t>f.life;}
@@ -532,7 +532,7 @@ function renderCutscene(dt){
   const pal=hell?{a:'#6a2ad0',b:'#ff4a1a',c:'#ffd080',d:'#2a0606'}:{a:'#2a6ad0',b:'#5ae0ff',c:'#e0fff8',d:'#06121a'};
   const rnd2=(k)=>{const x=Math.sin(k*127.1+c.seed)*43758.5;return x-Math.floor(x);};
   const ss=(a,b,x)=>{const q=clamp((x-a)/(b-a),0,1);return q*q*(3-2*q);};
-  /* каменное кольцо портала на постаменте: (x,y) -- центр кольца, r -- радиус, ig -- сила вихря */
+  /* каменное кольцо портала на постаменте: (x,y) — центр кольца, r — радиус, ig — сила вихря */
   const portalRing=(x,y,r,ig,col,lit,spin)=>{
     const gy=y+r*1.32;
     /* постамент со ступенями */
@@ -628,7 +628,7 @@ function renderCutscene(dt){
       ctx.fillStyle=hell?(i%3?'#2a1410':'#5a1a10'):(i%3?'#3a3a48':'#5a4a30');ctx.beginPath();ctx.moveTo(-sz,-sz*0.4);ctx.lineTo(-sz*0.2,-sz*0.8);ctx.lineTo(sz*0.9,-sz*0.3);ctx.lineTo(sz*0.6,sz*0.7);ctx.lineTo(-sz*0.7,sz*0.5);ctx.closePath();ctx.fill();
       ctx.fillStyle=hexA(i%2?pal.b:pal.c,0.9);ctx.fillRect(-sz*0.15,-sz*0.15,sz*0.3,sz*0.3);ctx.restore();}
     ctx.globalAlpha=1;
-    /* сам герой кувыркается в потоке -- видно, что это его путь */
+    /* сам герой кувыркается в потоке — видно, что это его путь */
     {const sc2=Math.min(1.3,H/520)*(0.7+0.3*Math.sin(k*2)),px=cx+Math.sin(k*1.6)*W*0.06,py=cy+Math.cos(k*1.3)*H*0.04;
       ctx.globalCompositeOperation='lighter';softGlow(ctx,px,py-12*sc2,40*sc2,pal.c,0.35);ctx.globalCompositeOperation='source-over';
       ctx.save();ctx.translate(px,py);ctx.rotate(k*2.6);ctx.scale(sc2,sc2);ctx.translate(0,22);drawPlayerSprite(ctx,0,0,'jump',k*2,1,{armor:player.armorLvl,pickLvl:player.pickLvl,torch:player.torchLvl,tool:null,swim:true});ctx.restore();}
@@ -661,7 +661,7 @@ function renderCutscene(dt){
     }
     /* вспышка прибытия */
     const fl=clamp(1-a0/0.5,0,1);if(fl>0){ctx.fillStyle='rgba(255,255,255,'+fl+')';ctx.fillRect(-20,-20,W+40,H+40);}
-    /* титр сверху -- не перекрывает сцену */
+    /* титр сверху — не перекрывает сцену */
     const tf=ss(1.4,2.2,a0)*(1-ss(3.6,4.1,a0));
     if(tf>0){
       const ty=H*0.84,ls=Math.max(0,1-(a0-1.4)/1.2);ctx.globalAlpha=tf;ctx.textAlign='center';
@@ -757,7 +757,7 @@ function minimapRect(){
   if(MM.big){const s=Math.min(W*0.86,H*0.7);return {x:(W-s)/2,y:(H-s)/2,s:s,n:120};}
   const base=[78,100,124][settings.minimapSize|0]||100;
   const s=Math.round(Math.min(base,W*0.3,H*0.26));
-  return {x:W-10-s,y:8+48+(G.dim===1||(player.souls||0)>0?24:0)+(settings.regen&&dugTiles.size>0?24:0),s:s,n:56};
+  return {x:W-10-s,y:Math.max(56,HUDL.rb+4),s:s,n:56};
 }
 const MM_SOLID={};
 function mmColor(t,o,bi){
@@ -835,7 +835,7 @@ function drawMinimap(){
       const ex=cx+Math.cos(ang)*(r0.s/2-14),ey=cy+Math.sin(ang)*(r0.s/2-14);
       g.save();g.translate(ex,ey);g.rotate(ang);g.fillStyle='#ffd060';g.beginPath();g.moveTo(6,0);g.lineTo(-4,-4);g.lineTo(-4,4);g.closePath();g.fill();g.restore();}
   }
-  /* якоря: внутри -- значок, за краем -- стрелка к ближайшему */
+  /* якоря: внутри — значок, за краем — стрелка к ближайшему */
   let nearest=null,nd=1e9;
   const ptx=player.x/TILE,pty=player.y/TILE;
   g.textAlign='center';g.textBaseline='middle';

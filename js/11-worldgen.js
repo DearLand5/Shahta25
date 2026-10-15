@@ -11,7 +11,7 @@ function getOreThreshold(or){
 }
 
 /* ------------ Тематические структуры биомов ------------ */
-/* естественный воздух (без структур) -- для проверки соседей */
+/* естественный воздух (без структур) — для проверки соседей */
 function isNaturalAir(wx,wy){
   if(wx<0||wx>=MW)return false;
   if(wy<0)return true;
@@ -25,7 +25,7 @@ function isNaturalAir(wx,wy){
   if(d>=1000&&Math.abs(vnoise((wx+wy*0.6)/12,(wy-wx*0.4)/12,s+606)-0.5)<0.017)air=true;
   return air;
 }
-/* Кристальные гроты: геоды -- полые шары с оболочкой из самоцветов */
+/* Кристальные гроты: геоды — полые шары с оболочкой из самоцветов */
 function geodeAt(wx,wy){
   if(wy<215||wy>480)return 0;
   const CS=38,cx=Math.floor(wx/CS),cy=Math.floor(wy/CS);
@@ -67,7 +67,7 @@ function pocketOre(wx,wy,d){
   if(d>=60&&r>0.45)return 5;
   return 4;
 }
-/* Бездна: монолиты -- зал с обсидиановой колонной и рунами */
+/* Бездна: монолиты — зал с обсидиановой колонной и рунами */
 function monolithAt(wx,wy){
   if(wy<1030)return 0;
   const CS=44,cx=Math.floor(wx/CS),cy=Math.floor(wy/CS);
@@ -85,11 +85,11 @@ function monolithAt(wx,wy){
 }
 /* ------------ Структуры: шаблоны из символов ------------
    . воздух   # порода биома   w доски   b кирпич   o обсидиан   l лава
-   i руда (по глубине)   g самоцвет/редкая руда   остальное -- воздух с декором:
+   i руда (по глубине)   g самоцвет/редкая руда   остальное — воздух с декором:
    L фонарь  C сундук  A наковальня  F горн  T стол  S саркофаг
    P кристальная колонна  c кристаллы  m/M грибы  V портал                   */
 const STRUCT_TPL={"ashOutpost": ["bbbbbbbbbbbbbbbbbbbbbbb", "b..!.....I.......!....b", "b.....................b", "b.1..d...a..5..d...C.1b", "bbbbbbbbbbbbbbbbbbbbbbb"], "bloodShrine": ["xxxxxxxxxxxxxxxxxxxxxxx", "x.j...!....0....!...j.x", "x.....................x", "x.....................x", "x.r..7...8.C.8...7..r.x", "xxx~~xxxxxxxxxxxxx~~xxx", "xxxxxxxxxxxxxxxxxxxxxxx"], "sulfurWorks": ["bbbbbbbbbbbbbbbbbbbbbbbbb", "b.4...!.....4.....!...4.b", "b.4.........4.........4.b", "b.4.3..3..U.4.3..C..3.4.b", "bbbbbbbbbbbbbbbbbbbbbbbbb"], "ossuary": ["xxxxxxxxxxxxxxxxxxxxx", "x.I...0.......0...I.x", "x...................x", "x.S.7..r..C..r..7.S.x", "xxxxxxxxx.xxxxxxxxxxx", "xE.................Ex", "x..Y..7....G...C..7.x", "xxxxxxxxxxxxxxxxxxxxx"], "fireTemple": ["ooooooooooooooooooooooooo", "o.Q...I.....0.....I...Q.o", "o.......................o", "o.......................o", "o.D...O..r..u..r..O...D.o", "ooolllooooooooooooolllooo", "ooooooooooooooooooooooooo"], "dugout": ["wwwwwwwwwwwwwwwww", "w.|..!..H..!..|.w", "w.|...........|.w", "w.|N.T.B.5.U.C|.w", "wwwwwwwwwwwwwwwww"], "warren": ["#################", "#Z..#....Z..#...#", "#...#.##....#.i.#", "#.#...#..##...#.#", "#.#.###..#..###.#", "#...#Y...#.C..i.#", "#################"], "mushgrove": ["###################", "#.Z.....L.....Z...#", "#.................#", "#..M....m.M..mC.M.#", "#####~~~###########", "###################"], "forgeRuin": ["bbbbbb###bbbbbbbbbb", "b.W..L.......L..W.b", "b.................b", "b.F.A..6.K.5..N.C.b", "bbbbbbbbbbbbbbbbbbb"], "shaft": ["#########", "#.H...L.#", "#.......#", "#.B.K..E#", "#wwwww..#", "#.......#", "#E......#", "#.X.Y...#", "#wwwwww.#", "#.......#", "#......E#", "#..wwwww#", "#.......#", "#E.R.C.R#", "#########"], "crypt": ["bbbbbbbbbbbbbbbbbbb", "b.W..0...H...0..W.b", "b.................b", "b.S.Y.7G...G7.Y.S.b", "bbbbbbbbb.bbbbbbbbb", "bL...............Lb", "b..U..7.C.7..N....b", "bbbbbbbbbbbbbbbbbbb"], "temple": ["bbbbbbbbbbbbbbbbbbbbb", "b.Q.....0...0.....Q.b", "b...%...........%...b", "b...................b", "b.P..O...bgb...O..P.b", "bbbbbb...bbbbbbbbbbbb", "bE.................Eb", "b.c..C.u...U..c..C..b", "bbbbbbbbbbbbbbbbbbbbb"], "garden": ["###################", "#..J...J.....J..J.#", "#.................#", "#.c.P..m.cCm..P.c.#", "#####~~#####~~#####", "###################"], "dwarfForge": ["ooooooooooooooooooooo", "o.H...0.....0...H...o", "o..%.............%..o", "o.F.A..9.6...U..N.C.o", "oooooooooollloooooooo", "ooooooooooooooooooooo"], "bridge": ["#############################", "#...L.......H.....H.......L.#", "#...........................#", "#..C....Y..........B....C...#", "#ooooooooooooooooooooooooooo#", "#lllllollllllllllllllollllll#", "#lllllollllllllllllllollllll#", "#############################"], "ribs": ["###################", "#.....xxxxxxx.....#", "#...xx.......xx...#", "#..x...........x..#", "#.x.............x.#", "#.x.............x.#", "#.x.c.7..C..Y.c.x.#", "###################"], "voidAltar": ["###############", "#.Q....H....Q.#", "#.............#", "#......V......#", "#.............#", "#..O..ogo..O..#", "#.ooooooooooo.#", "#E.C.......C.E#", "###############"], "minerCamp": ["#######################", "#..!.....!.......!....#", "#.....................#", "#.....................#", "#.d...a..5n..d...C..6.#", "#######################"], "library": ["bbbbbbbbbbbbbbbbbbbbb", "b..0.....0.....0....b", "b...................b", "b.e.e.P.e.C.e.P.e.e.b", "bbbbbbbbb.bbbbbbbbbbb", "b0.................0b", "b.....=......=......b", "b..e..c..u..c..5..e.b", "bbbbbbbbbbbbbbbbbbbbb"], "spiderNest": ["###################", "#v.......v.......v#", "#.................#", "#.2..C...2..Y..2..#", "###################"], "observatory": ["ooooooooooooooooooooo", "o..0.....=.=.....0..o", "o..%.............%..o", "o...................o", "o.O..t....5....t..C.o", "ooooooooooooooooooooo"], "gnomeHall": ["ooooooooooooooooooooooo", "o.0.......0........0..o", "o..%......%.......%...o", "o.....................o", "o.F..9..6..C..6..9..F.o", "ooooooooooooooooooooooo"], "ashTemple": ["bbbbbbbbbbbbbbbbbbbbbbbbb", "b..!.......0.0.......!..b", "b...|..%.........%..|...b", "b...|...............|...b", "b...|...............|...b", "b.D.|.....D.u.D.....|.D.b", "bbbbbbbbbbbbbbbbbbbbbbbbb"], "cursedMine": ["wwwwwwwwwwwwwwwwwwwww", "w.j....!....j....!..w", "w...................w", "w.n..R.R.R.R..n..C..w", "wwwwwwwwwwwwwwwwwwwww"], "meatworks": ["xxxxxxxxxxxxxxxxxxxxxxx", "x.j..j..j...j..j..j...x", "x.....................x", "x.....................x", "x.3..5..5....3..C..5..x", "xxxxxxxxxxxxxxxxxxxxxxx"], "scorpNest": ["#####################", "#v......v.......v...#", "#...................#", "#.2.2..7..2.2..Y..C.#", "#####################"], "kingsCrypt": ["xxxxxxxxxxxxxxxxxxxxxxxxx", "x..0.......!.!.......0..x", "x..%...%.........%...%..x", "x.......................x", "x.O..7..C...y...C..7..O.x", "xxxxxxxxxxxxxxxxxxxxxxxxx"], "demonForge": ["bbbbbbbbbbbbbbbbbbbbbbbbb", "b..!.....0.....0.....!..b", "b..%...........%.....%..b", "b.......................b", "b.F..9..6..C..6..9..F...b", "bbbbbbllbbbbbbbbbbbbbbbbb", "bbbbbbbbbbbbbbbbbbbbbbbbb"], "turretKeep": ["bbbbbbbbbbbbbbbbbbbbbbb", "bq.........0.........qb", "b.....................b", "bq...................qb", "b.....................b", "b..7.....5.k.5.....7..b", "bbbbbbbbbbbbbbbbbbbbbbb"], "bloodHive": ["xxxxxxxxxxxxxxxxxxxxx", "x..j.....j.....j....x", "x...................x", "x...................x", "x.h....h..k..h....h.x", "xxxx~~xxxxxxxxx~~xxxx", "xxxxxxxxxxxxxxxxxxxxx"], "summonPit": ["ooooooooooooooooooooooo", "o..!.......!.......!..o", "o.....................o", "o.....................o", "o.....................o", "o.D.7...k..s..k...7.D.o", "ooooooooooooooooooooooo"], "flameHall": ["bbbbbbbbbbbbbbbbbbbbbbbbbbb", "b....!.....!.....!.....!..b", "b.........................b", "b..f..f..f..f..f..f..f..C.b", "bbbbbbbbbbbbbbbbbbbbbbbbbbb"], "crusherHall": ["xxxxxxxxxxxxxxxxxxxxxxxxxxx", "x..p...p...p...p...p...p..x", "x.........................x", "x.7......................Cx", "xxxxxxxxxxxxxxxxxxxxxxxxxxx"], "riftShrine": ["ooooooooooooooooooooo", "o.0.......0.......0.o", "o...................o", "o.........z.........o", "o...................o", "o.r.7....k.k....7.r.o", "ooooooooooooooooooooo"]};
-/* wall -- задняя стена внутри структуры */
+/* wall — задняя стена внутри структуры */
 const STRUCTS=[
   {id:'dugout',    wall:'plank', cw:32,ch:16,prob:40,d0:8,  d1:46},
   {id:'warren',    wall:'dirt',  cw:44,ch:18,prob:30,d0:10, d1:48},
@@ -143,7 +143,7 @@ function structPlaceRaw(st,cx,cy){
   if(py<st.d0||py+th>st.d1||px<1||px+tw>=MW-1)return null;
   return {px,py,tw,th};
 }
-/* место структуры; если она задевает другую (с меньшим номером) -- её нет */
+/* место структуры; если она задевает другую (с меньшим номером) — её нет */
 function structPlace(st,cx,cy){
   if(_spSeed!==G.seed+'|'+G.dim){_spCache.clear();_spSeed=G.seed+'|'+G.dim;}
   const key=st.idx*1000003+cx*7919+cy;
@@ -193,7 +193,7 @@ function structList(tx0,tx1,ty0,ty1){
   }
   return out;
 }
-/* клетки «внутри» структур в окне -- там не рисуем природный декор */
+/* клетки «внутри» структур в окне — там не рисуем природный декор */
 let _intKey='',_intSet=new Set();
 function structInterior(tx0,tx1,ty0,ty1){
   const key=tx0+','+tx1+','+ty0+','+ty1+','+G.seed;

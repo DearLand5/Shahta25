@@ -85,6 +85,89 @@ const MenuScroll=(()=>{
   },true);
   return {stop:stopInertia};
 })();
+/* ---------- эмблема и надпись главного меню (рисованные, без эмодзи) ---------- */
+const LOGO_EMBLEM=`<svg class="emblem" viewBox="0 0 120 128" aria-hidden="true">
+  <defs>
+    <linearGradient id="lgRing" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6d48a"/><stop offset=".5" stop-color="#c8862f"/><stop offset="1" stop-color="#6e4214"/></linearGradient>
+    <radialGradient id="lgGem" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#fffbe6"/><stop offset=".35" stop-color="#9ff3ff"/><stop offset="1" stop-color="#2a8fb8"/></radialGradient>
+    <radialGradient id="lgGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#9ff3ff" stop-opacity=".75"/><stop offset="1" stop-color="#9ff3ff" stop-opacity="0"/></radialGradient>
+    <linearGradient id="lgSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#18203a"/><stop offset="1" stop-color="#2e2a3e"/></linearGradient>
+    <clipPath id="lgIn"><circle cx="60" cy="68" r="47"/></clipPath>
+  </defs>
+  <circle cx="60" cy="68" r="56" fill="#1a120b"/>
+  <circle cx="60" cy="68" r="54" fill="url(#lgRing)"/>
+  <circle cx="60" cy="68" r="48.5" fill="#20160e"/>
+  <g clip-path="url(#lgIn)">
+    <rect x="0" y="0" width="120" height="44" fill="url(#lgSky)"/>
+    <circle cx="82" cy="32" r="5" fill="#f3ecd2" opacity=".9"/>
+    <path d="M6 44 L24 34 L36 40 L50 30 L66 41 L80 35 L96 42 L114 36 L120 44 Z" fill="#3a3550"/>
+    <path d="M0 44 H120 V50 H0 Z" fill="#5d8a3a"/>
+    <path d="M0 49 Q30 46 60 50 T120 49 V66 Q90 63 60 67 T0 65 Z" fill="#7a5233"/>
+    <path d="M0 65 Q30 62 60 67 T120 66 V84 Q88 80 60 85 T0 82 Z" fill="#5c6068"/>
+    <path d="M0 82 Q32 79 60 85 T120 84 V100 Q90 96 60 101 T0 98 Z" fill="#4a3478"/>
+    <path d="M0 98 Q30 95 60 101 T120 100 V130 H0 Z" fill="#8a2a12"/>
+    <path d="M10 108 q8-4 14 1 M88 112 q9-5 16 0 M40 118 q10-3 18 2" stroke="#ff9a3a" stroke-width="2" fill="none" opacity=".8"/>
+    <g fill="#c9a9ff" opacity=".85"><path d="M22 90 l3-6 3 6 -3 3z"/><path d="M92 92 l2.5-5 2.5 5 -2.5 2.5z"/></g>
+    <g fill="#9aa0a8" opacity=".55"><circle cx="20" cy="74" r="2"/><circle cx="96" cy="73" r="1.6"/><circle cx="84" cy="78" r="1.2"/></g>
+    <rect x="53" y="44" width="14" height="62" fill="#0e0a07"/>
+    <g stroke="#b07a40" stroke-width="2"><path d="M55 44 V104 M65 44 V104"/></g>
+    <g stroke="#8a5a2a" stroke-width="2"><path d="M55 52 H65 M55 60 H65 M55 68 H65 M55 76 H65 M55 84 H65 M55 92 H65"/></g>
+    <circle cx="60" cy="108" r="16" fill="url(#lgGlow)"/>
+    <path d="M60 99 L68 107 L60 118 L52 107 Z" fill="url(#lgGem)" stroke="#e8fbff" stroke-width="1"/>
+    <path d="M52 107 H68 M60 99 L57 107 L60 118 M60 99 L63 107 L60 118" stroke="#2a8fb8" stroke-width=".7" fill="none" opacity=".8"/>
+  </g>
+  <g fill="#3a2a1a">${[0,1,2,3,4,5,6,7].map(i=>{const a=i/8*Math.PI*2+Math.PI/8;return `<circle cx="${(60+Math.cos(a)*51.2).toFixed(1)}" cy="${(68+Math.sin(a)*51.2).toFixed(1)}" r="1.7"/>`;}).join('')}</g>
+  <g transform="translate(60 14)">
+    <rect x="-3.2" y="0" width="6.4" height="26" rx="2" fill="#8a5a2c" stroke="#2a1608" stroke-width="1.4"/>
+    <path d="M-40 6 Q-22 -10 0 -9 Q22 -10 40 6 L36 9 Q20 -1 0 -1 Q-20 -1 -36 9 Z" fill="#c9ccd2" stroke="#24201c" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M-34 4 Q-18 -6 0 -6" stroke="#ffffff" stroke-width="1.4" fill="none" opacity=".6"/>
+    <rect x="-6" y="-11" width="12" height="11" rx="2" fill="#6b6f78" stroke="#24201c" stroke-width="1.6"/>
+  </g>
+</svg>`;
+const LOGO_WORD=`<svg class="wordmark" viewBox="0 0 380 118" aria-label="Глубины Надежды">
+  <defs>
+    <linearGradient id="lgTxt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2cc"/><stop offset=".45" stop-color="#f7c35c"/><stop offset=".8" stop-color="#df7e2c"/><stop offset="1" stop-color="#a8461a"/></linearGradient>
+  </defs>
+  <g font-family="Russo One, Rubik, sans-serif" text-anchor="middle" paint-order="stroke" stroke-linejoin="round">
+    <text x="190" y="54" font-size="54" textLength="350" lengthAdjust="spacingAndGlyphs" fill="url(#lgTxt)" stroke="#2a1407" stroke-width="7">ГЛУБИНЫ</text>
+    <text x="190" y="104" font-size="40" textLength="250" lengthAdjust="spacingAndGlyphs" fill="url(#lgTxt)" stroke="#2a1407" stroke-width="6">НАДЕЖДЫ</text>
+  </g>
+  <g fill="#e4a443" stroke="#2a1407" stroke-width="1.5"><path d="M30 90 l8 -6 8 6 -8 6z"/><path d="M334 90 l8 -6 8 6 -8 6z"/></g>
+  <path d="M50 90 H52 M328 90 H330" stroke="#e4a443" stroke-width="2"/>
+</svg>`;
+/* значки кнопок меню (простые линии в цвет текста) */
+const ICONS={
+  gear:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>',
+  disk:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M4 4h12l4 4v12H4z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg>',
+  book:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M4 5c3-1.5 5.5-1.5 8 0v15c-2.5-1.5-5-1.5-8 0zM20 5c-3-1.5-5.5-1.5-8 0v15c2.5-1.5 5-1.5 8 0z"/></svg>',
+  help:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.3 9.4a2.8 2.8 0 0 1 5.4 1c0 1.9-2.7 2.3-2.7 4"/><circle cx="12" cy="17.6" r=".6" fill="currentColor"/></svg>',
+  wrench:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5.5a4 4 0 0 0 5 5l-9 9a2.1 2.1 0 0 1-3-3l9-9a4 4 0 0 0-2-2z"/></svg>',
+  play:'<svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z"/></svg>'
+};
+/* эмодзи в начале заголовков и кнопок делают интерфейс «шаблонным» — убираем их,
+   если после этого остаётся текст. Значки в списках предметов (.ico) не трогаем. */
+const LEAD_EMOJI=/^\s*(?:[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}][\u{FE0F}\u{200D}\u{1F3FB}-\u{1F3FF}]*)+\s*/u;
+function stripLeadEmoji(str){const r=str.replace(LEAD_EMOJI,'');return r.trim()?r:str;}
+/* значки монет и душ в тексте окон -- рисованными кружками вместо эмодзи */
+const INLINE_IC={'💰':'coin','👻':'soul'};
+function inlineIcons(root){
+  try{const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),list=[];let n;
+    while((n=w.nextNode()))if(/[💰👻]/u.test(n.nodeValue)&&!(n.parentElement&&n.parentElement.closest('textarea,svg')))list.push(n);
+    for(const t of list){const frag=document.createDocumentFragment();
+      for(const part of t.nodeValue.split(/([💰👻])/u)){if(!part)continue;
+        if(INLINE_IC[part]){const i=document.createElement('i');i.className='mi '+INLINE_IC[part]+' inl';frag.appendChild(i);}
+        else frag.appendChild(document.createTextNode(part));}
+      t.parentNode.replaceChild(frag,t);}
+  }catch(e){}
+}
+function cleanEmoji(root){
+  inlineIcons(root);
+  try{root.querySelectorAll('h1,h2,h3,.btn,.tabs button,.seg button,.sect,.cheatSection,.setHead b').forEach(el=>{
+    const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);let n;
+    while((n=w.nextNode())){if(!n.nodeValue.trim())continue;if(n.parentElement&&n.parentElement.closest('.ico,svg'))break;
+      const r=n.nodeValue.replace(LEAD_EMOJI,'');if(r.trim()||el.textContent.trim()!==n.nodeValue.trim())n.nodeValue=r;break;}
+  });}catch(e){}
+}
 const UI={
   modal:null,el:null,
   clear(){if(this.el){try{this.el.remove();}catch(e){}}this.el=null;this.modal=null;},
@@ -92,7 +175,7 @@ const UI={
   toast(msg){
     let t=document.getElementById('toastEl');
     if(!t){t=document.createElement('div');t.id='toastEl';t.className='toast';uiRoot.appendChild(t);}
-    t.textContent=msg;t.classList.add('show');t.classList.toggle('low',!!UI.modal);
+    t.textContent=stripLeadEmoji(String(msg)).replace(/\s?💰/gu,' монет').replace(/\s?👻/gu,' душ');t.classList.add('show');t.classList.toggle('low',!!UI.modal);
     clearTimeout(t._t);
     t._t=setTimeout(()=>t.classList.remove('show'),1800);
   },
@@ -109,7 +192,7 @@ const UI={
     const fresh=!this.el;
     this.clear();
     const d=document.createElement('div');
-    d.className='panel';d.innerHTML=html;
+    d.className='panel';d.innerHTML=html;cleanEmoji(d);
     if(fresh&&name!=='menu'&&name!=='death')SFX.open();
     uiRoot.appendChild(d);
     this.el=d;this.modal=name;
@@ -128,23 +211,23 @@ const UI={
   mainMenu(){
     const dimName=DIM_NAMES[G.dim]||DIM_NAMES[0];
     const d=this.build('menu',`
-      <div class="logo">⛏</div>
-      <h1 class="title">ГЛУБИНЫ<br>НАДЕЖДЫ</h1>
+      <div class="menuWrap"><div class="brand">
+      ${LOGO_EMBLEM}${LOGO_WORD}
       <h2 class="sub">${player.prog&&player.prog.hellUnlocked?'Земля надежды · Ад':'Копай · Продавай · Выживай'}</h2>
       <div class="menuStats">
-        <span>💰 ${fmt(player.money)}</span><span>⬇ ${fmt(player.maxDepth||0)} м</span>
-        ${(player.souls||0)>0||G.dim===1?`<span>👻 ${fmt(player.souls||0)}</span>`:''}
-        <span>${G.dim===1?'🔥':'🌍'} ${dimName}</span>
-        ${player.prog&&player.prog.key?'<span>🗝 Ключ</span>':''}${player.prog&&player.prog.heart&&!player.prog.hellUnlocked?'<span>💜 Сердце</span>':''}
-      </div>
-      <button class="btn big" id="mPlay">▶ ${canResumeMine()?'Продолжить':'Играть'}<small>${canResumeMine()?'Шахта · '+Math.max(0,Math.floor(G.resumeMine.y/TILE))+' м':G.dim===1?'Лобби Ада':'Лобби · '+dimName}</small></button>
+        <span><i class="mi coin"></i>${fmt(player.money)}</span><span><i class="mi depth"></i>рекорд ${fmt(player.maxDepth||0)} м</span>
+        ${(player.souls||0)>0||G.dim===1?`<span><i class="mi soul"></i>${fmt(player.souls||0)}</span>`:''}
+        <span><i class="mi ${G.dim===1?'hell':'earth'}"></i>${dimName}</span>
+        ${player.prog&&player.prog.key?'<span><i class="mi key"></i>Ключ</span>':''}${player.prog&&player.prog.heart&&!player.prog.hellUnlocked?'<span><i class="mi heart"></i>Сердце</span>':''}
+      </div></div><div class="menuActions">
+      <button class="btn big" id="mPlay">${canResumeMine()?'Продолжить':'Играть'}<small>${canResumeMine()?'Шахта · '+Math.max(0,Math.floor(G.resumeMine.y/TILE))+' м':G.dim===1?'Лобби Ада':'Лобби · '+dimName}</small></button>
       <div class="menuGrid">
-        <button class="btn alt" id="mSet">⚙ Настройки</button>
-        <button class="btn alt" id="mSave">💾 Сохранения</button>
-        <button class="btn alt" id="mAbout">ℹ Об игре</button>
-        ${settings.cheatsUnlocked?'<button class="btn alt" id="mCheat" style="border:1px solid #5ee06a">🔧 Тест-панель</button>':'<button class="btn alt" id="mHow">❓ Как играть</button>'}
+        <button class="btn alt" id="mSet">${ICONS.gear}Настройки</button>
+        <button class="btn alt" id="mSave">${ICONS.disk}Сохранения</button>
+        <button class="btn alt" id="mAbout">${ICONS.book}Об игре</button>
+        ${settings.cheatsUnlocked?`<button class="btn alt" id="mCheat" style="border-color:#5ea85e">${ICONS.wrench}Тест-панель</button>`:`<button class="btn alt" id="mHow">${ICONS.help}Как играть</button>`}
       </div>
-      <div class="tiny" style="margin-top:6px;text-align:center;opacity:.7">Обновление «Ад» · v20</div>
+      <div class="ver">Обновление «Ад» · v21</div></div></div>
     `);
     d.classList.add('menuPanel');
     d.querySelector('#mPlay').onclick=()=>{SFX.ui();AU.init();AU.resume();if(canResumeMine()){resumeMine();return;}G.scene='lobby';lobbyPlayer.x=200;UI.close();};
@@ -158,10 +241,10 @@ const UI={
     const d=this.build('about',`
       <div class="card">
         <h3>Об игре</h3>
-        <p class="muted">Ты -- старатель. Первое измерение -- <b>Земля надежды</b>: спускайся в шахту, добывай руду,
+        <p class="muted">Ты — старатель. Первое измерение — <b>Земля надежды</b>: спускайся в шахту, добывай руду,
           продавай её на бирже, улучшай снаряжение в кузнице.</p>
         <p class="muted" style="margin-top:8px"><b>🔥 Путь в Ад:</b> кирка, меч, броня и огнестрел VI, максимальная скорость копания,
-          бур 6 ур. и пушка-крюк (факел, амортизаторы и баррикады -- по желанию). Затем найди <b>💜 Сердце Бездны</b> в святилище на глубине 1150–1450 м, победи <b>☠ Пожирателя Бездны</b>
+          бур 6 ур. и пушка-крюк (факел, амортизаторы и баррикады — по желанию). Затем найди <b>💜 Сердце Бездны</b> в святилище на глубине 1150–1450 м, победи <b>☠ Пожирателя Бездны</b>
           на арене (2000 м) и забери <b>🗝 Ключ</b>. Портал в лобби откроется за 2 000 000 монет.</p>
         <p class="muted" style="margin-top:8px"><b>👹 Ад:</b> пять биомов, 19 видов адской руды, больше 30 своих мобов с уникальными атаками
           и опасные структуры (сокровищницы с черепами-турелями, ульи, круги призыва, давилки, огненные залы). <b>Жар</b> снижают адская броня,
@@ -169,24 +252,24 @@ const UI={
         <p class="muted" style="margin-top:8px"><b>🏭 Производство:</b> руда Ада переплавляется в <b>Печи</b> в слитки, сплавы и компоненты
           (плавка идёт и пока ты в шахте). В <b>Кузнице</b> из слитков + монет куются кирки, броня, мечи и огнестрел VII–XI,
           прокачки (копание, бур, баррикады, слоты, стопки, факелы, печь) и адские предметы (плащ, респиратор, ранец, компас).
-          Рынок душ покупает руду, слитки и сплавы, но насыщается -- продавай разное.</p>
+          Рынок душ покупает руду, слитки и сплавы, но насыщается — продавай разное.</p>
         <p class="muted" style="margin-top:8px"><b>📦 Ящики и сортировщик:</b> ящики из Кузницы Ада ставятся в лобби и в шахте («Ставить»), хранят любые ресурсы,
           переименовываются и видны на мини-карте. Робот-сортировщик (ставится в лобби Ада) сам разносит ресурсы из ящика-приёмника по ящикам с нужными фильтрами.</p>
         <p class="muted" style="margin-top:8px"><b>👻 Алтарь душ:</b> благословения, ритуалы на время, реликвии в слоты, подношения для уровня алтаря.
-          <b>🌦 Погода Ада:</b> в каждом биоме свои явления -- буря и смерч в Пустошах, кровавый дождь и луна в Копях, кислотный дождь и туман в Топях, ночь душ и ветер мёртвых в Катакомбах, огненный дождь и вспышка ядра в Ядре.</p>
+          <b>🌦 Погода Ада:</b> в каждом биоме свои явления — буря и смерч в Пустошах, кровавый дождь и луна в Копях, кислотный дождь и туман в Топях, ночь душ и ветер мёртвых в Катакомбах, огненный дождь и вспышка ядра в Ядре.</p>
         <p class="muted" style="margin-top:8px"><b>🧱 Особые породы Ада:</b> песок душ (из него выбираются Заблудшие души), костяные шипы, пепельные гейзеры-трамплины,
           наросты плоти (лечат или выпускают тварей), нестабильная сера (взрывается) и корка над лавой (обваливается). Рынок душ покупает и слитки.</p>
         <p class="muted" style="margin-top:8px"><b>🎰 Казино:</b> на Земле — колесо, кости, напёрстки, рулетка, блэкджек, слоты (ставка рудой). В «Котле» — рулетка, блэкджек, кости
           (руда или слитки), а на души — «Три черепа», «Колесо душ» и сделка с демоном.</p>
         <p class="muted" style="margin-top:8px"><b>🎒 Предметы → Ресурсы:</b> что лежит в рюкзаке, сколько слотов занято и вместимость стопки.
-          <b>💾 Сохранение:</b> автосохранение (вкл/выкл и частота) и ручное сохранение -- в Настройки → Прочее. Выход в меню из шахты запоминает место.</p>
-        <p class="muted" style="margin-top:8px"><b>📖 Бестиарий</b> (в паузе): все встреченные враги, статистика и трофеи -- 50 убийств
+          <b>💾 Сохранение:</b> автосохранение (вкл/выкл и частота) и ручное сохранение — в Настройки → Прочее. Выход в меню из шахты запоминает место.</p>
+        <p class="muted" style="margin-top:8px"><b>📖 Бестиарий</b> (в паузе): все встреченные враги, статистика и трофеи — 50 убийств
           одного вида дают +15% урона по нему.</p>
         <p class="muted" style="margin-top:8px"><b>⚓ Якоря</b> стоят в каждом биоме обоих измерений и переносят в соседний биом.
-          Они отмечены на <b>мини-карте</b> (нажми на неё -- развернётся; вкл/выкл в настройках).</p>
+          Они отмечены на <b>мини-карте</b> (нажми на неё — развернётся; вкл/выкл в настройках).</p>
         <p class="muted" style="margin-top:8px"><b>Управление:</b> джойстик, прыжок, «Ставить» (лестницы, баррикады, бур),
-          «Стрелять» (крюк, аптечки, ледяные зелья, огнестрел), «Предметы» -- выбор, «Ставить» в лобби -- ящики. <b>Тап</b> по экрану копает блок и задаёт направление.
-          Атака мечом -- автоматическая.</p>
+          «Стрелять» (крюк, аптечки, ледяные зелья, огнестрел), «Предметы» — выбор, «Ставить» в лобби — ящики. <b>Тап</b> по экрану копает блок и задаёт направление.
+          Атака мечом — автоматическая.</p>
       </div>
       <button class="btn" id="aBack">Назад</button>
     `);
@@ -198,7 +281,7 @@ const UI={
       <div class="card" style="max-width:560px;width:96vw">
         <h3>💾 Сохранения</h3>
         <p class="muted" style="font-size:12.5px;margin-bottom:10px">
-          Если браузер не сохраняет прогресс -- используй буфер обмена.
+          Если браузер не сохраняет прогресс — используй буфер обмена.
         </p>
         <div class="row" style="margin-bottom:8px;gap:6px">
           <button class="btn small" id="svCopy" style="flex:1">📋 Скопировать код</button>
@@ -276,7 +359,7 @@ const UI={
         <div class="setting"><span>Упрощённая руда<br><span class="tiny">как в ранних версиях</span></span>${seg('Вкл','Выкл',!!settings.simpleOre,'sSoOn','sSoOff')}</div>
         <div class="setting"><span>Скрыть шлем<br><span class="tiny">видна голова персонажа</span></span>${seg('Вкл','Выкл',!!settings.hideHelmet,'sHhOn','sHhOff')}</div>
         <div class="tiny" style="padding:4px 2px">Разрешение рендера сейчас: <b style="color:#7dffb0">${Math.round((G.renderScale||1)*100)}%</b> · FPS ${Math.round(G.fpsNow||0)}</div></div>
-      <div class="card">${head('🗺','Мини-карта','Показывает пещеры, руду, мобов и ⚓ якоря. Нажми на неё в игре -- развернётся')}
+      <div class="card">${head('🗺','Мини-карта','Показывает пещеры, руду, мобов и ⚓ якоря. Нажми на неё в игре — развернётся')}
         <div class="setting"><span>Мини-карта</span>${seg('Вкл','Выкл',settings.minimap,'sMmOn','sMmOff')}</div>
         <div class="setting"><span>Размер</span><div class="seg">
           <button data-mms="0" class="${settings.minimapSize===0?'on':''}">S</button><button data-mms="1" class="${settings.minimapSize===1?'on':''}">M</button><button data-mms="2" class="${settings.minimapSize===2?'on':''}">L</button></div></div></div>`;
@@ -307,7 +390,7 @@ const UI={
           <input type="range" id="sLava" min="0" max="3" step="0.05" value="${settings.lavaAmount}"></div>
         <div class="presetRow"><button class="btn small alt" data-lavapreset="0">❄ Нет</button><button class="btn small alt" data-lavapreset="0.5">🔥 Мало</button><button class="btn small alt" data-lavapreset="1">⚖ Обычно</button><button class="btn small alt" data-lavapreset="2">🌋 Много</button></div></div>`;
     }else if(tab==='ctrl'){
-      body=`<div class="card">${head('🎮','Раскладка','Перетаскивай кнопки, размер -- кнопками +/−')}
+      body=`<div class="card">${head('🎮','Раскладка','Перетаскивай кнопки, размер — кнопками +/−')}
         <button class="btn" id="sControls">🎮 Настроить управление</button></div>
       <div class="card">${head('🎨','Прозрачность кнопок','')}
         <div class="setting"><span>Джойстик</span><input type="range" id="tJoy" min="0.1" max="1" step="0.05" value="${c.joy.a}"></div>
@@ -319,12 +402,12 @@ const UI={
     }else{
       const mi=Save.info(SAVE_KEY_M),ai=Save.info(SAVE_KEY);
       const ints=[[15,'15 с'],[30,'30 с'],[60,'1 мин'],[180,'3 мин']];
-      body=`<div class="card">${head('🌐','Сохранение в браузере',settings.autoSave===false?'Автосохранение выключено -- не забывай сохраняться вручную':'Прогресс сохраняется сам, а ручной слот -- твоя «точка отката»')}
+      body=`<div class="card">${head('🌐','Сохранение в браузере',settings.autoSave===false?'Автосохранение выключено — не забывай сохраняться вручную':'Прогресс сохраняется сам, а ручной слот — твоя «точка отката»')}
         <div class="setting"><span>Автосохранение</span>${seg('Вкл','Выкл',settings.autoSave!==false,'sAsOn','sAsOff')}</div>
         ${settings.autoSave!==false?`<div class="setting"><span>Как часто</span><div class="seg">${ints.map(t=>`<button data-asint="${t[0]}" class="${(settings.autoSaveInt||30)===t[0]?'on':''}">${t[1]}</button>`).join('')}</div></div>`:''}
         <div class="tiny" style="padding:2px 2px 8px;line-height:1.5">Основной слот: <b style="color:#7dffb0">${ai?agoText(ai.ts):'пусто'}</b>${ai?' · '+fmt(ai.money)+' 💰':''}<br>
           Ручной слот: <b style="color:#ffd98a">${mi?agoText(mi.ts):'пусто'}</b>${mi?' · '+fmt(mi.money)+' 💰':''}
-          ${Save.available?'':'<br><b style="color:#ff8a8a">⚠ Браузер запрещает сохранение'+(Save.lastErr?' ('+Save.lastErr+')':'')+' -- используй код сохранения ниже</b>'}</div>
+          ${Save.available?'':'<br><b style="color:#ff8a8a">⚠ Браузер запрещает сохранение'+(Save.lastErr?' ('+Save.lastErr+')':'')+' — используй код сохранения ниже</b>'}</div>
         <div class="row" style="gap:6px">
           <button class="btn small" id="sSaveNow" style="flex:1">💾 Сохранить сейчас</button>
           <button class="btn alt small" id="sLoadM" style="flex:1" ${mi?'':'disabled'}>📂 Загрузить ручной</button></div>
@@ -439,8 +522,8 @@ const UI={
       <div id="ceArea" style="position:absolute;inset:0;touch-action:none;overflow:hidden"></div>
       <div style="position:absolute;top:0;left:0;right:0;padding:14px;pointer-events:none;z-index:6;text-align:center">
         <div style="display:inline-block;padding:8px 14px;border-radius:12px;background:rgba(0,0,0,.72);border:1px solid rgba(120,200,255,.3);font-size:12px;color:#9be8ff;max-width:82vw;line-height:1.5">
-          <b style="color:#ffd98a">Перетащи</b> кнопку · коснись -- появятся <b style="color:#ffd98a">+</b> <b style="color:#ffd98a">−</b><br>
-          Прозрачность -- в Настройках
+          <b style="color:#ffd98a">Перетащи</b> кнопку · коснись — появятся <b style="color:#ffd98a">+</b> <b style="color:#ffd98a">−</b><br>
+          Прозрачность — в Настройках
         </div>
       </div>
       <button class="btn" id="ceBack" style="position:absolute;right:14px;top:14px;z-index:7;width:auto;padding:8px 16px;min-height:46px;font-size:15px">Готово</button>
@@ -497,7 +580,7 @@ const UI={
       sizeBox.style.display='flex';
       const bw=sizeBox.offsetWidth||150,bh=sizeBox.offsetHeight||56;
       let top=cy-r-bh-8;
-      if(top<64)top=cy+r+8;                      /* сверху нет места -- ставим снизу */
+      if(top<64)top=cy+r+8;                      /* сверху нет места — ставим снизу */
       if(top+bh>H-6)top=Math.max(64,cy-bh/2);
       sizeBox.style.left=clamp(cx-bw/2,6,W-bw-6)+'px';
       sizeBox.style.top=top+'px';
@@ -525,7 +608,7 @@ const UI={
 
     area.addEventListener('pointerdown',e=>{
       const el=e.target.closest('.ceCircle');
-      if(!el){selected=null;renderCircles();placeSizeBox();return;}   /* касание пустого места -- снимаем выбор */
+      if(!el){selected=null;renderCircles();placeSizeBox();return;}   /* касание пустого места — снимаем выбор */
       e.preventDefault();e.stopPropagation();
       const key=el.dataset.key;
       for(const tt of activeTouches.values())if(tt.key===key)return;     /* один палец на кнопку */
@@ -635,24 +718,33 @@ const UI={
     });
   },
   pause(){
-    const cheatBtn=settings.cheatsUnlocked?'<button class="btn alt" id="pCheat" style="border:1px solid #5ee06a">🔧 Читы</button>':'';
+    const cheatBtn=settings.cheatsUnlocked?'<button class="btn alt" id="pCheat" style="border-color:#5ea85e">Читы</button>':'';
     const d=this.build('pause',`
       <h1 class="title" style="font-size:clamp(24px,7vw,40px)">ПАУЗА</h1>
+      <div class="pauseWrap">
       <div class="card" style="max-width:420px">
-        <div class="row spread"><span class="muted">Глубина</span><b>${player.y>0?Math.floor(player.y/TILE):0} м</b></div>
-        <div class="row spread"><span class="muted">Здоровье</span><b>${Math.ceil(player.hp)} / ${player.maxHp}</b></div>
-        <div class="row spread"><span class="muted">Монеты</span><b>${fmt(player.money)}</b></div>
-        <div class="row spread"><span class="muted">Руда</span><b>${totalOre()} шт · ${fmt(invValue())} 💰</b></div>
-        ${settings.regen?`<div class="row spread"><span class="muted">Восстановлено породы</span><b style="color:#7dffb0">${regenTotal} блоков</b></div>`:''}
+        <h3>Сводка</h3>
+        <div class="statGrid">
+          <span>Глубина</span><b>${player.y>0?Math.floor(player.y/TILE):0} м</b>
+          <span>Здоровье</span><b>${Math.ceil(player.hp)} / ${player.maxHp}</b>
+          <span>Монеты</span><b class="gold">${fmt(player.money)}</b>
+          <span>Руда</span><b>${totalOre()} шт · ${fmt(invValue())}</b>
+          ${settings.regen?`<span>Восстановлено породы</span><b style="color:var(--teal)">${regenTotal} бл.</b>`:''}
+        </div>
       </div>
-      <button class="btn" id="pResume">▶ Продолжить</button>
-      <button class="btn" id="pSaveNow">💾 Сохранить игру <span style="font-size:11px;opacity:.75;font-weight:600">· ${G.lastSaveTs?agoText(G.lastSaveTs):'ещё не сохранено'}${settings.autoSave===false?' · автосейв выкл':''}</span></button>
-      <button class="btn alt" id="pCopy">📋 Скопировать сейв в буфер</button>
-      ${cheatBtn}
-      <button class="btn alt" id="pBest">📖 Бестиарий и статистика</button>
-      <button class="btn alt" id="pSave">🔑 Код сохранения</button>
-      <button class="btn alt" id="pSet">⚙ Настройки</button>
-      <button class="btn alt" id="pMenu">🏠 В главное меню</button>
+      <div class="pauseBtns">
+        <button class="btn big" id="pResume">Продолжить</button>
+        <button class="btn" id="pSaveNow">Сохранить игру <small style="font-family:var(--font-body);font-size:11px;opacity:.75;font-weight:600">· ${G.lastSaveTs?agoText(G.lastSaveTs):'ещё не сохранено'}${settings.autoSave===false?' · автосейв выкл':''}</small></button>
+        <div class="two">
+          <button class="btn alt" id="pBest">Бестиарий</button>
+          <button class="btn alt" id="pSet">Настройки</button>
+          <button class="btn alt" id="pSave">Код сохранения</button>
+          <button class="btn alt" id="pCopy">Копировать сейв</button>
+          ${cheatBtn}
+          <button class="btn alt" id="pMenu"${cheatBtn?'':' style="grid-column:1/-1"'}>В главное меню</button>
+        </div>
+      </div>
+      </div>
     `);
     d.querySelector('#pResume').onclick=()=>{SFX.ui();G.paused=false;UI.clear();};
     d.querySelector('#pSaveNow').onclick=()=>{if(manualSave())UI.pause();};
@@ -703,7 +795,7 @@ const UI={
         <h3>${hell?'👻 Рынок душ':'💹 Рудная биржа'}</h3>
         <div class="bal"><span>Баланс</span><b>${fmt(player.money)} 💰</b></div>
         ${hell?'<p class="tiny" style="margin-bottom:8px">Скупщики Ада быстро насыщаются: чем больше продаёшь одной руды, тем ниже цена. Спрос восстанавливается за несколько минут. Ценнее переплавить руду в Печи.</p>':''}
-        <p class="tiny" style="margin-bottom:6px">Ползунком выбери, сколько продать -- цена за это количество видна сразу (с учётом падения спроса). Рюкзак: ${invCount()}/${player.slots} видов · стопка до ${stackCap()} шт</p>
+        <p class="tiny" style="margin-bottom:6px">Ползунком выбери, сколько продать — цена за это количество видна сразу (с учётом падения спроса). Рюкзак: ${invCount()}/${player.slots} видов · стопка до ${stackCap()} шт</p>
         ${html}
       </div>
       <div class="row" style="width:min(94vw,540px)">
@@ -714,7 +806,7 @@ const UI={
     `);
     wireQty(d,(key,v)=>{const kind=key[1],id=key.slice(2);const sum=kind==='o'?preview(id,v):previewM(id,v);
       const a=d.querySelector(`[data-qs="${key}"]`),b=d.querySelector(`[data-qp="${key}"]`),c=d.querySelector(`[data-qa="${key}"]`);
-      if(a)a.textContent=v;if(b)b.textContent=fmt(sum)+' 💰';if(c)c.textContent=v>1?' · ≈'+fmt(Math.round(sum/v))+'/шт':'';});
+      if(a)a.textContent=v;if(b)b.innerHTML=fmt(sum)+' <i class="mi coin inl"></i>';if(c)c.textContent=v>1?' · ≈'+fmt(Math.round(sum/v))+'/шт':'';});
     d.querySelector('#mAll').onclick=()=>{let g=0,n=0;for(const k of keys){n+=player.inv[k]||0;g+=sellN(k,player.inv[k]||0);}
       if(!g){UI.toast('Нечего продавать');return;}SFX.sell();SFX.coin();vib(20);UI.toast('Продано '+n+' шт за '+fmt(g)+' 💰');statAdd('earned',g);saveGame();UI.market();};
     if(d.querySelector('#mEarth'))d.querySelector('#mEarth').onclick=()=>{let g=0;for(const k of keys)if(!ORES[k].dim)g+=sellN(k,player.inv[k]);SFX.coin();UI.toast('+'+fmt(g)+' 💰');statAdd('earned',g);saveGame();UI.market();};
@@ -748,13 +840,13 @@ const UI={
       SFX.buy();vib(25);UI.toast('Куплено: '+nxt.name);saveGame();UI.forge();
     };
     const buyStack=()=>{
-      const lv=player.stackLvl||0;if(lv>=8){UI.toast('Дальше -- в Кузнице Ада');return;}
+      const lv=player.stackLvl||0;if(lv>=8){UI.toast('Дальше — в Кузнице Ада');return;}
       const cost=Math.round(900*Math.pow(2.3,lv));
       if(player.money<cost){UI.toast('Мало монет');SFX.uiBack();return;}
       player.money-=cost;player.stackLvl=lv+1;SFX.buy();vib(25);UI.toast('📦 Стопка: '+stackCap()+' шт');saveGame();UI.forge();
     };
     const buySlot=()=>{
-      if(player.slots>=20){UI.toast('Дальше -- в Кузнице Ада');return;}
+      if(player.slots>=20){UI.toast('Дальше — в Кузнице Ада');return;}
       const cost=Math.floor(600*Math.pow(2.1,player.slots-8));
       if(player.money<cost){UI.toast('Мало монет');SFX.uiBack();return;}
       player.money-=cost;player.slots++;
@@ -804,7 +896,7 @@ const UI={
       player.gunLvl++;
       if(first)player.gunAmmo+=next.pack;
       validateSelection();
-      SFX.buy();vib(30);UI.toast(next.icon+' '+next.name+(first?' куплен! +'+next.pack+' патр.':' -- улучшено!'));saveGame();UI.forge();
+      SFX.buy();vib(30);UI.toast(next.icon+' '+next.name+(first?' куплен! +'+next.pack+' патр.':' — улучшено!'));saveGame();UI.forge();
     };
     const buyGunAmmo=()=>{
       const g=curGun();if(!g)return;
@@ -894,7 +986,7 @@ const UI={
           ${nextArmor?`<button class="btn small" id="bArmor" ${player.money<nextArmor.cost?'disabled':''}>${fmt(nextArmor.cost)} 💰</button>`:'<span class="tiny">MAX</span>'}
         </div>
 
-        <div style="margin:14px 0 6px;color:#9be8ff;font-size:12px;letter-spacing:1px;text-transform:uppercase;border-top:1px solid rgba(255,255,255,.1);padding-top:10px">Инструменты</div>
+        <div style="margin:14px 0 6px;color:#e0b86a;font-size:12px;letter-spacing:1px;text-transform:uppercase;border-top:1px solid rgba(255,255,255,.1);padding-top:10px">Инструменты</div>
 
         <div class="item"><div class="ico" style="background:linear-gradient(135deg,#8fa8c8,#2a4a68)"></div>
           <div class="txt"><div class="nm">🪝 Пушка-крюк</div>
@@ -914,7 +1006,7 @@ const UI={
         </div>
         <div class="item"><div class="ico" style="background:linear-gradient(135deg,#5ee06a,#1f7a52)"></div>
           <div class="txt"><div class="nm">🧪 Аптечка</div>
-          <div class="ds">У вас: ${player.potions} шт · +30% HP. Выберите в «Предметах», лечение -- кнопкой «Стрелять»</div></div>
+          <div class="ds">У вас: ${player.potions} шт · +30% HP. Выберите в «Предметах», лечение — кнопкой «Стрелять»</div></div>
           <button class="btn small" id="bPotion" ${player.money<C_POT?'disabled':''}>${fmt(C_POT)} 💰</button>
         </div>
         <div class="item"><div class="ico" style="background:linear-gradient(135deg,#a05ce0,#5a2a90)"></div>
@@ -928,7 +1020,7 @@ const UI={
           <button class="btn small" id="bLad" ${player.money<C_LAD?'disabled':''}>${fmt(C_LAD)} 💰</button>
         </div>
 
-        <div style="margin:14px 0 6px;color:#9be8ff;font-size:12px;letter-spacing:1px;text-transform:uppercase;border-top:1px solid rgba(255,255,255,.1);padding-top:10px">Огнестрельное (кнопка «Стрелять», автоприцел)</div>
+        <div style="margin:14px 0 6px;color:#e0b86a;font-size:12px;letter-spacing:1px;text-transform:uppercase;border-top:1px solid rgba(255,255,255,.1);padding-top:10px">Огнестрельное (кнопка «Стрелять», автоприцел)</div>
         ${(()=>{
           const cg=curGun(),ng=(GUNS[player.gunLvl]&&!GUNS[player.gunLvl].hell)?GUNS[player.gunLvl]:null;
           const dmgTxt=g=>'Урон '+g.dmg+(g.pellets>1?'×'+g.pellets:'');
@@ -945,11 +1037,11 @@ const UI={
         </div>`:''}`;
         })()}
 
-        <div style="margin:14px 0 6px;color:#9be8ff;font-size:12px;letter-spacing:1px;text-transform:uppercase;border-top:1px solid rgba(255,255,255,.1);padding-top:10px">Копание</div>
+        <div style="margin:14px 0 6px;color:#e0b86a;font-size:12px;letter-spacing:1px;text-transform:uppercase;border-top:1px solid rgba(255,255,255,.1);padding-top:10px">Копание</div>
 
         <div class="item"><div class="ico" style="background:linear-gradient(135deg,#ffd98a,#f0a33c)"></div>
           <div class="txt"><div class="nm">⚡ Скорость копания (ур. ${player.digSpeedLvl||0}/${DIG_SPEED_MAX})</div>
-          <div class="ds">${(player.digSpeedLvl||0)>=DIG_SPEED_MAX?'Максимум: с киркой VI копаешь почти мгновенно':'Ускоряет копание любой киркой. На максимуме -- почти мгновенно'}</div></div>
+          <div class="ds">${(player.digSpeedLvl||0)>=DIG_SPEED_MAX?'Максимум: с киркой VI копаешь почти мгновенно':'Ускоряет копание любой киркой. На максимуме — почти мгновенно'}</div></div>
           ${(player.digSpeedLvl||0)>=DIG_SPEED_MAX?'<span class="tiny">MAX</span>':`<button class="btn small" id="bSpd" ${player.money<spCost?'disabled':''}>${fmt(spCost)} 💰</button>`}
         </div>
         ${!player.drillBought?`
@@ -991,7 +1083,7 @@ const UI={
         </div>
         <div class="item"><div class="ico" style="background:linear-gradient(135deg,#c8a060,#5a3a10)"></div>
           <div class="txt"><div class="nm">📦 Вместимость стопки (${stackCap()} шт)</div>
-          <div class="ds">Сколько штук одной руды помещается. Излишек -- за ½ цены</div></div>
+          <div class="ds">Сколько штук одной руды помещается. Излишек — за ½ цены</div></div>
           ${(player.stackLvl||0)>=8?'<span class="tiny">MAX</span>':`<button class="btn small" id="bStack" ${player.money<Math.round(900*Math.pow(2.3,player.stackLvl||0))?'disabled':''}>${fmt(Math.round(900*Math.pow(2.3,player.stackLvl||0)))} 💰</button>`}
         </div>
       </div>
@@ -1157,7 +1249,7 @@ const UI={
           <div class="txt"><div class="nm">Ящик для хранения <span class="tiny">· с собой ${packedCrates().length} · всего ${crateTotal()}/${CRATE_MAX}</span></div><div class="ds">Хранит любую руду и материалы без ограничений. Ставится в лобби и в шахте («Ставить»), переименовывается, разбирается вместе с содержимым. Ящики в шахте видны на мини-карте.</div><div class="cost">${costChips(CRATE_COST)}</div></div>
           <button class="btn small" id="hgCrate" ${canPay(CRATE_COST)&&crateTotal()<CRATE_MAX?'':'disabled'}>Создать</button></div>`
         +`<div class="item" style="flex-wrap:wrap"><div class="ico" style="background:rgba(127,240,255,.15);display:flex;align-items:center;justify-content:center;font-size:15px">🤖</div>
-          <div class="txt"><div class="nm">Робот-кладовщик <span class="cnt">${botUnits().length}/${BOT_MAX}</span></div><div class="ds">Ставится в лобби Ада. Назначь ящик-приёмник и фильтры ящиков -- роботы сами разнесут всё по местам (по ${botLoad()} шт за ходку) и делят работу между собой. Имя, скин и прокачки -- в меню робота (тапни по нему).</div>${botUnits().length<BOT_MAX?`<div class="cost">${costChips(BOT_COST)}</div>`:''}</div>
+          <div class="txt"><div class="nm">Робот-кладовщик <span class="cnt">${botUnits().length}/${BOT_MAX}</span></div><div class="ds">Ставится в лобби Ада. Назначь ящик-приёмник и фильтры ящиков — роботы сами разнесут всё по местам (по ${botLoad()} шт за ходку) и делят работу между собой. Имя, скин и прокачки — в меню робота (тапни по нему).</div>${botUnits().length<BOT_MAX?`<div class="cost">${costChips(BOT_COST)}</div>`:''}</div>
           ${botUnits().length>=BOT_MAX?'<span class="pill" style="background:rgba(120,255,160,.15);color:#7dffb0">MAX</span>':`<button class="btn small" id="hgBot" ${canPay(BOT_COST)?'':'disabled'}>Создать</button>`}</div>`;
     }else{
       const sup=[
@@ -1198,7 +1290,7 @@ const UI={
     if(d.querySelector('#hgBot'))d.querySelector('#hgBot').onclick=()=>{const S=bot();if(S.units.length>=BOT_MAX||!pay(BOT_COST))return;const U=newBotUnit(S.units.length);
       const used=new Set(S.units.map(u=>u.name));if(used.has(U.name))U.name=BOT_NAMES.find(n=>!used.has(n))||U.name;S.units.push(U);bot();G.placeItem='sorter';SFX.buy();vib(30);validateSelection();saveGame();
       UI.toast('🤖 '+U.name+' собран! В лобби Ада выбери его в «Предметах» и нажми «Ставить»');UI.hforge('items');};
-    if(d.querySelector('#hgCrate'))d.querySelector('#hgCrate').onclick=()=>{if(crateTotal()>=CRATE_MAX||!pay(CRATE_COST))return;packedCrates().push(newCrate());G.placeItem='crate';SFX.buy();vib(20);validateSelection();saveGame();UI.toast('📦 Ящик готов -- выбери его в «Предметах» и нажми «Ставить»');UI.hforge('items');};
+    if(d.querySelector('#hgCrate'))d.querySelector('#hgCrate').onclick=()=>{if(crateTotal()>=CRATE_MAX||!pay(CRATE_COST))return;packedCrates().push(newCrate());G.placeItem='crate';SFX.buy();vib(20);validateSelection();saveGame();UI.toast('📦 Ящик готов — выбери его в «Предметах» и нажми «Ставить»');UI.hforge('items');};
     if(d.querySelector('#hgIce'))d.querySelector('#hgIce').onclick=()=>{if(!pay({c:40000,m:{i27:1}}))return;player.icePotions+=2;SFX.buy();vib(20);validateSelection();saveGame();UI.hforge('items');};
     d.querySelectorAll('[data-sup]').forEach(b=>b.onclick=()=>{const x=(UI._hgSup||[]).find(q=>q.id===b.getAttribute('data-sup'));if(!x||!pay({c:x.c,m:x.m}))return;
       if(x.id==='lad')player.ladders+=20;else if(x.id==='med')player.potions+=3;else if(x.id==='ice')player.icePotions+=2;
@@ -1577,7 +1669,7 @@ const UI={
     const d=this.build('items',`
       <div class="card" style="max-width:480px;width:96vw">
         <div class="tabs"><button data-ittab="items" class="on">🎒 Предметы</button><button data-ittab="res">⛏ Ресурсы</button></div>
-        <p class="tiny" style="margin-bottom:4px">Здесь только купленное. Остальное -- в кузнице.</p>
+        <p class="tiny" style="margin-bottom:4px">Здесь только купленное. Остальное — в кузнице.</p>
         <div class="cheatSection" style="text-align:left;margin-top:4px">Активируются кнопкой «Ставить»</div>
         ${placeItems.map(it=>row(it,G.placeItem===it.id,'p')).join('')}
         <div class="cheatSection" style="text-align:left">Активируются кнопкой «Стрелять»</div>
@@ -1626,7 +1718,7 @@ const UI={
         <div class="cheatSection" style="text-align:left">⛏ Руда в рюкзаке <span class="tiny">· ${fmt(totalOre())} шт</span></div>
         <div class="resGrid">${slotsHtml||'<div class="resCell empty">рюкзак пуст</div>'}</div>
         ${matHtml||''}
-        ${matHtml?'<p class="tiny" style="margin-top:4px">Слитки, сплавы, компоненты и части мобов слоты рюкзака не занимают.</p>':'<p class="tiny" style="margin-top:6px">Материалов Ада пока нет -- их дают Печь и мобы Ада.</p>'}
+        ${matHtml?'<p class="tiny" style="margin-top:4px">Слитки, сплавы, компоненты и части мобов слоты рюкзака не занимают.</p>':'<p class="tiny" style="margin-top:6px">Материалов Ада пока нет — их дают Печь и мобы Ада.</p>'}
         ${crateHtml}
       </div>
       <button class="btn" id="itClose">Закрыть</button>
@@ -1639,7 +1731,7 @@ const UI={
     const S=bot(),L=lobbyCrates(),inp=L.find(c=>c.id===S.input);
     if(uid)UI._botSel=uid;const U=botById(UI._botSel)||S.units.find(u=>u.placed)||S.units[0];if(!U){UI.clear();return;}UI._botSel=U.id;
     const st=U.state==='work'?(U.carry?'Несёт '+(U.carry.kind==='o'?ORES[U.carry.id].name:MATS[U.carry.id].n)+' ×'+U.carry.n+' → «'+escHtml((crateById(U.carry.to)||{}).name||'?')+'»':'Работает'):
-      U.state==='noinput'?'Выбери ящик-приёмник ниже':U.state==='nofilter'?'В приёмнике есть ресурсы, для которых нет ящика -- отметь категорию или «Всё остальное»':U.placed?'Отдыхает: в приёмнике нечего сортировать':'Не поставлен -- выбери его в «Предметах» и нажми «Ставить» в лобби';
+      U.state==='noinput'?'Выбери ящик-приёмник ниже':U.state==='nofilter'?'В приёмнике есть ресурсы, для которых нет ящика — отметь категорию или «Всё остальное»':U.placed?'Отдыхает: в приёмнике нечего сортировать':'Не поставлен — выбери его в «Предметах» и нажми «Ставить» в лобби';
     const known=new Set();for(const c of L){for(const k in c.inv)if(c.inv[k]>0)known.add('o:'+k);for(const k in c.mats)if(c.mats[k]>0)known.add('m:'+k);if(c.sf)for(const k of (c.sf.ids||[]))known.add(k);}
     for(const k in player.inv)if(player.inv[k]>0)known.add('o:'+k);for(const k in (player.mats||{}))if(player.mats[k]>0)known.add('m:'+k);
     const knownL=[...known].filter(k=>{const [a,b]=k.split(':');return a==='o'?!!ORES[b]:!!MATS[b];});
@@ -1675,8 +1767,8 @@ const UI={
         ${L.length?`<div style="display:flex;flex-wrap:wrap;gap:5px">${L.map(c=>`<button class="btn small ${c.id===S.input?'':'alt'}" data-binp="${c.id}" style="font-size:12px;min-width:0;padding:6px 10px">${c.id===S.input?'✓ ':''}${escHtml(c.name)}</button>`).join('')}</div>`
           :'<p class="muted">В лобби нет ящиков. Поставь хотя бы два: приёмник и склад.</p>'}
         <div class="cheatSection" style="text-align:left">🗂 Что класть в остальные ящики</div>
-        ${inp?(others.length?others.map(crateCard).join(''):'<p class="muted">Поставь в лобби ещё ящики -- и отметь, что в них класть.</p>'):'<p class="muted">Сначала выбери приёмник.</p>'}
-        <p class="tiny" style="margin-top:6px;line-height:1.4">Порядок выбора ящика: точный выбор → категория → «Всё остальное». Если подходит несколько -- первый по списку.</p>
+        ${inp?(others.length?others.map(crateCard).join(''):'<p class="muted">Поставь в лобби ещё ящики — и отметь, что в них класть.</p>'):'<p class="muted">Сначала выбери приёмник.</p>'}
+        <p class="tiny" style="margin-top:6px;line-height:1.4">Порядок выбора ящика: точный выбор → категория → «Всё остальное». Если подходит несколько — первый по списку.</p>
       </div>
       <div class="row" style="gap:6px;max-width:540px;width:96vw">
         <button class="btn alt" id="bPick" style="flex:1">🔧 Переставить</button>
@@ -1699,7 +1791,7 @@ const UI={
     d.querySelectorAll('[data-bid]').forEach(b=>b.onclick=()=>{const v=b.getAttribute('data-bid'),cid=v.split('|')[0],k=v.slice(cid.length+1),c=crateById(cid);if(!c)return;if(!c.sf)c.sf={cats:[],ids:[]};
       const i=c.sf.ids.indexOf(k);if(i>=0)c.sf.ids.splice(i,1);else c.sf.ids.push(k);SFX.ui();re();});
     d.querySelector('#bPick').onclick=()=>{if(U.carry){const inp2=crateById(S.input)||lobbyCrates()[0];if(inp2){const box=U.carry.kind==='o'?inp2.inv:inp2.mats;box[U.carry.id]=(box[U.carry.id]||0)+U.carry.n;}U.carry=null;}
-      U.placed=false;U.job=null;bot();G.placeItem='sorter';validateSelection();saveGame();UI.clear();UI.toast('🤖 '+U.name+' у тебя -- выбери место и нажми «Ставить»');};
+      U.placed=false;U.job=null;bot();G.placeItem='sorter';validateSelection();saveGame();UI.clear();UI.toast('🤖 '+U.name+' у тебя — выбери место и нажми «Ставить»');};
     d.querySelector('#bClose').onclick=()=>{SFX.uiBack();UI.clear();};
   },
   /* хранилище ящика */
@@ -1749,7 +1841,7 @@ const UI={
     d.querySelector('#crRen').onclick=()=>{const v=String(d.querySelector('#crName').value||'').replace(/\s+/g,' ').trim().slice(0,20);if(!v){msg('Имя не может быть пустым');return;}c.name=v;SFX.ui();done('Переименовано');};
     d.querySelector('#crName').onkeydown=(e)=>{if(e.key==='Enter')d.querySelector('#crRen').click();};
     d.querySelector('#crPick').onclick=()=>{const L=worldCrates(),i=L.indexOf(c);if(i<0)return;L.splice(i,1);delete c.where;delete c.x;delete c.y;packedCrates().push(c);
-      SFX.breakBlock&&SFX.breakBlock();vib(25);G.placeItem='crate';validateSelection();saveGame();UI.clear();UI.toast('📦 '+c.name+' разобран и у тебя -- содержимое внутри');};
+      SFX.breakBlock&&SFX.breakBlock();vib(25);G.placeItem='crate';validateSelection();saveGame();UI.clear();UI.toast('📦 '+c.name+' разобран и у тебя — содержимое внутри');};
     d.querySelector('#crClose').onclick=()=>{SFX.uiBack();UI.clear();};
   },
   cheats(tab){
@@ -1837,7 +1929,7 @@ const UI={
           ${G.dim===0?act('spawnBoss','☠ Вызвать Пожирателя')+act('bossPhase','⏭ Следующая фаза босса'):''}</div>
         <div class="sect">Создать рядом</div>
         <div class="cheatGrid">${list.map(d=>`<button class="btn small" data-spawn="${d.id}">${d.name}</button>`).join('')}</div>
-        <p class="tiny" style="margin-top:6px">Ползунок частоты мобов -- в настройках, раздел «Мир».</p>`;
+        <p class="tiny" style="margin-top:6px">Ползунок частоты мобов — в настройках, раздел «Мир».</p>`;
     }else{
       body=`<div class="cheatGrid">${tog('showDebug','📊 Отладка-панель')}${act('saveNow','💾 Сохранить')}${act('resetCheats','🔄 Выключить читы')}${act('lockCheats','🔒 Заблокировать читы','alt')}</div>
         <p class="tiny" style="margin-top:8px">FPS ${Math.round(G.fpsNow||0)} · масштаб рендера ${Math.round((G.renderScale||1)*100)}% · участков в памяти ${chunks.size} · кэш отрисовки ${typeof CC!=='undefined'?CC.size:0} · мобов ${mobs.length} · частиц ${parts.length}</p>`;
@@ -2145,71 +2237,103 @@ function roundRect(c,x,y,w,h,r){
   c.closePath();
 }
 
+/* ---------- значки и плашки верхней панели (рисуются на холсте, без эмодзи) ---------- */
+const HUDF='Rubik,system-ui,sans-serif';
+const HUDL={rb:56};
+function hudPlate(x,y,w,h,warn){
+  ctx.fillStyle='rgba(18,14,11,.84)';roundRect(ctx,x,y,w,h,Math.min(7,h/2));ctx.fill();
+  ctx.strokeStyle=warn?'rgba(255,90,70,.75)':'rgba(255,224,176,.16)';ctx.lineWidth=1;roundRect(ctx,x+0.5,y+0.5,w-1,h-1,Math.min(6.5,h/2));ctx.stroke();
+  ctx.fillStyle='rgba(255,236,206,.06)';ctx.fillRect(x+4,y+1,w-8,1);
+}
+function hudIcon(kind,cx,cy,s){
+  const c=ctx;c.save();c.translate(cx,cy);c.lineJoin='round';c.lineCap='round';
+  switch(kind){
+    case 'coin':{const g=c.createRadialGradient(-s*0.2,-s*0.25,s*0.05,0,0,s*0.5);g.addColorStop(0,'#fff4c8');g.addColorStop(0.55,'#f2b84a');g.addColorStop(1,'#a86a1a');
+      c.fillStyle=g;c.beginPath();c.arc(0,0,s*0.46,0,TAU);c.fill();c.strokeStyle='rgba(110,60,10,.9)';c.lineWidth=1;c.stroke();
+      c.strokeStyle='rgba(140,80,20,.7)';c.beginPath();c.arc(0,0,s*0.28,0,TAU);c.stroke();break;}
+    case 'heart':{c.fillStyle='#ff5a5a';c.beginPath();c.moveTo(0,s*0.38);c.bezierCurveTo(-s*0.55,0,-s*0.42,-s*0.48,0,-s*0.18);c.bezierCurveTo(s*0.42,-s*0.48,s*0.55,0,0,s*0.38);c.fill();
+      c.fillStyle='rgba(255,255,255,.55)';c.beginPath();c.ellipse(-s*0.18,-s*0.14,s*0.08,s*0.05,-0.6,0,TAU);c.fill();break;}
+    case 'depth':{c.strokeStyle='#9be8ff';c.lineWidth=Math.max(1.6,s*0.14);c.beginPath();c.moveTo(0,-s*0.4);c.lineTo(0,s*0.22);c.moveTo(-s*0.24,0);c.lineTo(0,s*0.26);c.lineTo(s*0.24,0);c.stroke();
+      c.strokeStyle='rgba(155,232,255,.5)';c.beginPath();c.moveTo(-s*0.4,s*0.42);c.lineTo(s*0.4,s*0.42);c.stroke();break;}
+    case 'soul':{const g=c.createRadialGradient(0,s*0.1,1,0,0,s*0.5);g.addColorStop(0,'#eafcff');g.addColorStop(0.6,'#7fd8ff');g.addColorStop(1,'#2a6a98');c.fillStyle=g;
+      c.beginPath();c.moveTo(0,-s*0.46);c.quadraticCurveTo(s*0.42,0,s*0.3,s*0.24);c.arc(0,s*0.18,s*0.3,0.2,Math.PI-0.2);c.quadraticCurveTo(-s*0.42,0,0,-s*0.46);c.fill();break;}
+    case 'ore':{c.fillStyle='#8a8f98';c.beginPath();c.moveTo(-s*0.44,s*0.1);c.lineTo(-s*0.2,-s*0.36);c.lineTo(s*0.3,-s*0.3);c.lineTo(s*0.46,s*0.12);c.lineTo(s*0.1,s*0.4);c.lineTo(-s*0.3,s*0.34);c.closePath();c.fill();
+      c.fillStyle='#ffd060';c.beginPath();c.arc(-s*0.08,-s*0.06,s*0.12,0,TAU);c.arc(s*0.2,s*0.14,s*0.08,0,TAU);c.fill();break;}
+    case 'sprout':{c.strokeStyle='#7dffb0';c.lineWidth=Math.max(1.4,s*0.12);c.beginPath();c.moveTo(0,s*0.42);c.lineTo(0,-s*0.05);c.stroke();
+      c.fillStyle='#7dffb0';c.beginPath();c.ellipse(-s*0.2,-s*0.12,s*0.22,s*0.1,0.6,0,TAU);c.ellipse(s*0.2,-s*0.24,s*0.22,s*0.1,-0.6,0,TAU);c.fill();break;}
+    case 'flame':{c.fillStyle='#ffb030';c.beginPath();c.moveTo(0,-s*0.48);c.quadraticCurveTo(s*0.46,0,s*0.2,s*0.42);c.quadraticCurveTo(0,s*0.5,-s*0.2,s*0.42);c.quadraticCurveTo(-s*0.46,0,0,-s*0.48);c.fill();
+      c.fillStyle='#fff0a0';c.beginPath();c.ellipse(0,s*0.18,s*0.12,s*0.18,0,0,TAU);c.fill();break;}
+    case 'ice':{c.strokeStyle='#9fe8ff';c.lineWidth=Math.max(1.4,s*0.12);for(let k=0;k<3;k++){c.rotate(Math.PI/3);c.beginPath();c.moveTo(0,-s*0.44);c.lineTo(0,s*0.44);c.stroke();}break;}
+  }
+  c.restore();
+}
+/* плашка «значок + текст», выровненная по правому краю rx */
+function hudPillR(rx,y,kind,text,col){
+  ctx.font='700 12px '+HUDF;const tw=ctx.measureText(text).width,w=tw+34;
+  hudPlate(rx-w,y,w,20);hudIcon(kind,rx-w+13,y+10,13);
+  ctx.fillStyle=col;ctx.textAlign='left';ctx.fillText(text,rx-w+24,y+14.5);return w;
+}
 function drawHUD(){
   const W=view.W,H=view.H;
   ctx.save();
   const top=8;
-  const hpW=Math.min(160,W*0.36);
-  ctx.fillStyle='rgba(8,10,16,.72)';
-  roundRect(ctx,10,top,hpW,20,10);ctx.fill();
-  const hpF=clamp(player.hp/player.maxHp,0,1);
-  const grd=ctx.createLinearGradient(10,0,10+hpW,0);
-  grd.addColorStop(0,'#ff4d4d');grd.addColorStop(1,'#ff8a5c');
-  ctx.fillStyle=grd;
-  roundRect(ctx,11,top+1,(hpW-2)*hpF,18,9);ctx.fill();
-  ctx.fillStyle='#fff';ctx.font='700 11px system-ui,sans-serif';ctx.textAlign='center';
-  ctx.fillText(Math.ceil(player.hp)+' / '+player.maxHp,10+hpW/2,top+14);
+  const hpW=Math.min(170,W*0.36);
+  const hpF=clamp(player.hp/player.maxHp,0,1),low=hpF<0.25&&player.hp>0;
+  hudPlate(10,top,hpW,22,low&&Math.sin(G.time*8)>0);
+  hudIcon('heart',23,top+11.5,14);
+  const bx0=34,bw0=hpW-30;
+  ctx.fillStyle='rgba(0,0,0,.45)';roundRect(ctx,bx0,top+5,bw0,12,6);ctx.fill();
+  if(hpF>0){const grd=ctx.createLinearGradient(0,top+5,0,top+17);
+    grd.addColorStop(0,low?'#ff7a6a':'#ff6a5a');grd.addColorStop(1,low?'#b8201a':'#c8302a');
+    ctx.fillStyle=grd;roundRect(ctx,bx0,top+5,Math.max(12,bw0*hpF),12,6);ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.22)';ctx.fillRect(bx0+5,top+6,Math.max(2,bw0*hpF-10),2);}
+  ctx.fillStyle='#fff';ctx.font='700 10.5px '+HUDF;ctx.textAlign='center';
+  ctx.shadowColor='rgba(0,0,0,.8)';ctx.shadowBlur=2;ctx.fillText(Math.ceil(player.hp)+' / '+player.maxHp,bx0+bw0/2,top+15);ctx.shadowBlur=0;
   if(G.dim===1&&G.scene==='mine'){
     const hf=clamp((player.heat||0)/100,0,1);
-    ctx.fillStyle='rgba(8,10,16,.72)';roundRect(ctx,10,top+23,hpW,12,6);ctx.fill();
-    const hg=ctx.createLinearGradient(10,0,10+hpW,0);hg.addColorStop(0,'#ffb030');hg.addColorStop(1,'#ff2a0a');
-    ctx.fillStyle=player.iceT>0?'#7fd8ff':hg;roundRect(ctx,11,top+24,Math.max(0,(hpW-2)*hf),10,5);ctx.fill();
-    if(hf>=1){ctx.fillStyle='rgba(255,255,255,'+(0.3+0.3*Math.sin(G.time*14))+')';roundRect(ctx,11,top+24,hpW-2,10,5);ctx.fill();}
-    ctx.fillStyle='#fff';ctx.font='700 9px system-ui,sans-serif';ctx.fillText((player.iceT>0?'🧊 ':'🔥 ')+'Жар '+Math.round(player.heat||0)+'%',10+hpW/2,top+32);
+    hudPlate(10,top+25,hpW,15);hudIcon(player.iceT>0?'ice':'flame',22,top+32.5,11);
+    ctx.fillStyle='rgba(0,0,0,.45)';roundRect(ctx,bx0,top+29,bw0,7,3.5);ctx.fill();
+    const hg=ctx.createLinearGradient(bx0,0,bx0+bw0,0);hg.addColorStop(0,'#ffb030');hg.addColorStop(1,'#ff2a0a');
+    if(hf>0){ctx.fillStyle=player.iceT>0?'#7fd8ff':hg;roundRect(ctx,bx0,top+29,Math.max(7,bw0*hf),7,3.5);ctx.fill();}
+    if(hf>=1){ctx.fillStyle='rgba(255,255,255,'+(0.3+0.3*Math.sin(G.time*14))+')';roundRect(ctx,bx0,top+29,bw0,7,3.5);ctx.fill();}
+    ctx.fillStyle='#ffe0c0';ctx.font='700 9px '+HUDF;ctx.textAlign='right';ctx.fillText(Math.round(player.heat||0)+'%',10+hpW-6,top+36);
   }
 
-  ctx.textAlign='right';
-  ctx.fillStyle='rgba(8,10,16,.72)';
-  const mw=Math.min(120,W*0.30);
-  roundRect(ctx,W-10-mw-54,top,mw,20,10);ctx.fill();
-  ctx.fillStyle='#ffd98a';ctx.font='800 12px system-ui,sans-serif';
-  ctx.fillText(fmt(player.money)+' 💰',W-16-54,top+14);
-
-  if(G.dim===1||(player.souls||0)>0){
-    ctx.textAlign='right';ctx.fillStyle='rgba(8,10,16,.72)';
-    roundRect(ctx,W-10-mw-54,top+(G.scene==='mine'?50+(settings.regen&&dugTiles.size>0?24:0):26),mw,20,10);ctx.fill();
-    ctx.fillStyle='#9ad8ff';ctx.font='800 12px system-ui,sans-serif';
-    ctx.fillText(fmt(player.souls||0)+' 👻',W-16-54,top+(G.scene==='mine'?64+(settings.regen&&dugTiles.size>0?24:0):40));
+  /* правая колонка: левее кнопки паузы, подложки по ширине текста */
+  const pb=getBtnRect('pause'),pw=pb.r*1.9,ph=pb.r*1.7;
+  const nearPause=pb.y-ph/2<top+60&&pb.x+pw/2>W-170;
+  const rx=nearPause?pb.x-pw/2-6:W-10;
+  let ry=top;
+  hudPillR(rx,ry,'coin',fmt(player.money),'#ffd98a');ry+=24;
+  if(G.dim===1||(player.souls||0)>0){hudPillR(rx,ry,'soul',fmt(player.souls||0),'#9ad8ff');ry+=24;}
+  if(G.scene==='mine'){
+    hudPillR(rx,ry,'ore',totalOre()+' шт · '+invCount()+'/'+player.slots,'#e6d9c4');ry+=24;
+    if(settings.regen&&dugTiles.size>0){hudPillR(rx,ry,'sprout',dugTiles.size+' в очереди','#7dffb0');ry+=24;}
   }
+  HUDL.rb=Math.max(ry,nearPause?pb.y+ph/2+6:0);
+
   const depth=G.scene==='mine'?Math.floor(Math.max(0,player.y)/TILE):0;
-  ctx.textAlign='center';
-  ctx.fillStyle='rgba(8,10,16,.72)';
-  roundRect(ctx,W/2-40,top,80,20,10);ctx.fill();
-  ctx.fillStyle='#9be8ff';ctx.font='800 12px system-ui,sans-serif';
-  ctx.fillText(depth+' м',W/2,top+14);
+  {ctx.font='800 12.5px '+HUDF;const t=depth+' м',w=ctx.measureText(t).width+34;
+    hudPlate(W/2-w/2,top,w,20);hudIcon('depth',W/2-w/2+13,top+10,13);
+    ctx.fillStyle='#bff0ff';ctx.textAlign='left';ctx.fillText(t,W/2-w/2+24,top+14.5);}
   if(G.saveFlash>0){   /* короткая отметка об автосохранении под глубиной */
     const fa=Math.min(1,G.saveFlash/0.5,(2.2-G.saveFlash)/0.2+0.4);ctx.globalAlpha=clamp(fa,0,1)*0.9;
-    ctx.fillStyle='rgba(8,10,16,.6)';roundRect(ctx,W/2-34,top+24,68,15,7.5);ctx.fill();
-    ctx.fillStyle='#9fe8b0';ctx.font='700 9px system-ui,sans-serif';ctx.fillText('💾 сохранено',W/2,top+35);ctx.globalAlpha=1;
+    hudPlate(W/2-36,top+24,72,15);
+    ctx.fillStyle='#9fe8b0';ctx.font='700 9.5px '+HUDF;ctx.textAlign='center';ctx.fillText('сохранено',W/2,top+35);ctx.globalAlpha=1;
   }
 
-  const pb=getBtnRect('pause');
   ctx.globalAlpha=pb.a;
-  ctx.fillStyle='rgba(8,10,16,.78)';
-  const pw=pb.r*1.9, ph=pb.r*1.7;
-  roundRect(ctx,pb.x-pw/2,pb.y-ph/2,pw,ph,pb.r*0.5);ctx.fill();
-  ctx.strokeStyle='rgba(160,190,230,.28)';ctx.lineWidth=1;
-  roundRect(ctx,pb.x-pw/2,pb.y-ph/2,pw,ph,pb.r*0.5);ctx.stroke();
-  ctx.fillStyle='#cfdcec';ctx.font='800 '+Math.max(12,Math.floor(pb.r*0.75))+'px system-ui,sans-serif';
-  ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText('❚❚',pb.x,pb.y+1);
+  hudPlate(pb.x-pw/2,pb.y-ph/2,pw,ph);
+  ctx.fillStyle='#e9dcc7';
+  {const bw=Math.max(3,pb.r*0.2),bh=pb.r*0.72;roundRect(ctx,pb.x-bw*1.6,pb.y-bh/2,bw,bh,1.5);ctx.fill();roundRect(ctx,pb.x+bw*0.6,pb.y-bh/2,bw,bh,1.5);ctx.fill();}
   ctx.textBaseline='alphabetic';
   ctx.globalAlpha=1;
 
   if(G.scene==='mine'){
-    const bx=10,by=H*0.22,bw=8,bh=H*0.42;
-    ctx.fillStyle='rgba(8,10,16,.6)';
-    roundRect(ctx,bx,by,bw,bh,4);ctx.fill();
+    /* шкала глубины: между верхней панелью и джойстиком, не залезает на него */
+    const jbr=getBtnRect('joy'),jTop=(jbr.x<W*0.4)?jbr.y-jbr.r-18:H*0.7;
+    const bx=12,bw=8,by=Math.max(H*0.2,G.dim===1?84:62),bh=Math.max(50,Math.min(H*0.42,jTop-by-6));
+    hudPlate(bx-3,by-3,bw+6,bh+6);
     const maxD=G.dim===1?1600:2016;
     const cols=['#7a5a34','#6a7180','#5a4aa0','#a0442a','#3a2a6a','#6a5a52','#8a2030','#a09a2a','#b8b8c8','#e04a10'];
     for(let i=(G.dim===1?5:0);i<(G.dim===1?10:5);i++){
@@ -2222,23 +2346,11 @@ function drawHUD(){
     const py=by+bh*(clamp(depth,0,maxD)/maxD);
     ctx.fillStyle='#fff';
     ctx.fillRect(bx-2,py-1,bw+4,2);
-    ctx.fillStyle='#9be8ff';ctx.font='700 10px system-ui,sans-serif';ctx.textAlign='left';
-    ctx.fillText('0',bx+bw+4,by+8);
-    ctx.fillText(G.dim===1?'1600':'2000',bx+bw+4,by+bh);
+    ctx.fillStyle='rgba(230,217,196,.8)';ctx.font='700 9.5px '+HUDF;ctx.textAlign='left';
+    ctx.shadowColor='rgba(0,0,0,.9)';ctx.shadowBlur=2;
+    ctx.fillText('0',bx+bw+6,by+8);
+    ctx.fillText(G.dim===1?'1600':'2000',bx+bw+6,by+bh);ctx.shadowBlur=0;
     if(G.dim===0){const ay=by+bh*(ARENA_Y0/maxD);ctx.fillStyle=G.wf.bossDead?'#5ab8ff':'#ff5aff';ctx.fillRect(bx-3,ay-1,bw+6,3);ctx.font='12px system-ui';ctx.fillText(G.wf.bossDead?'✔':'☠',bx+bw+4,ay+4);}
-  }
-  if(G.scene==='mine'){
-    ctx.textAlign='right';
-    ctx.fillStyle='rgba(8,10,16,.7)';
-    roundRect(ctx,W-10-110,top+26,110,20,10);ctx.fill();
-    ctx.fillStyle='#c9d6e8';ctx.font='700 11px system-ui,sans-serif';
-    ctx.fillText('⛏ '+totalOre()+' шт · '+invCount()+'/'+player.slots,W-18,top+40);
-    if(settings.regen && dugTiles.size>0){
-      ctx.fillStyle='rgba(8,10,16,.7)';
-      roundRect(ctx,W-10-110,top+50,110,20,10);ctx.fill();
-      ctx.fillStyle='#7dffb0';ctx.font='700 11px system-ui,sans-serif';
-      ctx.fillText('🌱 '+dugTiles.size+' в очереди',W-18,top+64);
-    }
   }
   {const boss=G.scene==='mine'&&!G.bossCut?bossAlive():null;
   if(boss){
@@ -2362,6 +2474,25 @@ function drawDebugOverlay(){
   ctx.restore();
 }
 
+/* круглая кнопка в стиле «латунь и железо»: латунный обод, железная или латунная середина */
+function ctrlDisc(x,y,r,pressed,face,ring){
+  const c=ctx;
+  c.fillStyle='rgba(0,0,0,.35)';c.beginPath();c.arc(x,y+3,r,0,TAU);c.fill();
+  const rg=c.createLinearGradient(x,y-r,x,y+r);
+  rg.addColorStop(0,ring==='red'?'#ff9a8a':ring==='green'?'#a8f0b0':'#f7d088');rg.addColorStop(1,ring==='red'?'#8a2a20':ring==='green'?'#2a6a38':'#7a4c16');
+  c.fillStyle=rg;c.beginPath();c.arc(x,y,r,0,TAU);c.fill();
+  const ir=r*0.86,fg=c.createRadialGradient(x-ir*0.3,y-ir*0.4,ir*0.1,x,y,ir);
+  if(face==='brass'){fg.addColorStop(0,pressed?'#fff0c0':'#ffe2a0');fg.addColorStop(0.6,pressed?'#f3b450':'#e4a443');fg.addColorStop(1,'#a8661e');}
+  else{fg.addColorStop(0,pressed?'#5a5047':'#463e36');fg.addColorStop(1,pressed?'#2a241f':'#1c1815');}
+  c.fillStyle=fg;c.beginPath();c.arc(x,y,ir,0,TAU);c.fill();
+  c.strokeStyle='rgba(255,240,210,'+(pressed?0.5:0.22)+')';c.lineWidth=1.2;c.beginPath();c.arc(x,y,ir-1,Math.PI*1.1,Math.PI*1.9);c.stroke();
+}
+function ctrlCount(x,y,r,n,ok){
+  ctx.font='700 '+Math.max(10,Math.floor(r*0.3))+'px '+HUDF;ctx.textAlign='center';ctx.textBaseline='middle';
+  const t=String(n),w=Math.max(r*0.62,ctx.measureText(t).width+10),h=Math.max(13,r*0.36);
+  ctx.fillStyle='rgba(16,12,9,.92)';roundRect(ctx,x-w/2,y+r*0.62-h/2,w,h,h/2);ctx.fill();
+  ctx.fillStyle=ok?'#ffe2a6':'#ff8a7a';ctx.fillText(t,x,y+r*0.62+0.5);
+}
 function drawTouchControls(){
   if(G.scene!=='lobby'&&G.scene!=='mine')return;
   const W=view.W,H=view.H;
@@ -2374,44 +2505,25 @@ function drawTouchControls(){
   ctx.globalAlpha=joyAlpha;
   ctx.beginPath();ctx.arc(jb.x,jb.y,jR,0,TAU);
   const bg=ctx.createRadialGradient(jb.x,jb.y,jR*0.15,jb.x,jb.y,jR);
-  bg.addColorStop(0,'rgba(28,36,54,.65)');
-  bg.addColorStop(1,'rgba(14,20,32,.55)');
+  bg.addColorStop(0,'rgba(34,28,23,.6)');bg.addColorStop(1,'rgba(18,14,11,.55)');
   ctx.fillStyle=bg;ctx.fill();
-  ctx.lineWidth=3;ctx.strokeStyle='rgba(160,190,230,'+(j.active?0.75:0.42)+')';ctx.stroke();
-  ctx.strokeStyle='rgba(160,190,230,'+(j.active?0.45:0.25)+')';ctx.lineWidth=2;
-  for(let i=0;i<4;i++){
-    const a=i*Math.PI/2;
-    ctx.beginPath();
-    ctx.moveTo(jb.x+Math.cos(a)*(jR-jR*0.22),jb.y+Math.sin(a)*(jR-jR*0.22));
-    ctx.lineTo(jb.x+Math.cos(a)*(jR-jR*0.06),jb.y+Math.sin(a)*(jR-jR*0.06));
-    ctx.stroke();
-  }
+  ctx.lineWidth=3;ctx.strokeStyle='rgba(228,164,67,'+(j.active?0.85:0.45)+')';ctx.stroke();
+  ctx.fillStyle='rgba(240,200,130,'+(j.active?0.7:0.4)+')';
+  for(let i=0;i<4;i++){const a=i*Math.PI/2,px=jb.x+Math.cos(a)*jR*0.8,py=jb.y+Math.sin(a)*jR*0.8;
+    ctx.save();ctx.translate(px,py);ctx.rotate(a);ctx.beginPath();ctx.moveTo(jR*0.09,0);ctx.lineTo(-jR*0.05,-jR*0.08);ctx.lineTo(-jR*0.05,jR*0.08);ctx.closePath();ctx.fill();ctx.restore();}
   const kx=j.active?j.kx:jb.x, ky=j.active?j.ky:jb.y;
-  const stickR=jR*0.4;
-  ctx.beginPath();ctx.arc(kx,ky,stickR,0,TAU);
-  const kg=ctx.createRadialGradient(kx-stickR*0.25,ky-stickR*0.25,2,kx,ky,stickR);
-  if(j.active){kg.addColorStop(0,'#ffe9a8');kg.addColorStop(1,'#e08a2a');}
-  else{kg.addColorStop(0,'rgba(180,200,230,.55)');kg.addColorStop(1,'rgba(100,120,160,.35)');}
-  ctx.fillStyle=kg;ctx.fill();
-  ctx.lineWidth=2;ctx.strokeStyle='rgba(255,255,255,.5)';ctx.stroke();
+  const stickR=jR*0.42;
+  ctrlDisc(kx,ky,stickR,j.active,j.active?'brass':'iron');
 
   const b=getBtnRect('jump');
   const pressed=Input.jumpPtr!==null;
   const off=pressed?4:0;
   ctx.globalAlpha=b.a;
-  ctx.beginPath();ctx.arc(b.x,b.y+off,b.r,0,TAU);
-  const g=ctx.createRadialGradient(b.x-b.r*0.3,b.y-b.r*0.4,4,b.x,b.y,b.r);
-  if(pressed){g.addColorStop(0,'#a8d8ff');g.addColorStop(1,'#3a6aa0');}
-  else{g.addColorStop(0,'#7fbaff');g.addColorStop(1,'#2a4a80');}
-  ctx.fillStyle=g;ctx.fill();
-  ctx.lineWidth=3.5;ctx.strokeStyle='rgba(255,255,255,'+(pressed?0.85:0.45)+')';ctx.stroke();
-  ctx.fillStyle='rgba(255,255,255,.97)';
-  ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.font='800 '+Math.floor(b.r*0.85)+'px system-ui,sans-serif';
-  ctx.fillText('↑',b.x,b.y+off-2);
-  ctx.font='700 '+Math.max(9,Math.floor(b.r*0.18))+'px system-ui,sans-serif';
-  ctx.fillStyle='rgba(255,255,255,.9)';
-  ctx.fillText('прыжок',b.x,b.y+off+b.r*0.52);
+  ctrlDisc(b.x,b.y+off,b.r,pressed,'brass');
+  {const s2=b.r*0.36,y0=b.y+off;ctx.fillStyle='#3a2208';ctx.beginPath();
+    ctx.moveTo(b.x,y0-s2*1.25);ctx.lineTo(b.x+s2*1.05,y0-s2*0.1);ctx.lineTo(b.x+s2*0.38,y0-s2*0.1);ctx.lineTo(b.x+s2*0.38,y0+s2*1.05);
+    ctx.lineTo(b.x-s2*0.38,y0+s2*1.05);ctx.lineTo(b.x-s2*0.38,y0-s2*0.1);ctx.lineTo(b.x-s2*1.05,y0-s2*0.1);ctx.closePath();ctx.fill();
+    ctx.fillStyle='rgba(255,240,200,.35)';ctx.fillRect(b.x-s2*0.3,y0+s2*0.1,s2*0.12,s2*0.8);}
   ctx.textBaseline='alphabetic';
 
   {
@@ -2420,29 +2532,23 @@ function drawTouchControls(){
     const pp=Input.placePtr!==null;
     const po=pp?3:0;
     ctx.globalAlpha=pb.a*((inMine||G.placeItem==='crate'||G.placeItem==='sorter')?1:0.4);
-    ctx.beginPath();ctx.arc(pb.x,pb.y+po,pb.r,0,TAU);
-    const pg=ctx.createRadialGradient(pb.x-pb.r*0.3,pb.y-pb.r*0.4,4,pb.x,pb.y,pb.r);
-    if(pp){pg.addColorStop(0,'#ffe0a0');pg.addColorStop(1,'#a06020');}
-    else{pg.addColorStop(0,'#e8b878');pg.addColorStop(1,'#5a3a20');}
-    ctx.fillStyle=pg;ctx.fill();
-    ctx.lineWidth=3;ctx.strokeStyle='rgba(255,255,255,'+(pp?0.85:0.45)+')';ctx.stroke();
+    ctrlDisc(pb.x,pb.y+po,pb.r,pp,'iron');ctx.fillStyle='#f3e6cf';ctx.strokeStyle='#f3e6cf';
     ctx.textAlign='center';ctx.textBaseline='middle';
     validateSelection();
     if(G.placeItem==='sorter'){
-      ctx.font=Math.floor(pb.r*0.95)+'px system-ui,sans-serif';ctx.fillText('🤖',pb.x,pb.y+po);
+      {const u=pb.r*0.3,y0=pb.y+po-u*0.3;ctx.fillStyle='#9fe8ff';roundRect(ctx,pb.x-u*1.2,y0-u,u*2.4,u*1.8,u*0.4);ctx.fill();
+        ctx.fillStyle='#1c1815';ctx.beginPath();ctx.arc(pb.x-u*0.5,y0-u*0.1,u*0.28,0,TAU);ctx.arc(pb.x+u*0.5,y0-u*0.1,u*0.28,0,TAU);ctx.fill();
+        ctx.strokeStyle='#9fe8ff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(pb.x,y0-u);ctx.lineTo(pb.x,y0-u*1.6);ctx.stroke();}
     }else if(G.placeItem==='crate'){
       const cs=pb.r*0.5;ctx.fillStyle='#fff';ctx.fillRect(pb.x-cs,pb.y+po-cs*1.05,cs*2,cs*1.6);
       ctx.fillStyle='#8a5c34';ctx.fillRect(pb.x-cs+2.5,pb.y+po-cs*1.05+2.5,cs*2-5,cs*1.6-5);
       ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(pb.x-cs+3,pb.y+po-cs*0.25);ctx.lineTo(pb.x+cs-3,pb.y+po-cs*0.25);ctx.stroke();
-      ctx.font='800 '+Math.max(10,Math.floor(pb.r*0.34))+'px system-ui,sans-serif';ctx.fillStyle='#ffe9a8';
-      ctx.fillText(packedCrates().length,pb.x,pb.y+po+pb.r*0.7);
+      ctrlCount(pb.x,pb.y+po,pb.r,packedCrates().length,true);
     }else if(G.placeItem==='barricade'){
       const bs=pb.r*0.42,bx0=pb.x-bs,by0=pb.y+po-bs*0.95;
       ctx.fillStyle='#fff';
       for(let r=0;r<3;r++){const off=(r%2)?bs*0.5:0;for(let k=0;k<3;k++){const xx=bx0+off+k*bs*0.72-(r%2?bs*0.36:0);if(xx<bx0-1||xx+bs*0.62>bx0+bs*2+1)continue;ctx.fillRect(xx,by0+r*bs*0.62,bs*0.62,bs*0.5);}}
-      ctx.font='800 '+Math.max(10,Math.floor(pb.r*0.34))+'px system-ui,sans-serif';
-      ctx.fillStyle=player.barricades>0?'#ffe9a8':'#ff8a8a';
-      ctx.fillText(player.barricades,pb.x,pb.y+po+pb.r*0.7);
+      ctrlCount(pb.x,pb.y+po,pb.r,player.barricades,player.barricades>0);
     }else if(G.placeItem==='drill'){
       ctx.save();
       ctx.translate(pb.x,pb.y+po);
@@ -2451,23 +2557,19 @@ function drawTouchControls(){
       ctx.beginPath();ctx.moveTo(pb.r*0.5,0);ctx.lineTo(-pb.r*0.3,-pb.r*0.4);ctx.lineTo(-pb.r*0.3,pb.r*0.4);ctx.closePath();ctx.fill();
       ctx.fillRect(-pb.r*0.55,-pb.r*0.2,pb.r*0.25,pb.r*0.4);
       ctx.restore();
-      ctx.font='800 '+Math.max(10,Math.floor(pb.r*0.34))+'px system-ui,sans-serif';
-      ctx.fillStyle=player.drills>0?'#ffe9a8':'#ff8a8a';
-      ctx.fillText(player.drills,pb.x,pb.y+po+pb.r*0.7);
+      ctrlCount(pb.x,pb.y+po,pb.r,player.drills,player.drills>0);
     }else{
-      ctx.strokeStyle='#fff';ctx.lineWidth=2;
-      const ls=pb.r*0.55;
+      ctx.strokeStyle='#f3e6cf';ctx.lineWidth=2.4;ctx.lineCap='round';
+      const ls=pb.r*0.42,lo=-pb.r*0.12;
       ctx.beginPath();
-      ctx.moveTo(pb.x-ls,pb.y+po-ls);ctx.lineTo(pb.x-ls,pb.y+po+ls);
-      ctx.moveTo(pb.x+ls,pb.y+po-ls);ctx.lineTo(pb.x+ls,pb.y+po+ls);
+      ctx.moveTo(pb.x-ls*0.8,pb.y+po+lo-ls);ctx.lineTo(pb.x-ls*0.8,pb.y+po+lo+ls);
+      ctx.moveTo(pb.x+ls*0.8,pb.y+po+lo-ls);ctx.lineTo(pb.x+ls*0.8,pb.y+po+lo+ls);
       for(let k=-1;k<=1;k++){
-        ctx.moveTo(pb.x-ls,pb.y+po+k*(ls*0.7));
-        ctx.lineTo(pb.x+ls,pb.y+po+k*(ls*0.7));
+        ctx.moveTo(pb.x-ls*0.8,pb.y+po+lo+k*(ls*0.62));
+        ctx.lineTo(pb.x+ls*0.8,pb.y+po+lo+k*(ls*0.62));
       }
-      ctx.stroke();
-      ctx.font='800 '+Math.max(10,Math.floor(pb.r*0.34))+'px system-ui,sans-serif';
-      ctx.fillStyle=player.ladders>0?'#ffe9a8':'#ff8a8a';
-      ctx.fillText(player.ladders,pb.x,pb.y+po+pb.r*0.7);
+      ctx.stroke();ctx.lineCap='butt';
+      ctrlCount(pb.x,pb.y+po,pb.r,player.ladders,player.ladders>0);
     }
     ctx.textBaseline='alphabetic';
 
@@ -2478,15 +2580,10 @@ function drawTouchControls(){
     const sp=Input.shootPtr!==null;
     const so=sp?3:0;
     ctx.globalAlpha=sb.a*((inMine&&shCur)?1:0.4);
-    ctx.beginPath();ctx.arc(sb.x,sb.y+so,sb.r,0,TAU);
-    const sg=ctx.createRadialGradient(sb.x-sb.r*0.3,sb.y-sb.r*0.4,4,sb.x,sb.y,sb.r);
     const medk=(shItem==='medkit'),gunk=(shItem==='gun');
-    if(sp){sg.addColorStop(0,medk?'#c8ffd0':gunk?'#ffe0b0':'#c8e0ff');sg.addColorStop(1,medk?'#2a8a40':gunk?'#a05a20':'#406a90');}
-    else{sg.addColorStop(0,medk?'#6fc880':gunk?'#c89060':'#8fa8c8');sg.addColorStop(1,medk?'#1f5a30':gunk?'#6a3a18':'#2a4a68');}
-    ctx.fillStyle=sg;ctx.fill();
-    ctx.lineWidth=3;ctx.strokeStyle='rgba(255,255,255,'+(sp?0.85:0.45)+')';ctx.stroke();
-    ctx.strokeStyle='#fff';ctx.fillStyle='#fff';ctx.lineWidth=2;
-    const gs=sb.r*0.45;
+    ctrlDisc(sb.x,sb.y+so,sb.r,sp,'iron',medk?'green':gunk?'red':null);
+    ctx.strokeStyle='#f3e6cf';ctx.fillStyle=medk?'#a8f0b0':'#f3e6cf';ctx.lineWidth=2.4;ctx.lineCap='round';
+    const gs=sb.r*0.36;
     if(medk){
       ctx.fillRect(sb.x-gs*0.28,sb.y+so-gs*1.0,gs*0.56,gs*2.0);
       ctx.fillRect(sb.x-gs*1.0,sb.y+so-gs*0.28,gs*2.0,gs*0.56);
@@ -2504,25 +2601,20 @@ function drawTouchControls(){
       ctx.moveTo(sb.x-gs*0.55,sb.y+so+gs*0.3);ctx.lineTo(sb.x+gs*0.55,sb.y+so+gs*0.3);
       ctx.stroke();
     }
-    ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.font='800 '+Math.max(10,Math.floor(sb.r*0.34))+'px system-ui,sans-serif';
-    ctx.fillStyle=(!shCur||shCur.count<=0)?'#ff8a8a':'#d8e8ff';
-    ctx.fillText(shCur?shCur.count:'🔒',sb.x,sb.y+so+sb.r*0.7);
+    ctx.lineCap='butt';
+    ctrlCount(sb.x,sb.y+so,sb.r,shCur?shCur.count:'—',!!(shCur&&shCur.count>0));
     ctx.textBaseline='alphabetic';
 
     const ib=getBtnRect('items');
     const ip=Input.itemsPtr!==null;
     const io=ip?3:0;
     ctx.globalAlpha=ib.a*(inMine?1:0.5);
-    ctx.beginPath();ctx.arc(ib.x,ib.y+io,ib.r,0,TAU);
-    const ig=ctx.createRadialGradient(ib.x-ib.r*0.3,ib.y-ib.r*0.4,3,ib.x,ib.y,ib.r);
-    if(ip){ig.addColorStop(0,'#e0c8ff');ig.addColorStop(1,'#5a3a80');}
-    else{ig.addColorStop(0,'#a88fd0');ig.addColorStop(1,'#4a3068');}
-    ctx.fillStyle=ig;ctx.fill();
-    ctx.lineWidth=2.5;ctx.strokeStyle='rgba(255,255,255,'+(ip?0.85:0.4)+')';ctx.stroke();
-    ctx.font=Math.floor(ib.r*0.95)+'px system-ui,sans-serif';
-    ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText('🎒',ib.x,ib.y+io+1);
+    ctrlDisc(ib.x,ib.y+io,ib.r,ip,'iron');
+    {const u=ib.r*0.34,x0=ib.x,y0=ib.y+io+u*0.15;   /* рюкзак */
+      ctx.strokeStyle='#f3e6cf';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x0,y0-u*0.85,u*0.45,Math.PI,0);ctx.stroke();
+      ctx.fillStyle='#e4a443';roundRect(ctx,x0-u*0.95,y0-u*0.85,u*1.9,u*1.85,u*0.45);ctx.fill();
+      ctx.fillStyle='#8a5a1c';roundRect(ctx,x0-u*0.6,y0+u*0.05,u*1.2,u*0.7,u*0.2);ctx.fill();
+      ctx.fillStyle='#f3e6cf';ctx.fillRect(x0-u*0.12,y0-u*0.05,u*0.24,u*0.22);}
     ctx.textBaseline='alphabetic';
   }
   ctx.globalAlpha=1;
@@ -2541,9 +2633,9 @@ function drawTouchControls(){
     }else if(((player.stats&&player.stats.blocks)||0)<40){
       /* подсказка только для новичка, потом исчезает и не перекрывает кнопки */
       ctx.textAlign='center';const a=0.55*clamp(1-((player.stats&&player.stats.blocks)||0)/40,0,1);
-      ctx.font='700 11px system-ui,sans-serif';const L1='тапни -- копать и прицелиться',L2='«Ставить» / «Стрелять» -- использовать предмет';
+      ctx.font='600 11px '+HUDF;const L1='тапни — копать и прицелиться',L2='«Ставить» / «Стрелять» — использовать предмет';
       const tw=Math.max(ctx.measureText(L1).width,ctx.measureText(L2).width)+20,hy=H*0.3;
-      ctx.fillStyle='rgba(8,10,16,'+(a*0.8)+')';roundRect(ctx,W/2-tw/2,hy-15,tw,36,11);ctx.fill();
+      ctx.fillStyle='rgba(18,14,11,'+(a*1.3)+')';roundRect(ctx,W/2-tw/2,hy-15,tw,36,7);ctx.fill();
       ctx.fillStyle='rgba(255,217,138,'+a+')';ctx.fillText(L1,W/2,hy);ctx.fillText(L2,W/2,hy+14);
     }
   }

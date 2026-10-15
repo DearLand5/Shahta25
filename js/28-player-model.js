@@ -2,7 +2,7 @@
 /* ============================================================
    ПЕРСОНАЖ v12: шахтёр в стиле «стимпанк-мультфильм» --
    крупная голова, усы, каска с фонарём, коренастое тело, большие перчатки
-   и ботинки; каждый уровень брони -- свой силуэт.
+   и ботинки; каждый уровень брони — свой силуэт.
    ============================================================ */
 const PL_SKIN='#f0bf8f',PL_SKIN_D='#c98c62',PL_BEARD=['#6a3a1c','#6a3a1c','#5a3218','#4a2a14','#e8f4ff','#2a1a3a','#3a2a24','#4a0a12','#d8d0bc','#2a0a04'];
 function plBlob(g,x,y,rx,ry,c,rot){g.beginPath();g.ellipse(x,y,rx,ry,rot||0,0,TAU);g.fillStyle=c;g.fill();}
@@ -271,7 +271,7 @@ function drawPlayerSprite(g,x,y,st,anim,facing,opts){
   else if(air){if(rising){la=1.05;lb=-0.35;ka=-1.5;kb=-0.6;}else{const f=Math.sin(t*14)*0.12;la=0.45+f;lb=-0.45-f;ka=-0.5;kb=-0.3;}}
   else if(run){la=rs*1.0;lb=-rs*1.0;ka=-(Math.max(0,-rs)*1.3+0.15);kb=-(Math.max(0,rs)*1.3+0.15);}
   else if(dig){la=0.25;lb=-0.3;ka=-0.25;kb=-0.1;}
-  /* ---- позы рук (0 -- вниз, π/2 -- вперёд, π -- вверх) ---- */
+  /* ---- позы рук (0 — вниз, π/2 — вперёд, π — вверх) ---- */
   let aF=0.38+breath*0.04,kF=-1.0,aB=0.1+breath*0.03,kB=-0.35,toolRot=0.32,showTool=true,lean=0;
   if(swim){const s2=Math.sin(t*6);aF=1.7+s2*1.1;kF=-0.3;aB=1.7-s2*1.1;kB=-0.3;showTool=false;}
   else if(climb){const s2=Math.sin(t*8);aF=2.75+s2*0.32;kF=0.35;aB=2.75-s2*0.32;kB=0.35;showTool=false;}
@@ -376,7 +376,7 @@ function olLight(g,fn){
 const OL_OFF8=[[1,0],[-1,0],[0,1],[0,-1],[0.72,0.72],[-0.72,0.72],[0.72,-0.72],[-0.72,-0.72]],OL_OFF4=[[1,0.35],[-1,0.35],[0.35,1],[-0.35,-1]];
 function withOutline(g,cx,cy,rx,ry,col,th,fn){
   if(settings.quality==='low'||settings.outline===false||OL.active||!g.getTransform||!olReady()){fn(g);return;}
-  /* бюджет на кадр: много мобов на экране -- упрощённый контур, потом без контура */
+  /* бюджет на кадр: много мобов на экране — упрощённый контур, потом без контура */
   if(OL.ft!==G.time){OL.ft=G.time;OL.cnt=0;}OL.cnt++;
   if(OL.cnt>(OL.maxN||16)){fn(g);return;}
   const M=g.getTransform();
@@ -979,7 +979,7 @@ function drawMobSprite0(g,m,t){
       g.save();g.translate(0,FY);g.scale((0.35+0.65*vis)*(1+Math.sin(t*40)*0.08*(1-vis)),vis);g.translate(0,-FY);
       g.translate(0,-hop);
       g.rotate(thr*0.28-cast*0.16+(moving?hopS*0.05:0));
-      /* хвост с огоньком -- плавно хлещет */
+      /* хвост с огоньком — плавно хлещет */
       const tw=Math.sin(t*4.5+m.phase)*3.5;
       g.strokeStyle=c2;g.lineWidth=1.8;g.lineCap='round';g.beginPath();g.moveTo(-5,5);g.bezierCurveTo(-11,9,-16,4+tw,-14,-3+tw*0.6);g.stroke();
       olLight(g,(g)=>{const fx=-14,fy=-3+tw*0.6,fl=1+Math.sin(t*16)*0.15;g.fillStyle='#ffb030';g.beginPath();g.moveTo(fx-1.6,fy+1);g.quadraticCurveTo(fx-3*fl,fy-5*fl,fx+0.5,fy-9*fl);g.quadraticCurveTo(fx+1.4,fy-4,fx+1.6,fy+1);g.fill();
@@ -994,7 +994,7 @@ function drawMobSprite0(g,m,t){
       mobLeg(g,-3,6,legA,4.4,0.5+air*1.2,4.6,2.4,shadeHex(c2,-0.1));mobLeg(g,3,6,-legA*0.6,4.4,0.5+air*1.2,4.6,2.4,c2);
       mobBlob(g,0,1,6.6,7.6,c1);
       olLight(g,(g)=>{g.fillStyle='rgba(255,150,40,'+(0.35+0.25*cast)+')';g.beginPath();g.ellipse(1,3,3,4,0,0,TAU);g.fill();});
-      /* задняя рука -- противовес */
+      /* задняя рука — противовес */
       mobLeg(g,-3,-3,0.7-cast*0.6+thr*0.4,4.4,0.5,3.8,2,shadeHex(c1,-0.15));
       /* голова-маска: наклон за броском, ухмылка шире при замахе */
       g.save();g.translate(1,-10);g.rotate(thr*0.15-cast*0.1+Math.sin(t*2.5+m.phase)*0.04);
@@ -1363,7 +1363,7 @@ function drawMobSprite0(g,m,t){
       if(settings.quality!=='low'&&Math.random()<0.3)spawnPart(m.x+rnd(-22,22),m.y-m.h*rnd(0.3,0.95),rnd(-10,10),rnd(-60,-30),0.6,Math.random()<0.5?'#ff8a30':'#ffd060',2.2,-30);
       break;}
     case 'h_magmael':{
-      /* ядерный элементаль: раскалённое ядро в клетке из базальтовых плит, вокруг -- снаряды-капли магмы */
+      /* ядерный элементаль: раскалённое ядро в клетке из базальтовых плит, вокруг — снаряды-капли магмы */
       const fuse=m.state==='fuse'?m.tele:0,n=Math.floor(m.rocks===undefined?3:m.rocks),walk=Math.abs(m.vx)>6;
       const hov=Math.sin(t*2.6+m.phase)*1.2,sh=fuse>0?Math.sin(t*60)*fuse*1.2:0;
       g.translate(sh,hov-2);
@@ -1441,7 +1441,7 @@ function drawMobSprite0(g,m,t){
       g.fillStyle='#0a0404';g.fillRect(0.4,-1.6,5,1.6);olLight(g,(g)=>{softGlow(g,3,-0.8,4.4,'#ff7a1a',0.7);g.fillStyle='rgba(255,160,60,.95)';g.fillRect(1,-1.2,3.8,0.8);});
       g.fillStyle=gold;g.fillRect(-4.6,1.6,10,0.8);
       g.restore();
-      /* изогнутый клинок двумя руками; в серии -- три рассечения с огненным шлейфом */
+      /* изогнутый клинок двумя руками; в серии — три рассечения с огненным шлейфом */
       {const ang=combo?(k2%2?1.6-swing*2.6:-1.0+swing*2.6):(m.tele>0?-1.2:(walk?0.5+Math.sin(ph)*0.08:0.62));
         if(combo&&swing>0.2&&swing<0.85)olLight(g,(g)=>{const a0=k2%2?1.6-0.2*2.6:-1+0.2*2.6,a1=ang;g.strokeStyle='rgba(255,140,40,'+(0.45*Math.sin((swing-0.2)/0.65*Math.PI))+')';g.lineWidth=7;g.lineCap='round';
           g.beginPath();g.arc(5,-6,26,Math.min(a0,a1),Math.max(a0,a1));g.stroke();g.strokeStyle='rgba(255,230,160,.5)';g.lineWidth=2;g.stroke();});
@@ -1574,7 +1574,7 @@ function drawMobSprite0(g,m,t){
       mobGlow(g,0,FY-15,22,'#ff2a3a',0.15+0.25*beat+ch*0.3);
       break;}
     case 'rift':{
-      /* кристалл разлома: друза парит над обломком скалы с рунами; в главном кристалле -- трещина в пустоту, вокруг кружат осколки */
+      /* кристалл разлома: друза парит над обломком скалы с рунами; в главном кристалле — трещина в пустоту, вокруг кружат осколки */
       const a=t*1.2,sum=m.cd>6.6?(m.cd-6.6)/1.4:0,pulse=0.5+0.5*Math.sin(t*2.2);
       olLight(g,(g)=>{softGlow(g,0,-2,34,'#a070ff',0.3+0.15*pulse+sum*0.4);});
       /* парящий обломок скалы с рунами */
@@ -1695,7 +1695,7 @@ function drawMobSprite0(g,m,t){
         g.restore();}
       break;}
     case 'imp':{
-      /* имп: семенящий бег, хвост-плеть, обе руки вверх -- три огонька над головой -- бросок веером; исчезает, свернувшись клубком */
+      /* имп: семенящий бег, хвост-плеть, обе руки вверх — три огонька над головой — бросок веером; исчезает, свернувшись клубком */
       const cast=m.castT>0?1-m.castT/0.45:0,thr=m.throwT>0?m.throwT/0.3:0,moving=Math.abs(m.vx)>8;
       const bo=m.blinkOut>0?1-m.blinkOut/0.22:0,bi=m.blinkIn>0?m.blinkIn/0.24:0,ball=Math.max(bo,bi);
       if(ball>0){olLight(g,(g)=>{for(let q=0;q<5;q++){const a=t*9+q*1.26,r=(6+ball*10);g.fillStyle='rgba(120,100,90,'+(0.45*ball)+')';g.beginPath();g.arc(Math.cos(a)*r,-8+Math.sin(a)*r*0.6,3+ball*3,0,TAU);g.fill();}});}
@@ -2254,7 +2254,7 @@ function drawDecor(g,tx,ty,t){
 }
 
 let ambT=0;
-/* поверхность под ногами -- для звука шагов */
+/* поверхность под ногами — для звука шагов */
 function footMat(){const t=getTile(Math.floor(player.x/TILE),Math.floor((player.y+4)/TILE));
   if(t===T_WOOD||t===T_LADDER||t===T_BARRICADE)return 'wood';
   if(t===T_CRYSTAL||t===T_SOULSTONE)return 'crystal';

@@ -8,23 +8,23 @@ const settings={
   regenSpeed:1,          /* ← новое: множитель скорости восстановления (0.25–4) */
   oreDensity:1,          /* ← новое: множитель плотности руды (0.25–3) */
   mobRate:1,             /* множитель частоты появления мобов (0–3) */
-  waterAmount:1,         /* сколько воды (озёра, лужи, родники) -- 0…3 */
-  lavaAmount:1,          /* сколько лавы (озёра, капли) -- 0…3 */
+  waterAmount:1,         /* сколько воды (озёра, лужи, родники) — 0…3 */
+  lavaAmount:1,          /* сколько лавы (озёра, капли) — 0…3 */
   cheatsUnlocked:false,
   controls:null,
   controlsCustomized:false,
   minimap:true,          /* мини-карта в шахте */
   outline:true,          /* мультяшный контур моделей */
-  minimapSize:1,         /* 0 -- маленькая, 1 -- средняя, 2 -- большая */
+  minimapSize:1,         /* 0 — маленькая, 1 — средняя, 2 — большая */
   autoSave:true,         /* автосохранение в браузер */
   simpleOre:false,       /* упрощённая отрисовка руды, как в ранних версиях */
-  hideHelmet:false,      /* скрыть шлем брони -- видна голова персонажа */
+  hideHelmet:false,      /* скрыть шлем брони — видна голова персонажа */
   autoSaveInt:30,        /* интервал автосохранения, с */
   qv:2
 };
 const SETTINGS_DEFAULTS=JSON.parse(JSON.stringify(settings));
 /* Скорость копания: ограниченное число уровней (раньше росла бесконечно).
-   Каждый уровень даёт +0.45 к множителю; на максимуме ×6.4 -- с кирками VI
+   Каждый уровень даёт +0.45 к множителю; на максимуме ×6.4 — с кирками VI
    даже обсидиан и ядра Бездны копаются почти мгновенно. */
 const DIG_SPEED_MAX=12;
 const DIG_SPEED_COSTS=[400,760,1450,2750,5200,9900,18800,35700,67900,129000,245000,465000];
@@ -41,7 +41,7 @@ function vib(ms){
 }
 
 /* ============================================================
-   УПРАВЛЕНИЕ -- раскладки кнопок
+   УПРАВЛЕНИЕ — раскладки кнопок
    ============================================================ */
 function getDefaultControls(){
   const W=view.W||360, H=view.H||640;
@@ -52,13 +52,17 @@ function getDefaultControls(){
   const jcx=W-pad-jr, jcy=H-pad-jr;
   const shootX=jcx, shootY=jcy-jr-mr-gap;
   const placeX=jcx-2*mr-gap, placeY=shootY;          /* рядом с «Стрелять», не на джойстике */
-  const itemsY=shootY-mr-sm*sc-gap;
+  /* на альбомном экране рюкзак встаёт в ряд с «Ставить» и «Стрелять»,
+     иначе он уезжает наверх под мини-карту */
+  const land=W>H*1.15;
+  const itemsY=land?shootY:shootY-mr-sm*sc-gap;
+  const itemsX=land?placeX-mr-sm*sc-gap:jcx;
   return {
     joy:    {cx:joyPad/W,  cy:(H-joyPad-30)/H, r:joyR, a:0.55},
     jump:   {cx:jcx/W,     cy:jcy/H,           r:big,  a:1.00},
     place:  {cx:placeX/W,  cy:placeY/H,        r:med,  a:1.00},
     shoot:  {cx:shootX/W,  cy:shootY/H,        r:med,  a:1.00},
-    items:  {cx:jcx/W,     cy:itemsY/H,        r:sm,   a:0.90},
+    items:  {cx:itemsX/W,  cy:itemsY/H,        r:sm,   a:0.90},
     pause:  {cx:(W-30)/W,  cy:30/H,            r:22,   a:0.85}
   };
 }

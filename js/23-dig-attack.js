@@ -94,7 +94,7 @@ function autoAttackUpdate(dt){
   if(G.scene!=='mine')return;
   let best=null,bestD=1e9;
   for(const m of mobs){
-    if(!m.alive||m.untargetable||m.hidden)continue;     /* под землёй / спрятан -- меч не машет впустую и не мешает копать */
+    if(!m.alive||m.untargetable||m.hidden)continue;     /* под землёй / спрятан — меч не машет впустую и не мешает копать */
     const d=Math.hypot(m.x-player.x,(m.y-m.h*0.5)-(player.y-player.h*0.5));
     if(d<62+(m.def.boss?m.w*0.4:0)&&d<bestD){bestD=d;best=m;}
   }

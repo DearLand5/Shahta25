@@ -220,7 +220,7 @@ function texFor(type,tx,ty){
   if(!a){a=TEX[type]=[0,1,2,3].map(v=>makeTex(type,v));}
   return a[hash2(tx,ty,7)&3];
 }
-/* узор 8x8 блоков из случайных вариантов -- целая полоса заливается одной операцией */
+/* узор 8x8 блоков из случайных вариантов — целая полоса заливается одной операцией */
 function makeAtlasPattern(g,variants,salt){
   const c=document.createElement('canvas');c.width=c.height=256;const cg=c.getContext('2d');
   for(let y=0;y<8;y++)for(let x=0;x<8;x++)cg.drawImage(variants[hash2(x,y,salt)%variants.length],x*32,y*32);

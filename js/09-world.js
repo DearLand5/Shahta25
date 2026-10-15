@@ -73,7 +73,7 @@ function canPlaceBarr(tx,ty){
 }
 function placeBarricade(){
   if(!player.barricadeBought){floatText(player.x,player.y-64,'Баррикады продаются в кузнице','#ff9a3c');SFX.uiBack();return;}
-  if(player.barricades<=0){floatText(player.x,player.y-64,'Нет баррикад -- купи в кузнице','#ff8a8a');SFX.uiBack();return;}
+  if(player.barricades<=0){floatText(player.x,player.y-64,'Нет баррикад — купи в кузнице','#ff8a8a');SFX.uiBack();return;}
   const cands=[];
   const pcx=player.x,pcy=player.y-player.h*0.5;
   if(aim.active){

@@ -647,7 +647,7 @@ function renderMine(dt){
     for(let tx=tx0;tx<=tx1;tx++){
       const o=getOre(tx,ty);
       if(o&&ORES[o].rar>=2){
-        /* в плотных жилах свечение делится между соседями -- не сливается в белое пятно */
+        /* в плотных жилах свечение делится между соседями — не сливается в белое пятно */
         let nb=0;for(let yy=-1;yy<=1;yy++)for(let xx=-1;xx<=1;xx++){const o2=getOre(tx+xx,ty+yy);if(o2&&ORES[o2].rar>=2)nb++;}
         const p=0.5+0.5*Math.sin(G.time*2.4+tx*1.3+ty*0.9);
         const R=TILE*(0.75+p*0.25);

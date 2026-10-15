@@ -297,7 +297,7 @@ function bossUpdate(m,dt,dx,dy,dist){
       if(B.at>2.4){B.atk='idle';B.at=0;}
       break;}
     case 'nova':{
-      /* кольцо сфер с «окнами» -- проскочи в разрыв */
+      /* кольцо сфер с «окнами» — проскочи в разрыв */
       hover(20);m.tele=Math.min(1,B.at/0.7);
       if(B.at>0.7&&(B.sub||0)<(B.phase>=3?2:1)&&B.at>0.7+(B.sub||0)*0.7){B.sub=(B.sub||0)+1;m.tele=0;shake(5);SFX.boom();
         const n=26,pa=Math.atan2(player.y-player.h*0.5-cy,player.x-m.x),off=pa+Math.PI+rnd(-0.6,0.6),gap=Math.floor(Math.random()*n);

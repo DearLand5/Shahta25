@@ -35,7 +35,7 @@ function launchDrill(){
   if(G.scene!=='mine')return;
   if(!player.drillBought){floatText(player.x,player.y-64,'Бур продаётся в кузнице','#ff9a3c');SFX.uiBack();return;}
   if(player.drills<=0){
-    floatText(player.x,player.y-64,'Нет буров -- купи в кузнице','#ff8a8a');
+    floatText(player.x,player.y-64,'Нет буров — купи в кузнице','#ff8a8a');
     SFX.uiBack();return;
   }
   let ax,ay;
@@ -45,7 +45,7 @@ function launchDrill(){
     const l=Math.hypot(ax,ay);
     if(l<2){ax=player.facing;ay=0;}else{ax/=l;ay/=l;}
   }else{
-    floatText(player.x,player.y-64,'Сначала коснитесь экрана -- укажите направление','#9be8ff');
+    floatText(player.x,player.y-64,'Сначала коснитесь экрана — укажите направление','#9be8ff');
     SFX.uiBack();return;
   }
   if(Math.abs(ax)>0.2)player.facing=ax>0?1:-1;
@@ -81,7 +81,7 @@ function updateDrills(dt){
           if(center){dead=true;floatText(tx*TILE+16,ty*TILE,'Нужна '+PICKS[ORES[ore].tier-1].name,'#ff9a3c');}
           continue;
         }
-        const cost=((ROCK_HP[t]||20)*0.5+(ore?ORES[ore].hp*0.3:0))*4;   /* прочность стала ниже -- цену блока для бура пересчитали */
+        const cost=((ROCK_HP[t]||20)*0.5+(ore?ORES[ore].hp*0.3:0))*4;   /* прочность стала ниже — цену блока для бура пересчитали */
         if(dr.power<cost){if(center)dead=true;continue;}
         dr.power-=cost;
         setTile(tx,ty,T_AIR);
@@ -191,6 +191,6 @@ function updateGrapple(dt){
       grapple=null;return;
     }
   }else if(g.state==='anchored'){
-    /* висим неограниченно: отцепление -- прыжок */
+    /* висим неограниченно: отцепление — прыжок */
   }
 }

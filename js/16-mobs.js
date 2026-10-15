@@ -67,7 +67,7 @@ function drawDebris(g){
     g.restore();
   }
 }
-/* лужи, свечение углей, следы -- рисуются под/над телами */
+/* лужи, свечение углей, следы — рисуются под/над телами */
 function drawDeathFxUnder(g){
   for(const f of deathFx){if(f.kind!=='puddle')continue;
     const grow=Math.min(1,f.t/(f.grow||0.25)),a=Math.min(1,(f.life-f.t)/0.6)*0.85;

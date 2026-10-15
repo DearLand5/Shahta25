@@ -22,7 +22,7 @@ const AU={
       try{c=new AC({latencyHint:'playback'});}catch(e){c=new AC();}
       AU.ctx=c;
       /* ограничитель-предохранитель: до 0.7 сигнал проходит без изменений
-         (никакой окраски/хрипа), выше -- плавно поджимается к 1.0.
+         (никакой окраски/хрипа), выше — плавно поджимается к 1.0.
          Без передискретизации: она сильно грузила аудиопоток телефона. */
       const clip=c.createWaveShaper();
       const n=4096,curve=new Float32Array(n);
@@ -76,7 +76,7 @@ const AU={
     AU.musicVol=clamp(v,0,1)*1.1;
     try{if(AU.musicBus){AU.musicBus.gain.setTargetAtTime(AU.musicVol,AU.ctx.currentTime,0.25);AU.musicSend.gain.setTargetAtTime(AU.musicVol*0.6,AU.ctx.currentTime,0.25);}}catch(e){}
   },
-  /* сколько голосов звучит прямо сейчас -- считаем по времени окончания,
+  /* сколько голосов звучит прямо сейчас — считаем по времени окончания,
      а не по событию onended (оно теряется, если игру свернули) */
   busy(){
     const now=AU.ctx.currentTime;
@@ -191,7 +191,7 @@ function tileMat(t){
   if(t===5)return 'obsidian';
   return 'stone';
 }
-/* из чего сделан моб -- для звуков ударов и гибели */
+/* из чего сделан моб — для звуков ударов и гибели */
 const MOB_MAT={golem:'stone',h_ashgolem:'stone',h_magmacrab:'stone',crab:'stone',turtle:'stone',elemental:'stone',h_magmael:'stone',h_infernal:'stone',
   prism:'crystal',rift:'crystal',wisp:'crystal',h_sulfurel:'crystal',
   skeleton:'bone',h_skeleton:'bone',h_bonecolossus:'bone',h_skelminion:'bone',h_necro:'bone',h_skullbat:'bone',turret:'bone',

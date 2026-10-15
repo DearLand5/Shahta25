@@ -38,7 +38,7 @@ function heartTile(wx,wy){
 }
 /* ============================================================
    ЯКОРЯ: по 3 в каждом биоме обоих измерений. Якорь переносит
-   в соседний биом (вверх или вниз) -- к якорю того биома.
+   в соседний биом (вверх или вниз) — к якорю того биома.
    ============================================================ */
 let _anKey='',_anList=[];
 function anchorList(){
@@ -105,8 +105,8 @@ function genTileAt(wx,wy){
         case 'b':return {t:T_BRICK,o:0};
         case 'o':return {t:T_OBS,o:0};
         case 'x':return {t:T_BONE,o:0};
-        case 'l':return {t:lavaAmt()>0?T_LAVA:T_OBS,o:0};        /* лава выключена -- застывший обсидиан */
-        case '~':return {t:waterAmt()>0?T_WATER:rock,o:0};      /* вода выключена -- пруд засыпан */
+        case 'l':return {t:lavaAmt()>0?T_LAVA:T_OBS,o:0};        /* лава выключена — застывший обсидиан */
+        case '~':return {t:waterAmt()>0?T_WATER:rock,o:0};      /* вода выключена — пруд засыпан */
         case 'i':return {t:rock,o:structOre(wx,wy,d,'i')};
         case 'g':return {t:rock,o:structOre(wx,wy,d,'g')};
         default:return {t:T_AIR,o:0};
@@ -124,7 +124,7 @@ function genTileAt(wx,wy){
     }
     const pk=pocketOre(wx,wy,d);
     if(pk)return {t:T_STONE,o:pk};
-    /* каркас штольни: сплошной пол, потолок и торцы -- рельсы и крепь стоят на камне */
+    /* каркас штольни: сплошной пол, потолок и торцы — рельсы и крепь стоят на камне */
     const cb=corrBand(wy);
     if(cb){
       const x0=cb.x0,x1=cb.x0+cb.len;

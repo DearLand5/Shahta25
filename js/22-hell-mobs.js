@@ -173,7 +173,7 @@ function updateMobs(dt){
       mvx=(m.hx||0)*(k||0.5);
       if(Math.abs(mvx)>0.05)face(mvx);
     };
-    /* «tele» растёт -- это замах (дрожь и вытягивание); если он прыгнул в 1 разом в момент выстрела --
+    /* «tele» растёт — это замах (дрожь и вытягивание); если он прыгнул в 1 разом в момент выстрела --
        это уже сам удар: показываем выпад, а затухающий tele больше не трясёт модель */
     {const pt=m._pt||0;if(m.tele>=0.99&&pt<0.6&&!m.teleUp){m.atkT=0.24;}m.teleUp=m.tele>pt+1e-4&&m.tele<0.99?true:(m.tele<pt?false:m.teleUp);}
     m.tele=Math.max(0,m.tele-dt*2);m._pt=m.tele;
@@ -186,7 +186,7 @@ function updateMobs(dt){
     }
     else if(m.stun>0){m.tele=0;}
     else switch(def.mech){
-      case 'skitter':{                                  /* кролик: зигзаг-прыжки; загнанный -- лягается */
+      case 'skitter':{                                  /* кролик: зигзаг-прыжки; загнанный — лягается */
         if(dist<190){
           mvx=-nx*1.2;face(mvx);
           if(m.onGround&&m.timer<=0){m.vy=-330;m.timer=rnd(0.35,0.8);mvx*=1.4;}
@@ -513,7 +513,7 @@ function updateMobs(dt){
             }
           }
         }else if(m.state==='tears'){
-          /* веер «слёз Бездны» -- три самонаводящиеся капли */
+          /* веер «слёз Бездны» — три самонаводящиеся капли */
           mvx=0;mvy=0;m.tele=Math.min(1,m.st/0.6);
           if(m.st>0.6){m.state='idle';m.st=0;m.shootCd=rnd(3,4.5);const a0=Math.atan2(dy,dx);
             for(let k=-1;k<=1;k++)mobShoot(m,a0+k*0.32,230,def.dmg*0.6,'#c8a0ff',4.2,{homing:1.6,life:2.6});SFX.hit();}
@@ -594,7 +594,7 @@ function updateMobs(dt){
         else wander(0.5);
         break;}
       case 'lavaworm':{                                 /* червь: плывёт в породе (неуязвим), выныривает с укусом и плевком лавы,
-                                                           затем ползёт по поверхности -- это окно, чтобы его бить */
+                                                           затем ползёт по поверхности — это окно, чтобы его бить */
         noPhys=true;if(!m.trail)m.trail=[];
         if(m.state==='idle')m.state='under';
         const wormTrail=(depth)=>{m.trail.length=0;for(let q=0;q<14;q++)m.trail.push([m.x-m.facing*q*4.6,m.y-12+Math.sin(G.time*9-q*0.8)*2.2*(q>0?1:0.4)+depth*q/13]);};
@@ -625,7 +625,7 @@ function updateMobs(dt){
           const sp=def.spd*0.55,nx2=m.x+m.facing*sp*dt,ftx=Math.floor((nx2+m.facing*14)/TILE),fty=Math.floor(m.y/TILE);
           if(Math.abs(dx)>30&&isSolid(ftx,fty)&&!isSolid(ftx,fty-1)){m.x=nx2;m.vx=m.facing*sp;}else m.vx=m.facing*1;
           m.vy=0;
-          if(!isSolid(Math.floor(m.x/TILE),fty))m.y+=Math.min(300*dt,TILE);   /* край -- соскальзывает вниз */
+          if(!isSolid(Math.floor(m.x/TILE),fty))m.y+=Math.min(300*dt,TILE);   /* край — соскальзывает вниз */
           if(dist<48&&m.atkCd<=0){m.atkCd=1;m.atkT=0.24;mobMelee(m,def.dmg*0.8,{burn:2},180,-200);}
           if(Math.random()<0.15)spawnPart(m.x-m.facing*rnd(10,50),m.y-4,rnd(-15,15),rnd(-40,-15),0.4,'#ff8a3a',1.8,200);
           wormTrail(0);
@@ -959,7 +959,7 @@ function updateMobs(dt){
         if(isSolid(fx,fy)&&m.timer<=0&&!(getTile(fx,fy)===T_BARRICADE&&m.provoked+(def.aggro>0?1:0)>0)){m.vy=-360;m.timer=0.4;}
       }
     }
-    /* упёрся в баррикаду по пути к игроку -- ломает её */
+    /* упёрся в баррикаду по пути к игроку — ломает её */
     if(aggro&&def.dmg>0&&m.atkCd<=0&&!m.untargetable&&m.alive){
       let bx=-1,by=-1;
       const pr=Math.max(m.w,m.h)*0.5+10;
@@ -989,7 +989,7 @@ function updateMobs(dt){
         mobMelee(m,def.dmg*(charging?1.3:0.7),charging&&def.mech==='swooper'?{bleed:3}:def.fx,charging?260:150,charging?-220:0);
       }
     }
-    /* контактный урон: элементаль/диверы -- см. выше; провокация краба и слизня */
+    /* контактный урон: элементаль/диверы — см. выше; провокация краба и слизня */
     if(def.mech==='splitter'&&hostile){
       const hitDist=Math.hypot(player.x-m.x,(player.y-player.h*0.5)-(m.y-m.h*0.5));
       if(hitDist<(m.w+player.w)/2+8&&m.atkCd<=0){m.atkCd=0.95;mobMelee(m,def.dmg,def.fx);}

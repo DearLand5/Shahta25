@@ -42,16 +42,16 @@ function drawLobbyPlaceGhost(g){
   g.setLineDash([3,3]);g.strokeStyle='rgba('+col+',.95)';g.lineWidth=1.4;g.strokeRect(x-w/2,-h,w,h);g.setLineDash([]);
   for(const [cx,cy,dx,dy] of [[x-w/2,-h,1,1],[x+w/2,-h,-1,1],[x-w/2,0,1,-1],[x+w/2,0,-1,-1]]){g.beginPath();g.moveTo(cx+dx*6,cy);g.lineTo(cx,cy);g.lineTo(cx,cy+dy*6);g.stroke();}
   g.font='800 9px system-ui,sans-serif';g.textAlign='center';
-  const lbl=ok?'«Ставить» -- сюда':why,tw=g.measureText(lbl).width+12;
+  const lbl=ok?'«Ставить» — сюда':why,tw=g.measureText(lbl).width+12;
   g.fillStyle='rgba(8,10,14,.75)';roundRect(g,x-tw/2,-h-20,tw,14,7);g.fill();g.fillStyle='rgba('+col+',1)';g.fillText(lbl,x,-h-10);
-  if(!G.lobbyAim){g.font='700 8px system-ui,sans-serif';g.fillStyle='rgba(230,240,255,.75)';g.fillText('тапни по полу или веди пальцем -- выбрать место',x,-h-25);}
+  if(!G.lobbyAim){g.font='700 8px system-ui,sans-serif';g.fillStyle='rgba(230,240,255,.75)';g.fillText('тапни по полу или веди пальцем — выбрать место',x,-h-25);}
   g.restore();
 }
 function placeCrate(){
-  const L=packedCrates();if(!L.length){floatText(player.x,player.y-64,'Нет ящиков -- купи в Кузнице Ада','#ff8a8a');SFX.uiBack();return;}
+  const L=packedCrates();if(!L.length){floatText(player.x,player.y-64,'Нет ящиков — купи в Кузнице Ада','#ff8a8a');SFX.uiBack();return;}
   if(G.scene==='lobby'){
     const x=lobbyPlaceX(),why=lobbyPlaceCheck('crate',x);
-    if(why){UI.toast(why+' -- выбери другое место');SFX.uiBack();return;}
+    if(why){UI.toast(why+' — выбери другое место');SFX.uiBack();return;}
     const c=L.shift();c.where='lobby';c.x=Math.round(x);c.y=0;worldCrates().push(c);G.lobbyAim=null;
     burst(x,-12,10,'#c89a60',110,2.6);SFX.place();vib(15);validateSelection();saveGame();UI.toast('📦 '+c.name+' поставлен');return;
   }
@@ -76,11 +76,11 @@ function updateCrates(dt){
   if(G.scene!=='mine')return;
   crateFallT+=dt;if(crateFallT<0.08)return;crateFallT=0;
   for(const c of worldCrates()){if(c.where!=='mine')continue;
-    if(isSolid(c.x,c.y)){let ty=c.y;while(ty>1&&isSolid(c.x,ty))ty--;c.y=ty;continue;}   /* затянуло породой -- выталкиваем наверх */
+    if(isSolid(c.x,c.y)){let ty=c.y;while(ty>1&&isSolid(c.x,ty))ty--;c.y=ty;continue;}   /* затянуло породой — выталкиваем наверх */
     if(!isSolid(c.x,c.y+1)&&!crateAtTile(c.x,c.y+1)&&c.y<4000){c.y++;c.fallT=0.2;}}
 }
 function drawCrate(g,x,y,c,near,t){
-  /* x,y -- середина низа; ящик 26×24, дощатый, с коваными уголками и табличкой */
+  /* x,y — середина низа; ящик 26×24, дощатый, с коваными уголками и табличкой */
   const w=26,h=24,x0=x-w/2,y0=y-h;
   g.save();
   g.fillStyle='rgba(0,0,0,.28)';g.beginPath();g.ellipse(x,y,w*0.6,3,0,0,TAU);g.fill();

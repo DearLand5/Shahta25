@@ -56,7 +56,7 @@ function liqReact(x,y,tt){
 }
 /* плотность (тяжёлая жидкость тонет в лёгкой), скорость падения за такт (вязкость) */
 const LIQ_DENS={9:1,23:2,22:3},LIQ_FALL={9:3,22:3,23:2,7:1};
-/* направление недавнего течения в клетке -- течения и водопады сносят игрока */
+/* направление недавнего течения в клетке — течения и водопады сносят игрока */
 const liqFlow=new Map();
 function liqFlowMark(x,y,dx,dy){if(liqFlow.size>4000)liqFlow.clear();liqFlow.set(x+y*MW,{dx,dy,t:G.time});}
 function liqFlowAt(x,y){const f=liqFlow.get(x+y*MW);return f&&G.time-f.t<0.4?f:null;}
@@ -73,7 +73,7 @@ function liqHead(x,y,dx,tt){
 }
 function liqStep(x,y,tt,reach){
   if(liqReact(x,y,tt))return;
-  /* свободное падение: несколько клеток за такт (вязкие -- медленнее) */
+  /* свободное падение: несколько клеток за такт (вязкие — медленнее) */
   if(liqFree(x,y+1)){let ny=y+1;const f=LIQ_FALL[tt]||1;for(let k=1;k<f&&liqFree(x,ny+1);k++)ny++;
     liqMove(x,y,x,ny,tt);const u=rawGet(x,ny+1);if(isLiq(u)||u===T_LAVA)liqSplash(x,ny,tt);return;}
   /* расслоение: тяжёлая жидкость опускается сквозь лёгкую */

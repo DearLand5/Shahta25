@@ -12,7 +12,7 @@ const BOT_UPG={
 function botSpd(){return BOT_SPD[clamp(bot().spdLv|0,0,5)];}
 function botLoad(){return BOT_CAP[clamp(bot().capLv|0,0,5)];}
 const BOT_CATS=[['hore','🔥 Руда Ада'],['eore','🌍 Руда Земли'],['ingot','▰ Слитки'],['alloy','⬢ Сплавы'],['comp','⚙️ Компоненты'],['part','🦴 Части мобов'],['rest','✳ Всё остальное']];
-/* общее состояние (приёмник, прокачки -- одни на всех роботов) + список роботов S.units (до BOT_MAX) */
+/* общее состояние (приёмник, прокачки — одни на всех роботов) + список роботов S.units (до BOT_MAX) */
 const BOT_MAX=3,BOT_NAMES=['Болтик','Гаечка','Шуруп'];
 const BOT_SKINS=[
   {id:'brass',n:'Латунь',b:['#e8b86a','#c8904a','#7a5226'],pan:'#3a2a1a',riv:'#f0d090',arm:['#8a6232','#6a4a28'],h:['#f8d898','#a87a3e'],vis:'#7ff0ff'},
@@ -47,7 +47,7 @@ function botNextJob(S,inp,claims){
   for(const kind of ['o','m']){const box=kind==='o'?inp.inv:inp.mats;
     for(const k of Object.keys(box)){if(!(box[k]>0)||!(kind==='o'?ORES[k]:MATS[k]))continue;const tg=botTarget(kind,k,inp.id);if(!tg)continue;
       const j={kind,id:k,to:tg.id};if(!claims||!claims.has(kind+':'+k))return j;if(!any)any=j;}}
-  return any;   /* все задания заняты другими роботами -- помогаем с тем же ресурсом */
+  return any;   /* все задания заняты другими роботами — помогаем с тем же ресурсом */
 }
 function botUnsorted(inp){let n=0;for(const k in inp.inv)if(inp.inv[k]>0&&!botTarget('o',k,inp.id))n++;for(const k in inp.mats)if(inp.mats[k]>0&&!botTarget('m',k,inp.id))n++;return n;}
 function crateOpen(c,t){c._openT=Math.max(c._openT||0,t);}
@@ -66,7 +66,7 @@ function botUnitTick(U,idx,inp,claims,dt){
   const sp=BOT_SPEED*botSpd(),hk=1/(1+(botSpd()-1)*0.6);const goTo=(x)=>{const d=x-U.x;if(Math.abs(d)<3){U.vx=0;return true;}const st=Math.sign(d)*Math.min(Math.abs(d),sp*dt);U.x+=st;U.vx=Math.sign(d)*sp;U.face=Math.sign(d);return false;};
   U.vx=0;
   if(!U.job){
-    if(U.carry){const tg=crateById(U.carry.to);if(!tg){/* ящик убрали -- вернуть в приёмник */if(inp){const box=U.carry.kind==='o'?inp.inv:inp.mats;box[U.carry.id]=(box[U.carry.id]||0)+U.carry.n;}U.carry=null;}
+    if(U.carry){const tg=crateById(U.carry.to);if(!tg){/* ящик убрали — вернуть в приёмник */if(inp){const box=U.carry.kind==='o'?inp.inv:inp.mats;box[U.carry.id]=(box[U.carry.id]||0)+U.carry.n;}U.carry=null;}
       else{U.job={ph:'toOut',to:tg.id};}}
     else if(!inp){U.state='noinput';return;}
     else{const j=botNextJob(U,inp,claims);if(!j){U.state=botUnsorted(inp)?'nofilter':'idle';const hx=inp.x+40+idx*30;if(Math.abs(U.x-hx)>4)goTo(hx);return;}
@@ -89,7 +89,7 @@ function placeBot(){
   const x=lobbyPlaceX(),why=lobbyPlaceCheck('sorter',x);if(why){UI.toast(why);SFX.uiBack();return;}
   U.placed=true;U.x=Math.round(x);U.face=x>=lobbyPlayer.x?-1:1;U.job=null;bot();
   G.lobbyAim=null;
-  burst(U.x,-14,14,'#9fe8ff',130,2.6);SFX.portal&&SFX.portal();vib(20);validateSelection();saveGame();UI.toast('🤖 '+U.name+' готов к работе -- тапни по нему, чтобы настроить');
+  burst(U.x,-14,14,'#9fe8ff',130,2.6);SFX.portal&&SFX.portal();vib(20);validateSelection();saveGame();UI.toast('🤖 '+U.name+' готов к работе — тапни по нему, чтобы настроить');
 }
 function botColor(kind,id){return kind==='o'?ORES[id].color:MATS[id].col;}
 /* модель: латунный робот на гусеничном ходу, купол-голова с визором, антенна, руки-клешни */
@@ -184,7 +184,7 @@ function trySpawnMob(){
   if(!G.mineActive)return;
   if(player.y<12*TILE)return;
   if(G.dim===0&&player.y>(ARENA_Y0-3)*TILE)return;
-  /* иногда ищем воду -- там живёт рыба */
+  /* иногда ищем воду — там живёт рыба */
   if(G.dim===0&&Math.random()<0.12){
     const wx=player.x+rnd(-16,16)*TILE,wy=player.y+rnd(-10,10)*TILE;
     const tx=Math.floor(wx/TILE),ty=Math.floor(wy/TILE);

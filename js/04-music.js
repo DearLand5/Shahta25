@@ -1,12 +1,12 @@
 'use strict';
 /* ============================================================
-   МУЗЫКА -- спокойная генеративная: лобби и по теме каждого биома
+   МУЗЫКА — спокойная генеративная: лобби и по теме каждого биома
    Слои: тёплая «струнная» подушка (два расстроенных осциллятора
    через мягкий фильтр с медленным «дыханием»), неторопливая
    мелодия-фразами (калимба / электропиано / музыкальная шкатулка)
    с эхом, редкий бас и колокольчики. Аккорды сменяются раз в два
-   такта, голоса ведутся плавно -- без скачков.
-   Отдельно -- фон пещеры (ветер, капли, гул, бульканье лавы),
+   такта, голоса ведутся плавно — без скачков.
+   Отдельно — фон пещеры (ветер, капли, гул, бульканье лавы),
    он идёт через шину звуков и не зависит от громкости музыки.
    ============================================================ */
 const Music={
@@ -72,7 +72,7 @@ const Music={
       mel:{inst:'flute',vol:0.055,dens:0.24,oct:1,dur:2.4},
       bass:{vol:0.08,every:2},drone:{note:23,vol:0.045,lp:160},
       amb:{wind:0.02,wlp:300,rumble:0.05,bubble:0.14,crackle:0.05}},
-    /* бой с боссом: напряжённо, но без грохота -- мягкая перкуссия и пульс баса */
+    /* бой с боссом: напряжённо, но без грохота — мягкая перкуссия и пульс баса */
     boss:{root:38,scale:[0,2,3,5,7,8,10],prog:[0,5,6,4],barsPer:1,bpm:84,
       pad:{type:'sawtooth',lp:700,vol:0.045,att:0.8,rel:1.2,det:9},
       mel:{inst:'epiano',vol:0.07,dens:0.55,oct:1,dur:0.8},
@@ -111,7 +111,7 @@ const Music={
     Amb.want(G.scene==='menu'?null:scene);
     const want=(AU.musicVol<=0.001)?null:scene;
     if(want===Music.cur){Music.pend=null;return;}
-    /* смена темы только если новый биом держится 2.5 с -- без дёрганья на стыке */
+    /* смена темы только если новый биом держится 2.5 с — без дёрганья на стыке */
     const isB=(x)=>typeof x==='string'&&x.startsWith('boss');
     if(Music.cur===null||want===null||isB(want)||isB(Music.cur)||(Music.cur==='lobby')!==(want==='lobby')){Music.pend=null;Music.set(want);return;}
     if(Music.pend!==want){Music.pend=want;Music.pendT=now;return;}
@@ -235,14 +235,14 @@ const Music={
     }
   },
   /* мелодия: случайное блуждание по ладу маленькими шагами, фразы по 4 такта,
-     сильные доли тянутся к нотам аккорда, в конце фразы -- длинная нота и пауза */
+     сильные доли тянутся к нотам аккорда, в конце фразы — длинная нота и пауза */
   melody(T,beat,t,spb,deg){
     const M=T.mel;if(!M)return;
     const bib=beat%4,bar=Math.floor(beat/4),phraseBar=bar%4,phrase=Math.floor(bar/4);
     const S=Music.mel||(Music.mel={i:T.scale.length*M.oct+2,rest:false,lastPhrase:-1});
     if(S.lastPhrase!==phrase){S.lastPhrase=phrase;S.rest=phrase%4===3&&Math.random()<0.7;}
     if(S.rest)return;
-    if(phraseBar===3&&bib>0)return;           /* хвост фразы -- дышим */
+    if(phraseBar===3&&bib>0)return;           /* хвост фразы — дышим */
     const n=T.scale.length;
     const chordIdx=[deg,deg+2,deg+4].map(x=>((x%n)+n)%n);
     for(let h=0;h<2;h++){

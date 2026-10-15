@@ -17,7 +17,7 @@ const SAVE_KEY_M='deep_hope_manual';     /* ручной слот */
 const SET_KEY='deep_hope_settings';      /* настройки хранятся отдельно от прогресса */
 const Save={
   available:true,lastErr:'',
-  /* ВАЖНО: раньше читалась только версия 1, а писалась версия 2 -- сейв писался, но
+  /* ВАЖНО: раньше читалась только версия 1, а писалась версия 2 — сейв писался, но
      при запуске не загружался, а изменение настроек затирало его пустым. */
   read(key){
     try{
@@ -29,7 +29,7 @@ const Save={
       return d;
     }catch(e){Save.lastErr=String(e&&e.message||e);return null;}
   },
-  /* true -- записано. При переполнении хранилища выкидываем «историю раскопок»
+  /* true — записано. При переполнении хранилища выкидываем «историю раскопок»
      (она нужна только для затягивания породы) и пробуем ещё раз. */
   write(obj,key){
     key=key||SAVE_KEY;
@@ -199,7 +199,7 @@ function switchDimension(nd){
   DIMWORLD[G.dim]=packWorldData();
   const w=DIMWORLD[nd];delete DIMWORLD[nd];
   G.dim=nd;
-  applyWorldData(w||{});           /* нет мира -- создаётся новый со своим сидом */
+  applyWorldData(w||{});           /* нет мира — создаётся новый со своим сидом */
   buildings=BUILDINGS[nd];LOBBY_W=LOBBY_WS[nd];G.resumeMine=null;
   mobs.length=0;projectiles.length=0;beams.length=0;grapple=null;drills.length=0;
   G.scene='lobby';G.mineActive=false;
@@ -261,14 +261,14 @@ function applySaveData(d){
       }
     }
     if(!settings.controlsCustomized)settings.controls=null;
-    /* старая авто-«Низкая графика» включалась сама из-за любого лага -- один раз возвращаем «Высокую» */
+    /* старая авто-«Низкая графика» включалась сама из-за любого лага — один раз возвращаем «Высокую» */
     if(!(d.settings&&d.settings.qv>=2)){if(settings.quality==='low')settings.quality='high';settings.qv=2;}
     if(d.player){
       const p=d.player;
       player.money=p.money||0;
       player.pickLvl=clamp(p.pickLvl||1,1,10);
       {
-        /* старые сохранения: уровней могло быть сколько угодно -- лишнее возвращаем монетами */
+        /* старые сохранения: уровней могло быть сколько угодно — лишнее возвращаем монетами */
         const oldLvl=Math.max(0,Math.floor(p.digSpeedLvl||0));
         player.digSpeedLvl=Math.min(oldLvl,DIG_SPEED_HMAX);
         for(let i=DIG_SPEED_HMAX;i<oldLvl;i++)player.money+=Math.floor(400*Math.pow(1.85,i));

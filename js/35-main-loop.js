@@ -123,7 +123,7 @@ function loadFromBrowser(key){
   SFX.buy();vib(30);UI.toast('📂 Сохранение загружено');UI.mainMenu();
   return true;
 }
-/* Полный сброс прогресса прямо в памяти -- без перезагрузки страницы, которая в
+/* Полный сброс прогресса прямо в памяти — без перезагрузки страницы, которая в
    HTML-просмотрщиках и встроенных браузерах часто заблокирована. */
 function resetProgress(){
   try{
@@ -183,7 +183,7 @@ function applyBalance15(){
   for(const d of MOBDEFS){if(d.hp)d.hp=Math.round(d.hp*(d.boss?1.15:1.2));if(d.dmg)d.dmg=Math.round(d.dmg*(d.boss?1.3:1.15));}
 }
 /* экономика Ада v16: руда Ада дороже (особенно на первых ярусах), снаряжение,
-   прокачки и предметы Ада -- заметно дешевле, рынок насыщается медленнее */
+   прокачки и предметы Ада — заметно дешевле, рынок насыщается медленнее */
 const SAT_ORE=260;
 function applyBalance16(){
   if(applyBalance16.done)return;applyBalance16.done=true;
@@ -207,7 +207,7 @@ function applyBalance16(){
   for(const p of PERKS)p.base=Math.round(p.base*0.7);
   for(const r of RITUALS)r.s=Math.round(r.s*0.75);
 }
-/* цены v19: кузницы чуть дешевле (−12%), буры и аптечки -- заметно дешевле */
+/* цены v19: кузницы чуть дешевле (−12%), буры и аптечки — заметно дешевле */
 function applyBalance19(){
   if(applyBalance19.done)return;applyBalance19.done=true;
   const k=0.88,r=(v)=>v>=1000?Math.round(v*k/100)*100:Math.round(v*k);

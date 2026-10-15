@@ -59,8 +59,8 @@ const player={
 const PLAYER_DEFAULTS=JSON.parse(JSON.stringify(player));
 function invCount(){let n=0;for(const k in player.inv)if(player.inv[k]>0)n++;return n;}
 function invValue(){let v=0;for(const k in player.inv)v+=player.inv[k]*orePrice(k);return v;}
-/* Рюкзак: слоты -- сколько видов руды, стопка -- сколько штук одного вида.
-   Лишнее не теряется, но уходит скупщику за полцены -- поэтому вместимость важна. */
+/* Рюкзак: слоты — сколько видов руды, стопка — сколько штук одного вида.
+   Лишнее не теряется, но уходит скупщику за полцены — поэтому вместимость важна. */
 function stackCap(){const l=player.stackLvl||0;return 40+20*Math.min(8,l)+40*Math.max(0,l-8);}
 let _fullMsgT=0;
 function addOre(id,n){
@@ -239,20 +239,20 @@ function playerDie(){
 function getPlaceItems(){
   const a=[{id:'ladder',icon:'🪜',name:'Лестница',count:player.ladders,desc:'Ставится в туннель. Кнопка «Ставить».'}];
   if(player.barricadeBought)a.push({id:'barricade',icon:'🧱',name:'Баррикада ('+BARR[player.barricadeLvl-1].name.toLowerCase()+')',count:player.barricades,
-    desc:'Ставится перед тобой или туда, куда тапнул. Прочность '+BARR[player.barricadeLvl-1].hp+'. Мобы её ломают. Выкопай -- вернётся в запас.'});
-  if((player.hitems&&player.hitems.hbombs)>0)a.push({id:'hbomb',icon:'💣',name:'Адская бомба',count:player.hitems.hbombs,desc:'Тап -- направление, «Ставить» -- бросок. Взрыв 3 блока, 1200 урона.'});
+    desc:'Ставится перед тобой или туда, куда тапнул. Прочность '+BARR[player.barricadeLvl-1].hp+'. Мобы её ломают. Выкопай — вернётся в запас.'});
+  if((player.hitems&&player.hitems.hbombs)>0)a.push({id:'hbomb',icon:'💣',name:'Адская бомба',count:player.hitems.hbombs,desc:'Тап — направление, «Ставить» — бросок. Взрыв 3 блока, 1200 урона.'});
   if((player.hitems&&player.hitems.icegren)>0)a.push({id:'icegren',icon:'❄️',name:'Ледяная граната',count:player.hitems.icegren,desc:'Замораживает лаву и жидкости вокруг, сковывает врагов.'});
-  {const un=botUnits().filter(u=>!u.placed);if(un.length)a.push({id:'sorter',icon:'🤖',name:'Робот-кладовщик «'+un[0].name+'»',count:un.length,desc:'Ставится в лобби Ада: зажми палец и веди -- выбери место, «Ставить» -- поставить. Разносит ресурсы из ящика-приёмника по ящикам.'});}
+  {const un=botUnits().filter(u=>!u.placed);if(un.length)a.push({id:'sorter',icon:'🤖',name:'Робот-кладовщик «'+un[0].name+'»',count:un.length,desc:'Ставится в лобби Ада: зажми палец и веди — выбери место, «Ставить» — поставить. Разносит ресурсы из ящика-приёмника по ящикам.'});}
   if(packedCrates().length>0)a.push({id:'crate',icon:'📦',name:'Ящик для хранения',count:packedCrates().length,
-    desc:'Ставится на пол в шахте или в лобби. Тапни по ящику рядом -- откроется хранилище.'});
+    desc:'Ставится на пол в шахте или в лобби. Тапни по ящику рядом — откроется хранилище.'});
   if(player.drillBought)a.push({id:'drill',icon:'🛠️',name:'Бур ур. '+player.drillLvl,count:player.drills,
-    desc:'Тап по экрану -- направление, «Ставить» -- запуск. Тоннель шириной '+drillWidth()+'. Одноразовый.'});
+    desc:'Тап по экрану — направление, «Ставить» — запуск. Тоннель шириной '+drillWidth()+'. Одноразовый.'});
   return a;
 }
 function getShootItems(){
   const a=[];
   if(player.grappleUnlocked)a.push({id:'grapple',icon:'🪝',name:'Пушка-крюк',count:player.grappleAmmo,
-    desc:'Тап -- направление, «Стрелять» -- выстрел. Джойстик: качаться, вверх/вниз по верёвке. Прыжок -- слезть.'});
+    desc:'Тап — направление, «Стрелять» — выстрел. Джойстик: качаться, вверх/вниз по верёвке. Прыжок — слезть.'});
   if(player.potions>0)a.push({id:'medkit',icon:'🧪',name:'Аптечка',count:player.potions,
     desc:'Каждое нажатие «Стрелять» восстанавливает 30% здоровья.'});
   if((player.hitems&&player.hitems.beacons)>0)a.push({id:'beacon',icon:'📡',name:'Рудный маяк',count:player.hitems.beacons,desc:'Продаёт весь рюкзак прямо из шахты по 75% рыночной цены.'});
@@ -358,7 +358,7 @@ function useShoot(holdRepeat){
   validateSelection();
   const it=G.shootItem;
   if(!it){
-    if(!holdRepeat){UI.toast('Для «Стрелять» нет предметов -- загляни в кузницу');SFX.uiBack();}
+    if(!holdRepeat){UI.toast('Для «Стрелять» нет предметов — загляни в кузницу');SFX.uiBack();}
     return;
   }
   if(it==='medkit'){if(!holdRepeat)useMedkit();return;}

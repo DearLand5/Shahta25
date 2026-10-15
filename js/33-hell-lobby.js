@@ -275,7 +275,7 @@ function drawHellBuilding(g,b,glowList,t){
     /* наковальня рядом */
     g.fillStyle='#1a1a20';g.fillRect(-150,-22,30,22);g.beginPath();g.moveTo(-160,-36);g.lineTo(-108,-36);g.lineTo(-100,-30);g.lineTo(-108,-24);g.lineTo(-150,-24);g.closePath();g.fill();
     gpush([0,-30,130,'#ff6a1a'],[58,-250,60,'#ff8a2a']);
-    /* литейные формы: когда в Печи идёт плавка -- течёт металл, готовые слитки сияют */
+    /* литейные формы: когда в Печи идёт плавка — течёт металл, готовые слитки сияют */
     {const F=(typeof furn==='function')?furn():{q:[]},act=F.q.length>0;
       g.fillStyle='#1a1214';g.fillRect(104,-18,96,18);g.fillStyle='#2a2024';g.fillRect(100,-22,104,5);
       for(let k=0;k<4;k++){const mx=110+k*23;g.fillStyle='#0a0606';g.fillRect(mx,-20,16,5);
@@ -697,7 +697,7 @@ function renderMenu(dt){
   /* горы */
   ctx.fillStyle='#1a2040';ctx.beginPath();ctx.moveTo(0,gy);
   for(let i=0;i<=12;i++){const x=i/12*W;ctx.lineTo(x,gy-20-Math.abs(Math.sin(i*1.7))*gy*0.28);}ctx.lineTo(W,gy);ctx.closePath();ctx.fill();
-  /* разрез недр: пласты биомов, медленно «едут» вверх -- как будто спускаемся */
+  /* разрез недр: пласты биомов, медленно «едут» вверх — как будто спускаемся */
   const layers=[['#3a2818','#2a1c10'],['#2a2e38','#1c2028'],['#262250','#16123a'],['#4a1a10','#2a0c08'],['#140e2a','#08060f']];
   if(hell)layers.push(['#3a0a08','#1a0302']);
   const LH=(H-gy)/(layers.length-0.6);

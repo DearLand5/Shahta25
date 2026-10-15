@@ -244,7 +244,7 @@ function pointerDown(e){
       return;
     }
     if(G.scene==='lobby'&&lobbyPlacing()){
-      /* режим установки: тап по полу или протяжка -- прицел; короткий тап выше пола -- как обычно (здания, ящики, роботы) */
+      /* режим установки: тап по полу или протяжка — прицел; короткий тап выше пола — как обычно (здания, ящики, роботы) */
       const w=screenToWorldLobby(x,y),rec={type:'laim',sx:x,sy:y,t:performance.now(),aim:false};
       if(w.y>-6){rec.aim=true;setLobbyAim(w.x);SFX.ui();}
       try{canvas.setPointerCapture(e.pointerId);}catch(_){}

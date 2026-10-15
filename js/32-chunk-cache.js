@@ -1,8 +1,8 @@
 'use strict';
 /* ============================================================
    КЭШ ОТРИСОВКИ УЧАСТКОВ (16x16 блоков)
-   Статичные слои -- задние стены, текстуры пород, лестницы, руда и тени
-   граней -- рисуются один раз в картинку участка в точном экранном
+   Статичные слои — задние стены, текстуры пород, лестницы, руда и тени
+   граней — рисуются один раз в картинку участка в точном экранном
    разрешении и дальше просто копируются. При изменении блока
    перерисовывается только клетка с соседями. Анимация не кэшируется.
    ============================================================ */
@@ -226,7 +226,7 @@ function drawParticles(){
     const sp=Math.hypot(p.vx,p.vy);
     if(inf.hot)ctx.globalCompositeOperation='lighter';
     ctx.globalAlpha=inf.hot?Math.min(1,a*1.2):Math.min(1,a*1.4);
-    if(sp>240&&s<8){/* быстрые искры -- вытянутые штрихи */
+    if(sp>240&&s<8){/* быстрые искры — вытянутые штрихи */
       const k=Math.min(0.05,22/sp)*sc;ctx.strokeStyle=p.color;ctx.lineCap='round';ctx.lineWidth=Math.max(1,s*0.55);
       ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(sx-p.vx*k,sy-p.vy*k);ctx.stroke();}
     const ds=inf.hot?s*2.6:s*1.25;ctx.drawImage(inf.c,sx-ds/2,sy-ds/2,ds,ds);
@@ -322,7 +322,7 @@ function drawLobbyScenery(g,cam,t,W,sc,glowList){
         g.fillStyle='#868b95';g.beginPath();g.ellipse(px+10,-4,7,5,0,Math.PI,0);g.fill();
       }
     }
-    /* цветы и трава -- везде */
+    /* цветы и трава — везде */
     if(typ===4||typ===5||typ===10||typ===11){
       const fc=['#ff7aa8','#ffd94d','#9be8ff','#ffffff'];
       for(let k=0;k<3;k++){

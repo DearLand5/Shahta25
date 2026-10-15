@@ -138,7 +138,7 @@ function cgSkulls(body,st,rerender){
     K.res=true;K.at=at;K.pick=pick;K.msg=cgFinish(st,at===pick?2.7:0,at===pick?'Пламя найдено!':'Пусто');rerender();});
   if(body.querySelector('#skAgain'))body.querySelector('#skAgain').onclick=()=>{K.res=null;K.msg=null;SFX.ui();rerender();};
 }
-/* --- колесо душ: ставка душами, призы -- слитки, сплавы, части, души --- */
+/* --- колесо душ: ставка душами, призы — слитки, сплавы, части, души --- */
 function cgSoulWheel(body,st,rerender){
   const W2=CG.sw||(CG.sw={rot:0,spin:false,res:null});
   const SEC=[{l:'×0',c:'#1a1424'},{l:'×2',c:'#2a4a7a',m:2},{l:'▰',c:'#6a5030',ing:1},{l:'×0',c:'#120e1a'},{l:'×1.5',c:'#304a6a',m:1.5},{l:'⚗',c:'#5a2a6a',alloy:1},{l:'×0',c:'#1a1424'},{l:'×4',c:'#4a8ac8',m:4}];
@@ -189,13 +189,13 @@ function cgStakePicker(opts){
   return {html,st,bind};
 }
 /* ---------- ползунок количества (рынок, биржа, печь, ящики, ставки) ----------
-   Значение запоминается в UI._qty[key]; по умолчанию -- максимум. */
+   Значение запоминается в UI._qty[key]; по умолчанию — максимум. */
 function qtyVal(key,max,def){if(!UI._qty)UI._qty={};let v=UI._qty[key];if(v==null)v=def==null?max:def;return Math.max(1,Math.min(max,Math.round(v)));}
 function qtyHtml(key,max,opt){opt=opt||{};max=Math.max(1,max|0);const v=qtyVal(key,max,opt.def);
   return `<div class="qty${opt.sm?' sm':''}" data-qk="${key}" data-qmax="${max}"><button class="qb" data-qd="-1" aria-label="меньше">−</button>`+
     `<input type="range" min="1" max="${max}" step="1" value="${v}" style="--p:${max>1?((v-1)/(max-1)*100).toFixed(1):100}%" ${max<=1?'disabled':''}>`+
     `<button class="qb" data-qd="1" aria-label="больше">+</button><b class="qn">${v}</b></div>`;}
-/* onChange(key,v,final) -- вызывается при движении (final=false) и по отпусканию/кнопкам (final=true) */
+/* onChange(key,v,final) — вызывается при движении (final=false) и по отпусканию/кнопкам (final=true) */
 function wireQty(root,onChange){
   if(!UI._qty)UI._qty={};
   root.querySelectorAll('.qty').forEach(q=>{
