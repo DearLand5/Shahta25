@@ -342,3 +342,6 @@ input[type=range],.sliderRow input[type=range]{accent-color:var(--brass);}
 .mi.key{border-radius:2px;transform:rotate(45deg);background:linear-gradient(135deg,#ffe9a8,#c8862f);}
 .mi.heart{transform:rotate(45deg);border-radius:2px;background:linear-gradient(135deg,#e0b0ff,#8a3ad0);}
 .mi.inl{width:.82em;height:.82em;flex:0 0 .82em;vertical-align:-.08em;margin:0 .12em;}
+/* редактор кнопок: кружки в стиле латуни, подписи не вылезают за круг */
+.ceCircle{border-color:rgba(228,164,67,.75);background:rgba(40,32,26,.55);font-size:10px;text-align:center;line-height:1.1;padding:4px;overflow:hidden;}
+.ceCircle.sel{border-color:#ffd98a;box-shadow:0 0 0 4px rgba(255,217,138,.35),0 0 24px rgba(255,217,138,.5);}

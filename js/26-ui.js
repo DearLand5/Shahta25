@@ -338,7 +338,7 @@ const UI={
   },
   settings(tab){
     ensureControls();
-    tab=tab||UI._sTab||'sound';UI._sTab=tab;
+    tab=tab||UI._sTab||'sound';if(!['sound','gfx','world','ctrl','misc'].includes(tab))tab='sound';UI._sTab=tab;
     const c=settings.controls;
     const regenDelaySec=Math.round(REGEN.delay/(settings.regenSpeed||1));
     const head=(ic,t,sub)=>`<div class="setHead"><div class="ic">${ic}</div><div><b>${t}</b>${sub?`<span>${sub}</span>`:''}</div></div>`;
@@ -517,16 +517,16 @@ const UI={
     const d=document.createElement('div');
     d.className='panel';
     d.style.cssText='padding:0;justify-content:flex-start;align-items:stretch;gap:0;overflow:hidden;touch-action:none;'+
-      'background:linear-gradient(180deg,#1a2a4a 0%,#3a4a6a 45%,#8a5a4a 62%,#2a1a12 100%)';
+      'background:linear-gradient(180deg,#1c1a22 0%,#2e2a30 45%,#5a3e2c 62%,#1e140c 100%)';
     d.innerHTML=`
       <div id="ceArea" style="position:absolute;inset:0;touch-action:none;overflow:hidden"></div>
       <div style="position:absolute;top:0;left:0;right:0;padding:14px;pointer-events:none;z-index:6;text-align:center">
-        <div style="display:inline-block;padding:8px 14px;border-radius:12px;background:rgba(0,0,0,.72);border:1px solid rgba(120,200,255,.3);font-size:12px;color:#9be8ff;max-width:82vw;line-height:1.5">
+        <div style="display:inline-block;padding:8px 14px;border-radius:12px;background:rgba(20,16,12,.88);border:1px solid #4a3d31;font-size:12px;color:#e6d9c4;max-width:82vw;line-height:1.5">
           <b style="color:#ffd98a">Перетащи</b> кнопку · коснись — появятся <b style="color:#ffd98a">+</b> <b style="color:#ffd98a">−</b><br>
           Прозрачность — в Настройках
         </div>
       </div>
-      <button class="btn" id="ceBack" style="position:absolute;right:14px;top:14px;z-index:7;width:auto;padding:8px 16px;min-height:46px;font-size:15px">Готово</button>
+      <button class="btn" id="ceBack" style="position:absolute;left:calc(env(safe-area-inset-left) + 14px);top:14px;z-index:7;width:auto;padding:8px 16px;min-height:46px;font-size:15px">Готово</button>
     `;
     uiRoot.appendChild(d);
     this.el=d;this.modal='controlsEditor';

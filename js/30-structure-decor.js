@@ -176,8 +176,14 @@ function drawGlyph11(g,ch,x,y,ceilY,wx,wy,h,time,low,gl,ban,q){
       g.strokeStyle='#4a4a52';g.lineWidth=2;for(let k=0;k<len;k+=6){g.beginPath();g.ellipse(x+16+sw*k/len,ceilY+k+3,1.6,2.8,0,0,TAU);g.stroke();}
       const hx=x+16+sw,hy=ceilY+len+4;
       g.strokeStyle='#8a8e98';g.lineWidth=2.4;g.beginPath();g.arc(hx,hy+5,5,-1.6,1.8);g.stroke();
-      if(hell){g.fillStyle='#8a2030';g.beginPath();g.ellipse(hx,hy+20,8,14,0,0,TAU);g.fill();g.fillStyle='#d8ccb0';g.fillRect(hx-6,hy+14,12,2);g.fillRect(hx-6,hy+19,12,2);g.fillRect(hx-5,hy+24,10,2);
-        if(!low&&Math.random()<0.03)spawnPart(hx,hy+32,0,20,1,'#a0101e',2,400);}
+      if(hell){   /* туша: окорок с костью, прожилки и капли */
+        const mg=g.createLinearGradient(hx-8,0,hx+8,0);mg.addColorStop(0,'#5a0e18');mg.addColorStop(0.45,'#a8283a');mg.addColorStop(1,'#4a0a12');
+        g.fillStyle='#e8dcc0';g.fillRect(hx-1.6,hy+7,3.2,6);g.beginPath();g.arc(hx-1.4,hy+7,2,0,TAU);g.arc(hx+1.4,hy+7,2,0,TAU);g.fill();
+        g.fillStyle=mg;g.beginPath();g.moveTo(hx-4,hy+12);g.quadraticCurveTo(hx-10,hy+22,hx-6,hy+32);g.quadraticCurveTo(hx,hy+36,hx+6,hy+32);g.quadraticCurveTo(hx+10,hy+22,hx+4,hy+12);g.closePath();g.fill();
+        g.strokeStyle='rgba(30,0,6,.6)';g.lineWidth=1;g.stroke();
+        g.strokeStyle='rgba(240,200,190,.35)';g.lineWidth=1;g.beginPath();g.moveTo(hx-5,hy+19);g.quadraticCurveTo(hx-1,hy+21,hx+2,hy+18);g.moveTo(hx-4,hy+26);g.quadraticCurveTo(hx+1,hy+28,hx+5,hy+24);g.stroke();
+        g.fillStyle='rgba(255,220,210,.25)';g.beginPath();g.ellipse(hx-3,hy+18,1.6,4,0.2,0,TAU);g.fill();
+        if(!low&&Math.random()<0.03)spawnPart(hx,hy+34,0,20,1,'#a0101e',2,400);}
       return true;}
     case 'v':{ /* паутина */
       const left=isSolid(wx-1,wy),cx=left?x:x+TILE,dir=left?1:-1,yy=ceilY;
@@ -448,15 +454,28 @@ function drawStructDecor(g,tx0,tx1,ty0,ty1){
             const bc=['#8a2a24','#2a5a8a','#3a7a3a','#caa24a','#6a3a8a'];
             for(let sh=0;sh<4;sh++){let bx=x+5;while(bx<x+26){const bw=2+((h>>>(bx+sh))%3);g.fillStyle=bc[(bx+sh*3+h)%5];g.fillRect(bx,top+sh*14+4+((bx*7+sh)%3),bw,10-((bx*7+sh)%3));bx+=bw+1;}}
             break;}
-          case 'O':{
-            const top=y-TILE+2;
-            g.fillStyle='#5a5e6a';g.fillRect(x+4,y+24,24,8);g.fillStyle='#6a6e7a';g.fillRect(x+4,y+24,24,2);
-            g.fillStyle='#8a8e9a';
-            g.beginPath();g.moveTo(x+9,y+24);g.lineTo(x+11,top+18);g.lineTo(x+21,top+18);g.lineTo(x+23,y+24);g.closePath();g.fill();
-            g.beginPath();g.arc(x+16,top+12,6,0,TAU);g.fill();
-            g.fillStyle='rgba(0,0,0,.2)';g.fillRect(x+16,top+18,7,y+24-(top+18));
-            g.fillStyle='#8a8e9a';g.fillRect(x+6,top+20,4,12);g.fillRect(x+22,top+20,4,12);
-            g.fillStyle='rgba(160,120,255,'+(0.5+0.4*Math.sin(time*2+h))+')';g.fillRect(x+13,top+11,2,2);g.fillRect(x+17,top+11,2,2);
+          case 'O':{   /* каменная статуя стража: цоколь, фигура в плаще с мечом, мягкий объём */
+            const top=y-TILE+2,sc=G.dim===1?['#5a4a4a','#7a6868','#3a2e2e']:['#6a6e7a','#9298a6','#454952'];
+            g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.ellipse(x+16,y+32,14,2.4,0,0,TAU);g.fill();
+            /* цоколь в две ступени */
+            g.fillStyle=sc[2];g.fillRect(x+3,y+26,26,6);g.fillStyle=sc[0];g.fillRect(x+5,y+22,22,5);
+            g.fillStyle='rgba(255,255,255,.14)';g.fillRect(x+3,y+26,26,1);g.fillRect(x+5,y+22,22,1);
+            /* плащ */
+            const gr=g.createLinearGradient(x+8,0,x+24,0);gr.addColorStop(0,sc[1]);gr.addColorStop(0.5,sc[0]);gr.addColorStop(1,sc[2]);
+            g.fillStyle=gr;g.beginPath();g.moveTo(x+8,y+22);g.quadraticCurveTo(x+9,top+30,x+11,top+20);g.lineTo(x+21,top+20);g.quadraticCurveTo(x+23,top+30,x+24,y+22);g.closePath();g.fill();
+            g.strokeStyle='rgba(0,0,0,.22)';g.lineWidth=1;g.beginPath();g.moveTo(x+13,top+24);g.lineTo(x+12,y+22);g.moveTo(x+17,top+24);g.lineTo(x+17.5,y+22);g.moveTo(x+21,top+26);g.lineTo(x+22,y+21);g.stroke();
+            /* плечи и голова в капюшоне */
+            g.fillStyle=sc[0];g.beginPath();g.ellipse(x+16,top+21,7,3,0,0,TAU);g.fill();
+            g.fillStyle=sc[1];g.beginPath();g.moveTo(x+11,top+19);g.quadraticCurveTo(x+11,top+8,x+16,top+7);g.quadraticCurveTo(x+21,top+8,x+21,top+19);g.closePath();g.fill();
+            g.fillStyle=sc[2];g.beginPath();g.ellipse(x+16,top+15,3,3.6,0,0,TAU);g.fill();
+            /* меч остриём вниз, руки на гарде */
+            g.fillStyle=sc[1];g.fillRect(x+15,top+24,2,y+20-(top+24));g.fillStyle=sc[2];g.fillRect(x+12,top+23,8,2);
+            g.fillStyle=sc[0];g.beginPath();g.arc(x+13.5,top+23.5,1.8,0,TAU);g.arc(x+18.5,top+23.5,1.8,0,TAU);g.fill();
+            g.fillStyle='rgba(255,255,255,.18)';g.fillRect(x+12,top+10,1.4,10);
+            /* мох и трещина */
+            g.fillStyle='rgba(80,120,60,.55)';g.fillRect(x+5,y+21,4,2);g.fillRect(x+22,y+25,4,2);
+            g.strokeStyle='rgba(0,0,0,.3)';g.lineWidth=0.8;g.beginPath();g.moveTo(x+20,top+28);g.lineTo(x+19,top+34);g.lineTo(x+21,top+38);g.stroke();
+            if(G.dim===1||h%3===0){g.fillStyle='rgba(160,120,255,'+(0.4+0.4*Math.sin(time*2+h))+')';g.fillRect(x+14.4,top+14.2,1.2,1.2);g.fillRect(x+16.6,top+14.2,1.2,1.2);}
             break;}
           case 'G':
             g.fillStyle='rgba(0,0,0,.3)';g.fillRect(x+6,y+30,20,2);

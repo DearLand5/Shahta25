@@ -741,6 +741,20 @@ function drawStructWall(g,style,x,y,wx,wy,ceil){
   }
   if(ceil){g.fillStyle='rgba(0,0,0,.35)';g.fillRect(x,y,TILE,5);g.fillStyle='rgba(0,0,0,.18)';g.fillRect(x,y+5,TILE,4);}
 }
+/* глубина интерьера: нижняя панель у кирпичных стен, тень у пола и у боковых стен */
+function structWallDepth(g,style,x,y,floor,left,right){
+  if(floor){
+    if(style==='brick'||style==='brickc'||style==='obs'||style==='hellbrick'||style==='basalt'||style==='bone'||style==='metal'){
+      const pc=style==='brickc'?'#1c1734':style==='obs'?'#110c18':style==='hellbrick'?'#1e0a08':style==='basalt'?'#141012':style==='bone'?'#38352e':style==='metal'?'#24201a':'#1e2026';
+      g.fillStyle=pc;g.fillRect(x,y+TILE-11,TILE,11);
+      g.fillStyle='rgba(255,255,255,.07)';g.fillRect(x,y+TILE-12,TILE,1);
+      g.fillStyle='rgba(0,0,0,.35)';g.fillRect(x,y+TILE-11,TILE,1);
+      g.fillStyle='rgba(0,0,0,.18)';g.fillRect(x+((x/TILE)%2?15:31),y+TILE-10,1,10);
+    }else{const gr=g.createLinearGradient(0,y+TILE-12,0,y+TILE);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(1,'rgba(0,0,0,.32)');g.fillStyle=gr;g.fillRect(x,y+TILE-12,TILE,12);}
+  }
+  if(left){const gr=g.createLinearGradient(x,0,x+10,0);gr.addColorStop(0,'rgba(0,0,0,.35)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(x,y,10,TILE);}
+  if(right){const gr=g.createLinearGradient(x+TILE,0,x+TILE-10,0);gr.addColorStop(0,'rgba(0,0,0,.35)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(x+TILE-10,y,10,TILE);}
+}
 function drawStructWalls(g,tx0,tx1,ty0,ty1){
   const lst=structList(tx0,tx1,ty0,ty1);
   for(const q of lst){
@@ -754,7 +768,9 @@ function drawStructWalls(g,tx0,tx1,ty0,ty1){
         if(STRUCT_SOLID.indexOf(row[c])>=0||row[c]==='l')continue;
         const t=getTile(wx,wy);
         if(t!==T_AIR&&!isLiq(t)&&t!==T_LADDER)continue;
-        drawStructWall(g,style,wx*TILE,wy*TILE,wx,wy,isSolid(wx,wy-1));
+        const ceil=isSolid(wx,wy-1),floor=isSolid(wx,wy+1);
+        drawStructWall(g,style,wx*TILE,wy*TILE,wx,wy,ceil);
+        structWallDepth(g,style,wx*TILE,wy*TILE,floor,isSolid(wx-1,wy),isSolid(wx+1,wy));
         /* колонны и арки на задней стене — глубина интерьера */
         if(q.tw>=9&&(c-3)%6===0&&c>1&&c<q.tw-2)drawStructColumn(g,style,wx*TILE,wy*TILE,isSolid(wx,wy-1),isSolid(wx,wy+1));
       }
@@ -763,16 +779,36 @@ function drawStructWalls(g,tx0,tx1,ty0,ty1){
 }
 function drawStructColumn(g,style,x,y,top,bot){
   const hell=G.dim===1;
-  const col=style==='plank'?'#4a3018':style==='basalt'?'#2e2426':style==='metal'?'#34383e':style==='char'?'#2a1a14':style==='brickc'?'#2e2650':hell?'#2e2428':'#3a3c46';
-  const cx=x+16,w=9;
-  const gr=g.createLinearGradient(cx-w,0,cx+w,0);gr.addColorStop(0,shadeHex(col,-0.35));gr.addColorStop(0.35,shadeHex(col,0.25));gr.addColorStop(0.6,col);gr.addColorStop(1,shadeHex(col,-0.45));
+  const col=style==='plank'?'#4a3018':style==='basalt'?'#2e2426':style==='metal'?'#34383e':style==='char'?'#2a1a14':style==='brickc'?'#2e2650':style==='bone'?'#6a645a':style==='flesh'?'#3a1a20':hell?'#2e2428':'#3a3c46';
+  const cx=x+16,w=8;
+  /* тень колонны на стене */
+  g.fillStyle='rgba(0,0,0,.2)';g.fillRect(cx+w,y,5,TILE);
+  /* ствол: скруглённый объём и каннелюры */
+  const gr=g.createLinearGradient(cx-w,0,cx+w,0);gr.addColorStop(0,shadeHex(col,-0.4));gr.addColorStop(0.3,shadeHex(col,0.28));gr.addColorStop(0.55,col);gr.addColorStop(1,shadeHex(col,-0.5));
   g.fillStyle=gr;g.fillRect(cx-w,y,w*2,TILE);
-  g.fillStyle='rgba(0,0,0,.22)';for(let k=-1;k<=1;k++)g.fillRect(cx+k*5-0.5,y,1,TILE);
-  if(top){g.fillStyle=shadeHex(col,0.15);g.fillRect(cx-w-4,y,w*2+8,5);g.fillStyle=shadeHex(col,-0.2);g.fillRect(cx-w-2,y+5,w*2+4,3);
-    /* полуарки к соседним колоннам */
-    g.strokeStyle=shadeHex(col,-0.1);g.lineWidth=4;g.beginPath();g.arc(cx-w-28,y+2,28,0,Math.PI*0.5);g.moveTo(cx+w+28+28,y+2);g.arc(cx+w+28,y+2,28,0,Math.PI*0.5);g.stroke();}
-  if(bot){g.fillStyle=shadeHex(col,0.1);g.fillRect(cx-w-4,y+TILE-6,w*2+8,6);g.fillStyle=shadeHex(col,-0.25);g.fillRect(cx-w-2,y+TILE-9,w*2+4,3);}
-  g.fillStyle='rgba(0,0,0,.18)';g.fillRect(cx+w,y,4,TILE);
+  if(style==='plank'){g.fillStyle='rgba(0,0,0,.25)';g.fillRect(cx-2,y,1,TILE);g.fillStyle='rgba(255,220,170,.08)';g.fillRect(cx-w+2,y,1,TILE);}
+  else{g.fillStyle='rgba(0,0,0,.2)';for(let k=-1;k<=1;k++)g.fillRect(cx+k*4.6-0.5,y,1,TILE);g.fillStyle='rgba(255,255,255,.07)';for(let k=-1;k<=1;k++)g.fillRect(cx+k*4.6+0.5,y,1,TILE);}
+  if(top){
+    /* капитель: плита + валик */
+    g.fillStyle=shadeHex(col,0.2);g.fillRect(cx-w-5,y,w*2+10,4);
+    g.fillStyle=shadeHex(col,-0.15);g.fillRect(cx-w-3,y+4,w*2+6,3);
+    g.fillStyle='rgba(255,255,255,.12)';g.fillRect(cx-w-5,y,w*2+10,1);
+    g.fillStyle='rgba(0,0,0,.3)';g.fillRect(cx-w-3,y+7,w*2+6,1);
+    /* изогнутые кронштейны-упоры под потолком в обе стороны (у дерева -- косые подкосы) */
+    const R=13,fc=shadeHex(col,-0.08);
+    for(const sd of [-1,1]){const x0=cx+sd*(w+3);
+      g.fillStyle=fc;g.beginPath();
+      if(style==='plank'){g.moveTo(x0,y+R+4);g.lineTo(x0,y+R);g.lineTo(x0+sd*R,y);g.lineTo(x0+sd*(R+4),y);g.closePath();}
+      else{g.moveTo(x0,y+R+2);g.quadraticCurveTo(x0,y+2,x0+sd*R,y+1);g.lineTo(x0+sd*R,y);g.lineTo(x0,y);g.closePath();}
+      g.fill();g.strokeStyle='rgba(0,0,0,.28)';g.lineWidth=1;g.beginPath();
+      if(style==='plank'){g.moveTo(x0,y+R+4);g.lineTo(x0+sd*(R+4),y);}else{g.moveTo(x0,y+R+2);g.quadraticCurveTo(x0,y+2,x0+sd*R,y+1);}g.stroke();}
+  }
+  if(bot){
+    /* база: ступенчатый цоколь */
+    g.fillStyle=shadeHex(col,-0.2);g.fillRect(cx-w-2,y+TILE-10,w*2+4,3);
+    g.fillStyle=shadeHex(col,0.12);g.fillRect(cx-w-5,y+TILE-7,w*2+10,7);
+    g.fillStyle='rgba(255,255,255,.1)';g.fillRect(cx-w-5,y+TILE-7,w*2+10,1);
+  }
 }
 const STRUCT_BANNER={dugout:'#8a3a2a',warren:'#6a4a2a',mushgrove:'#4a7a4a',forgeRuin:'#8a2a24',shaft:'#6a4a2a',crypt:'#4a2a5a',
   temple:'#5a3aa8',garden:'#2a8a7a',dwarfForge:'#a8401a',bridge:'#8a2a14',ribs:'#5a1a4a',voidAltar:'#5a1aa8',
