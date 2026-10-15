@@ -102,7 +102,7 @@ function autoAttackUpdate(dt){
   player.atkCd=0.5;player.atkAnim=1;player.animState='attack';
   if(best.x>player.x+2)player.facing=1;
   else if(best.x<player.x-2)player.facing=-1;
-  SFX.hit();
+  SFX.swing();
   const cx=player.x,cy=player.y-player.h*0.5;
   let anyHit=false,vampBest=0;
   for(const m of mobs){
@@ -160,7 +160,7 @@ function damageMob(m,dmg,kb,src){
   if(def.thorns&&!src&&!cheats.god){player.fx.burn=Math.max(player.fx.burn||0,3);hurtPlayer(6,'ожог');floatText(m.x,m.y-m.h-18,'ожог!','#ff9a3c');}
   if((def.boss||def.hp>=1500||def.w>=44)&&player.perks&&player.perks.slayer)dmg=Math.round(dmg*(1+0.1*player.perks.slayer));
   if(m.eShield){m.eShieldT=(m.eShieldT||0);if(G.time>m.eShieldT){dmg=Math.round(dmg*0.35);floatText(m.x,m.y-m.h-16,'щит','#9ad8ff');}}
-  m.hp-=dmg;m.hurt=0.24;
+  m.hp-=dmg;m.hurt=0.24;SFX.mobHit(def);
   if(settings.quality!=='low'){const hd=Math.sign(m.x-player.x)||1,hx=m.x-hd*m.w*0.3,hy=m.y-m.h*0.55;
     for(let k=0;k<5;k++){const a=(hd>0?0:Math.PI)+rnd(-0.9,0.9);spawnPart(hx,hy,Math.cos(a)*rnd(220,420),Math.sin(a)*rnd(220,420)-60,rnd(0.12,0.25),k%2?'#fff6d0':'#ffc060',rnd(1.6,2.6),600);}
     if(dmg>=m.maxHp*0.12)shockRings.push({x:hx,y:hy,r:4,max:26,t:0.2,col:'#ffe8b0'});}if(m.eShield&&G.time>(m.eShieldT||0)&&Math.random()<0.15)m.eShieldT=G.time+3;

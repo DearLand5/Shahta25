@@ -125,7 +125,9 @@ function moveY(e,dy){
     if(isSolid(tx,ty)){
       if(dy>0){
         e.y=ty*TILE-0.01;
+        const wasAir=!e.onGround;
         e.onGround=true;
+        if(e===player&&wasAir&&e.peakY!==undefined){const fd=e.y-e.peakY;if(fd>2.2*TILE)SFX.land(clamp(fd/(8*TILE),0.25,1));}
         if(e===player && !cheats.noFall && !cheats.god){
           const fallDist=e.y-e.peakY;
           const freePx=5*TILE;
@@ -230,6 +232,7 @@ function playerDie(){
     if(player.inv[k]<=0)delete player.inv[k];
   }
   grapple=null;
+  SFX.death();
   showDeath(lost);
 }
 /* ---- предметы: что куплено, то и показываем ---- */

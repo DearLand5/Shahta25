@@ -52,11 +52,11 @@ function lobbyUpdate(dt){
   if(wantJump&&p.onGround){p.vy=cheats.superJump?-700:-460;p.onGround=false;SFX.jump();}
   p.vy+=1500*dt;
   p.y+=p.vy*dt;
-  if(p.y>=0){p.y=0;p.vy=0;p.onGround=true;}
+  if(p.y>=0){if(!p.onGround&&p.vy>300)SFX.land(0.35);p.y=0;p.vy=0;p.onGround=true;}
   p.anim+=dt;
   if(Math.abs(p.vx)>30){
     p.stepT-=dt*Math.abs(p.vx)/100;
-    if(p.stepT<=0){p.stepT=0.32;SFX.step();}
+    if(p.stepT<=0){p.stepT=0.32;SFX.step(G.dim===1?'ash':'grass');}
   }
   Input.jumpPressed=false;
 }

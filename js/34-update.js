@@ -208,9 +208,12 @@ function update(dt){
 
   if(player.onGround&&Math.abs(player.vx)>25){
     player.stepT-=dt*Math.abs(player.vx)/110;
-    if(player.stepT<=0){player.stepT=0.3;SFX.step();if(settings.quality!=='low'){const c=landDustCol();for(let k=0;k<2;k++)spawnPart(player.x-player.facing*6+rnd(-3,3),player.y-1,-player.facing*rnd(10,40),rnd(-40,-10),0.35,c,rnd(1.4,2.2),200);}}
+    if(player.stepT<=0){player.stepT=0.3;SFX.step(footMat());if(settings.quality!=='low'){const c=landDustCol();for(let k=0;k<2;k++)spawnPart(player.x-player.facing*6+rnd(-3,3),player.y-1,-player.facing*rnd(10,40),rnd(-40,-10),0.35,c,rnd(1.4,2.2),200);}}
   }
   player.anim+=dt;
+  if(player.onLadder&&Math.abs(player.vy)>30){player.ladT=(player.ladT||0)-dt*Math.abs(player.vy)/120;if(player.ladT<=0){player.ladT=0.36;SFX.ladder();}}
+  /* стук сердца, когда здоровья меньше четверти */
+  if(player.hp>0&&player.hp<player.maxHp*0.25&&!G.paused){player.heartT=(player.heartT||0)-dt;if(player.heartT<=0){player.heartT=0.55+0.9*(player.hp/(player.maxHp*0.25));SFX.heart();}}
   if(player.onLadder&&Math.abs(player.vy)>10)player.animState='run';
   else if(!player.onGround)player.animState='jump';
   else if(Math.abs(player.vx)>25)player.animState='run';

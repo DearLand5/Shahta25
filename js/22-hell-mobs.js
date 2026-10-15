@@ -1000,7 +1000,7 @@ function killMob(m,quiet){
   if(!m.alive)return;
   if(m.def.revive&&!m.revived&&m.state!=='remains'){
     m.revived=true;m.state='remains';m.st=0;m.hp=m.maxHp*0.12;m.remT=3.6;m.vx=0;m.tele=0;m.burn=0;m.poison=0;
-    burst(m.x,m.y-m.h*0.4,20,m.def.c1,160,3.4);SFX.mobDie();floatText(m.x,m.y-m.h-10,m.def.mech==='phoenix'?'Яйцо феникса!':'Добей останки!','#ffd060');return;
+    burst(m.x,m.y-m.h*0.4,20,m.def.c1,160,3.4);SFX.mobDie(m.def);floatText(m.x,m.y-m.h-10,m.def.mech==='phoenix'?'Яйцо феникса!':'Добей останки!','#ffd060');return;
   }
   m.alive=false;
   const def=m.def;
@@ -1031,7 +1031,7 @@ function killMob(m,quiet){
     const a=Math.random()*TAU,s=rnd(30,120);
     spawnPart(m.x,m.y-m.h*0.5,Math.cos(a)*s,Math.sin(a)*s-60,rnd(0.4,0.9),def.c2,rnd(2,3));
   }
-  if(!quiet)SFX.mobDie();
+  if(!quiet)SFX.mobDie(m.def);
   floatText(m.x,m.y-m.h-8,'+'+def.xp+' XP','#9be8ff');
   if(def.split&&(def.mech==='splitter'||def.mech==='bloodslime')){
     for(let i=0;i<2;i++){

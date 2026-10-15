@@ -2254,6 +2254,14 @@ function drawDecor(g,tx,ty,t){
 }
 
 let ambT=0;
+/* поверхность под ногами -- для звука шагов */
+function footMat(){const t=getTile(Math.floor(player.x/TILE),Math.floor((player.y+4)/TILE));
+  if(t===T_WOOD||t===T_LADDER||t===T_BARRICADE)return 'wood';
+  if(t===T_CRYSTAL||t===T_SOULSTONE)return 'crystal';
+  if(t===T_DIRT||t===T_FLESH||t===T_SOULSAND)return 'dirt';
+  if(t===T_ASH)return 'ash';
+  if(t===T_ARENA||t===T_BRICK)return 'metal';
+  return 'stone';}
 function landDustCol(){const t=getTile(Math.floor(player.x/TILE),Math.floor((player.y+4)/TILE));const c=TILECOL[t];return c?shadeHex(c[0],0.25):'#a89880';}
 function ambientParticles(dt){
   ambT-=dt;

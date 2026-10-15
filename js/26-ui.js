@@ -106,9 +106,11 @@ const UI={
           inner:Array.from(this.el.querySelectorAll('.scroll')).map(x=>x.scrollTop)};
       }catch(e){keep=null;}
     }
+    const fresh=!this.el;
     this.clear();
     const d=document.createElement('div');
     d.className='panel';d.innerHTML=html;
+    if(fresh&&name!=='menu'&&name!=='death')SFX.open();
     uiRoot.appendChild(d);
     this.el=d;this.modal=name;
     if(keep){
