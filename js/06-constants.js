@@ -158,6 +158,9 @@ const GRAPPLE_RANGE=26;   /* дальность, блоков */
 const AMMO_COST=180;
 const AMMO_PACK=20;
 /* Огнестрельное: покупается в кузнице, выбирается в «Предметах», стреляет кнопкой «Стрелять» с автоприцелом */
+/* Огнестрел Ада, урон в секунду по одной цели (после общей правки ×0.85):
+   Испепелитель ~710 · Кровавый дробовик ~1020 · Мортира ~1470 (с отравлением) · Рельса душ ~2190 · Длань ~3190.
+   Раньше огнемёт давал ~2000 (как Рельса душ), а Длань ~7400 — первый и последний стволы ломали баланс боссов. */
 const GUNS=[
   {lv:1,id:'pistol', name:'Пистолет',   icon:'🔫',cost:2500,   pack:30,packCost:150,  dmg:14, rate:0.42,range:340,speed:760, pellets:1,spread:0.02, color:'#ffe9a8',size:3,  kb:0.6,pierce:false,desc:'Точный, дальний'},
   {lv:2,id:'shotgun',name:'Дробовик',   icon:'💥',cost:9000,   pack:12,packCost:260,  dmg:9,  rate:0.95,range:230,speed:640, pellets:6,spread:0.26, color:'#ffc070',size:2.6,kb:1.4,pierce:false,desc:'6 дробин, бьёт вблизи'},
@@ -165,11 +168,11 @@ const GUNS=[
   {lv:4,id:'plasma', name:'Плазмомёт',  icon:'⚡',cost:160000, pack:30,packCost:1100, dmg:70, rate:0.5, range:430,speed:640, pellets:1,spread:0.01, color:'#7fe8ff',size:6,  kb:0.9,pierce:true, desc:'Пробивает насквозь'},
   {lv:5,id:'rail',   name:'Рейлган',    icon:'🎯',cost:520000, pack:20,packCost:1800, dmg:190,rate:0.85,range:560,speed:1500,pellets:1,spread:0.004,color:'#ff9aff',size:5,  kb:1.2,pierce:true, desc:'Огромный урон, пробивает всё'},
   {lv:6,id:'void',   name:'Пустотный излучатель',icon:'🌀',cost:1500000,pack:60,packCost:4200,dmg:80,rate:0.13,range:480,speed:1100,pellets:1,spread:0.03,color:'#b080ff',size:5,kb:0.5,pierce:true,desc:'Скорострельный и пробивающий'},
-  {lv:7 ,id:'hellfire',name:'Испепелитель',      icon:'🔥',cost:0,hell:1,kind:'flame',pack:120,packCost:12000,dmg:70, rate:0.09,range:230,speed:420, pellets:3,spread:0.22,color:'#ff7a2a',size:6,kb:0.1,pierce:true,desc:'Огнемёт: конус пламени, поджигает (горение 4 с)'},
+  {lv:7 ,id:'hellfire',name:'Испепелитель',      icon:'🔥',cost:0,hell:1,kind:'flame',pack:120,packCost:12000,dmg:25, rate:0.09,range:230,speed:420, pellets:3,spread:0.22,color:'#ff7a2a',size:6,kb:0.1,pierce:true,desc:'Огнемёт: конус пламени, поджигает (горение 4 с)'},
   {lv:8 ,id:'bloodshot',name:'Кровавый дробовик',icon:'🩸',cost:0,hell:1,kind:'vamp', pack:30, packCost:30000,dmg:120,rate:0.8, range:260,speed:700, pellets:8,spread:0.3, color:'#ff3a4a',size:3,kb:1.4,pierce:false,desc:'8 дробин, каждое попадание лечит тебя'},
-  {lv:9 ,id:'acidcan', name:'Кислотная мортира',icon:'☣️',cost:0,hell:1,kind:'acid', pack:20, packCost:70000,dmg:900,rate:1.0, range:480,speed:560, pellets:1,spread:0.02,color:'#9aff40',size:7,kb:0.8,pierce:false,desc:'Навесной снаряд: взрыв кислоты, травит всех рядом'},
-  {lv:10,id:'soulrail',name:'Рельса душ',       icon:'⚡',cost:0,hell:1,kind:'chain',pack:40, packCost:150000,dmg:1600,rate:0.7,range:620,speed:0,  pellets:1,spread:0,   color:'#7ad8ff',size:4,kb:1.2,pierce:true,desc:'Мгновенный луч + молния на 3 соседних врагов'},
-  {lv:11,id:'infernus',name:'Длань Преисподней',icon:'☄️',cost:0,hell:1,kind:'homing',pack:60,packCost:300000,dmg:1400,rate:0.32,range:600,speed:520,pellets:2,spread:0.5,color:'#ffb030',size:6,kb:0.9,pierce:false,desc:'Самонаводящиеся огненные ракеты со взрывом'}
+  {lv:9 ,id:'acidcan', name:'Кислотная мортира',icon:'☣️',cost:0,hell:1,kind:'acid', pack:20, packCost:70000,dmg:1500,rate:1.0, range:480,speed:560, pellets:1,spread:0.02,color:'#9aff40',size:7,kb:0.8,pierce:false,desc:'Навесной снаряд: взрыв кислоты, травит всех рядом'},
+  {lv:10,id:'soulrail',name:'Рельса душ',       icon:'⚡',cost:0,hell:1,kind:'chain',pack:40, packCost:150000,dmg:1800,rate:0.7,range:620,speed:0,  pellets:1,spread:0,   color:'#7ad8ff',size:4,kb:1.2,pierce:true,desc:'Мгновенный луч + молния на 3 соседних врагов'},
+  {lv:11,id:'infernus',name:'Длань Преисподней',icon:'☄️',cost:0,hell:1,kind:'homing',pack:60,packCost:300000,dmg:600,rate:0.32,range:600,speed:520,pellets:2,spread:0.5,color:'#ffb030',size:6,kb:0.9,pierce:false,desc:'Самонаводящиеся огненные ракеты со взрывом'}
 ];
 const GUN_BY_ID={};for(const g0 of GUNS)GUN_BY_ID[g0.id]=g0;
 function curGun(){return player.gunLvl>0?GUNS[clamp(player.gunLvl-1,0,GUNS.length-1)]:null;}
@@ -235,7 +238,7 @@ const MOBDEFS=[
   c1:'#a8ffe8',c2:'#3aa890',mech:'guardian',xp:14,drops:[{ore:14,ch:.35},{ore:17,ch:.08}]},
  {id:'shadeling',name:'Тенёныш',shape:'ghost',d0:99999,d1:1e9,hp:34,dmg:14,spd:96,aggro:300,w:20,h:26,fly:true,
   c1:'#4a2a88',c2:'#1a0a38',mech:'phantom',xp:3,drops:[{ore:15,ch:.08}]},
- {id:'devourer',name:'Пожиратель Бездны',shape:'boss',boss:true,d0:99999,d1:1e9,hp:26000,dmg:90,spd:130,aggro:3000,w:110,h:110,fly:true,light:7,
+ {id:'devourer',name:'Пожиратель Бездны',shape:'boss',boss:true,d0:99999,d1:1e9,hp:26000,dmg:115,spd:130,aggro:3000,w:110,h:110,fly:true,light:7,
   c1:'#6a2ac8',c2:'#12052a',mech:'boss',xp:2000,drops:[]},
  /* ================= АД ================= */
  /* стражи опасных структур (не появляются сами) */

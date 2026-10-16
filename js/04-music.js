@@ -158,7 +158,7 @@ const Music={
     if(Music.timer){clearInterval(Music.timer);Music.timer=null;}
     if(!name)return;
     const T=Music.THEMES[name];
-    const tg=c.createGain();tg.gain.setValueAtTime(0,c.currentTime);tg.gain.linearRampToValueAtTime(1,c.currentTime+4);
+    const tg=envGain(c);tg.gain.setValueAtTime(0,c.currentTime);tg.gain.linearRampToValueAtTime(1,c.currentTime+4);
     tg.connect(AU.musicIn);
     Music.tg=tg;
     const E=Music.echo();
@@ -199,7 +199,7 @@ const Music={
     const c=AU.ctx;if(!Music.tg)return;
     const f=c.createBiquadFilter();f.type='lowpass';f.Q.value=0.5;
     f.frequency.setValueAtTime(P.lp*0.6,t);f.frequency.linearRampToValueAtTime(P.lp,t+dur*0.5);f.frequency.linearRampToValueAtTime(P.lp*0.7,t+dur);
-    const g=c.createGain(),v=(vol===undefined?P.vol:vol);
+    const g=envGain(c),v=(vol===undefined?P.vol:vol);
     g.gain.setValueAtTime(0,t);
     g.gain.linearRampToValueAtTime(v,t+P.att);
     g.gain.setValueAtTime(v,t+Math.max(P.att+0.01,dur-P.rel));
@@ -217,7 +217,7 @@ const Music={
     const o=c.createOscillator();o.type=type;o.frequency.value=freq;
     if(vib){const l=c.createOscillator(),lg=c.createGain();l.frequency.value=4.6;lg.gain.setValueAtTime(0,t);lg.gain.linearRampToValueAtTime(freq*0.006,t+att+0.3);l.connect(lg);lg.connect(o.frequency);l.start(t);l.stop(t+dur+0.05);}
     const f=c.createBiquadFilter();f.type='lowpass';f.frequency.value=lp;f.Q.value=0.4;
-    const g=c.createGain();
+    const g=envGain(c);
     g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+att);
     g.gain.setValueAtTime(vol,t+Math.max(att+0.01,dur-rel));g.gain.linearRampToValueAtTime(0,t+dur);
     o.connect(f);f.connect(g);g.connect(Music.tg);
@@ -227,7 +227,7 @@ const Music={
   /* FM-нота: калимба / электропиано / шкатулка / стекло */
   fm(freq,t,dur,vol,ratio,index,send){
     const c=AU.ctx;if(!Music.tg)return;
-    const car=c.createOscillator(),mod=c.createOscillator(),mg=c.createGain(),g=c.createGain();
+    const car=c.createOscillator(),mod=c.createOscillator(),mg=c.createGain(),g=envGain(c);
     car.frequency.value=freq;mod.frequency.value=freq*ratio;
     mg.gain.setValueAtTime(freq*index,t);mg.gain.exponentialRampToValueAtTime(Math.max(1,freq*index*0.03),t+Math.min(dur,0.9)*0.7);
     mod.connect(mg);mg.connect(car.frequency);
@@ -305,12 +305,14 @@ const Music={
     if(T.drums){
       const D=T.drums,c2=AU.ctx,dv=D.vol*(Music.duck||1);
       for(let q=0;q<4;q++){const st=bib*4+q,tt=t+q*spb/4;
-        if(D.kick[st]){const o=c2.createOscillator(),g=c2.createGain();o.type='sine';o.frequency.setValueAtTime(110,tt);o.frequency.exponentialRampToValueAtTime(44,tt+0.14);
+        if(D.kick[st]){const o=c2.createOscillator(),g=envGain(c2);o.type='sine';o.frequency.setValueAtTime(110,tt);o.frequency.exponentialRampToValueAtTime(44,tt+0.14);
           g.gain.setValueAtTime(0.0001,tt);g.gain.linearRampToValueAtTime(0.3*dv,tt+0.008);g.gain.exponentialRampToValueAtTime(0.0008,tt+0.34);o.connect(g);g.connect(Music.tg);o.start(tt);o.stop(tt+0.36);}
         if(D.snare[st]||D.hat[st]){const isS=!!D.snare[st],len=isS?0.22:0.05,buf=AU.nbuf;if(!buf)continue;
           const n=c2.createBufferSource();n.buffer=buf;const f=c2.createBiquadFilter();f.type=isS?'bandpass':'highpass';f.frequency.value=isS?1400:6500;f.Q.value=isS?0.7:0.5;
-          const g=c2.createGain();const v=(isS?0.12:0.025)*dv;g.gain.setValueAtTime(v,tt);g.gain.exponentialRampToValueAtTime(0.0008,tt+len);
-          n.connect(f);f.connect(g);g.connect(Music.tg);n.start(tt,Math.random()*0.5);n.stop(tt+len+0.02);}
+          const g=envGain(c2);const v=(isS?0.12:0.025)*dv;
+          /* плавное начало 2–4 мс: мгновенный старт шума щёлкал на каждой доле (замер: 26 щелчков за 12 с) */
+          g.gain.setValueAtTime(0,tt);g.gain.linearRampToValueAtTime(v,tt+(isS?0.004:0.0025));g.gain.exponentialRampToValueAtTime(0.0008,tt+len);g.gain.linearRampToValueAtTime(0,tt+len+0.015);
+          n.connect(f);f.connect(g);g.connect(Music.tg);n.start(tt,Math.random()*0.5);n.stop(tt+len+0.03);AU.ends.push(tt+len);}
       }
     }
   }
@@ -329,7 +331,7 @@ const Amb={
     Amb.stop();Amb.cur=key;
     if(!key)return;
     const A=T.amb,c=AU.ctx;
-    const g=c.createGain();g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(1,c.currentTime+3);g.connect(AU.sfxBus);
+    const g=envGain(c);g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(1,c.currentTime+3);g.connect(AU.sfxBus);
     let src=null,lfo=null;
     if(A.wind){
       src=c.createBufferSource();src.buffer=AU.nbuf;src.loop=true;
@@ -354,28 +356,28 @@ const Amb={
     if(G.paused||document.hidden)return;
     const P=(p)=>Math.random()<p*0.4;
     if(A.drip&&P(A.drip))Amb.ev((c,out,t)=>{          /* капля: короткий «плинк» со спадом высоты */
-      const f0=rr(1300,2400),o=c.createOscillator(),g=c.createGain(),pn=c.createStereoPanner?c.createStereoPanner():null;
+      const f0=rr(1300,2400),o=c.createOscillator(),g=envGain(c),pn=c.createStereoPanner?c.createStereoPanner():null;
       o.type='sine';o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f0*0.55,t+0.09);
       g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.05,t+0.004);g.gain.exponentialRampToValueAtTime(0.0008,t+0.22);
       o.connect(g);if(pn){pn.pan.value=rr(-0.8,0.8);g.connect(pn);pn.connect(out);pn.connect(AU.sfxSend);}else g.connect(out);
       o.start(t);o.stop(t+0.25);});
     if(A.rumble&&P(A.rumble))Amb.ev((c,out,t)=>{      /* далёкий гул породы */
       const s=c.createBufferSource();s.buffer=AU.nbuf;const f=c.createBiquadFilter();f.type='lowpass';f.frequency.value=110;
-      const g=c.createGain(),d=rr(1.6,3);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.11,t+d*0.35);g.gain.linearRampToValueAtTime(0,t+d);
+      const g=envGain(c),d=rr(1.6,3);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.11,t+d*0.35);g.gain.linearRampToValueAtTime(0,t+d);
       s.connect(f);f.connect(g);g.connect(out);s.start(t,Math.random()*0.5);s.stop(t+d+0.05);});
     if(A.bubble&&P(A.bubble))Amb.ev((c,out,t)=>{      /* бульканье лавы: пара глухих пузырей */
-      for(let k=0;k<1+Math.floor(Math.random()*3);k++){const tt=t+k*rr(0.08,0.2),f0=rr(140,260),o=c.createOscillator(),g=c.createGain();
+      for(let k=0;k<1+Math.floor(Math.random()*3);k++){const tt=t+k*rr(0.08,0.2),f0=rr(140,260),o=c.createOscillator(),g=envGain(c);
         o.type='sine';o.frequency.setValueAtTime(f0,tt);o.frequency.exponentialRampToValueAtTime(f0*1.9,tt+0.07);
         g.gain.setValueAtTime(0,tt);g.gain.linearRampToValueAtTime(0.045,tt+0.01);g.gain.exponentialRampToValueAtTime(0.0008,tt+0.12);
         o.connect(g);g.connect(out);o.start(tt);o.stop(tt+0.14);}});
     if(A.crackle&&P(A.crackle))Amb.ev((c,out,t)=>{    /* треск углей: мягкие тёплые щелчки, а не резкие — резкие звучали как сломанный динамик */
       for(let k=0;k<1+Math.floor(Math.random()*3);k++){const tt=t+k*rr(0.05,0.14),s=c.createBufferSource();s.buffer=AU.nbuf;
-        const f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=rr(900,2200);f.Q.value=1.4;const g=c.createGain();
+        const f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=rr(900,2200);f.Q.value=1.4;const g=envGain(c);
         g.gain.setValueAtTime(0,tt);g.gain.linearRampToValueAtTime(rr(0.012,0.03),tt+0.003);g.gain.exponentialRampToValueAtTime(0.0008,tt+0.06);
         s.connect(f);f.connect(g);g.connect(out);s.start(tt,Math.random()*0.8);s.stop(tt+0.08);}});
     if(A.chime&&P(A.chime))Amb.ev((c,out,t)=>{        /* хрустальный перезвон где-то вдали */
       const base=[1568,1760,2093,2349,2637][Math.floor(Math.random()*5)];
-      for(let k=0;k<2;k++){const tt=t+k*rr(0.1,0.25),o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=base*(k?1.5:1);
+      for(let k=0;k<2;k++){const tt=t+k*rr(0.1,0.25),o=c.createOscillator(),g=envGain(c);o.type='sine';o.frequency.value=base*(k?1.5:1);
         g.gain.setValueAtTime(0,tt);g.gain.linearRampToValueAtTime(0.018,tt+0.01);g.gain.exponentialRampToValueAtTime(0.0008,tt+1.6);
         o.connect(g);g.connect(out);g.connect(AU.sfxSend);o.start(tt);o.stop(tt+1.65);}});
   }

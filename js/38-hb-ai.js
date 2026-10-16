@@ -44,6 +44,16 @@ function hbPick(m,B,A){
   B.last2=B.last;B.last=a;B.atk=a;B.at=0;B.sub=0;
 }
 function hbDone(B){B.atk='idle';B.at=0;B.sub=0;}
+/* щупальце разорвало лестницы, поставленные игроком, в столбе шириной 3 клетки (без возврата в запас) */
+function hbRipLadders(x,yTop,yBot){
+  const cx=Math.floor(x/TILE);let n=0;
+  for(let tx=cx-1;tx<=cx+1;tx++)for(let ty=Math.floor(yTop/TILE);ty<=Math.floor(yBot/TILE);ty++){
+    if(!placedLadders.hasXY(tx,ty))continue;
+    placedLadders.delete(tx+','+ty);ccMarkDirty(tx,ty);n++;
+    for(let k=0;k<3;k++)spawnPart(tx*TILE+16,ty*TILE+16,rnd(-120,120),rnd(-160,40),rnd(0.4,0.8),k?'#8a5a30':'#c0142a',rnd(2,4),600);
+  }
+  if(n)SFX.breakBlock();
+}
 function hbBossUpdate(m,dt,dx,dy,dist){
   const id=m.def.hb,A=HB_AI[id],B=m.b;if(!A||!B)return;
   m.stun=0;m.frozen=0;
@@ -151,14 +161,18 @@ HB_AI.herald={
    швыряет сгустки, рожает мясных клочков. В 3-й фазе вырывает корни и прыгает. */
 HB_AI.mother={
   intro(m,B,c,dt,R){m.x=m.home.x;m.y=R.floor;m.facing=player.x<m.x?-1:1;B.open=c.t>c.roarT-0.5&&c.t<c.roarT+1.2?1:0;},
-  pool(B){const p=['tentacles','clots','birth','slam'];if(B.phase>=2)p.push('bloodrain','wave','flood','lash','leeches','leap');if(B.phase>=3)p.push('leap','crawl','flood');return p;},
+  pool(B){const p=['tentacles','clots','birth','slam'];if(B.phase>=2)p.push('bloodrain','wave','flood','lash','leeches','leap');if(B.phase>=3)p.push('leap','crawl','flood');
+    if((B.camp||0)>2.2)p.push('grab');return p;},
   w(m,B,S){const up=player.y<(m.hbB.y0+m.hbB.FY-1.5)*TILE;
     return {tentacles:S.still?2.6:1.2,clots:S.dist>300?1.6:0.9,birth:S.minions>=5?0.05:0.8,slam:S.dist<190?3:0.05,bloodrain:1.2,wave:S.air?0.4:1.4,
-      flood:up?0.3:1.6,lash:up?2.6:0.8,leeches:S.dist>240?1.6:0.9,leap:up||S.dist>260?2.2:1,crawl:S.dist>200?1.2:0.4};},
+      flood:up?0.3:1.6,lash:up?2.6:0.8,leeches:S.dist>240?1.6:0.9,leap:up||S.dist>260?2.2:1,crawl:S.dist>200?1.2:0.4,grab:10};},
   follow:{wave:['tentacles','clots'],leap:['wave','lash'],bloodrain:['tentacles','leeches'],slam:['wave'],flood:['clots','leeches'],lash:['leap']},
   onPhase(m,B,p){if(p===2){B.free=true;}if(p===2||p===3){B.free=true;shake(20);for(let i=0;i<40;i++)spawnPart(m.x+rnd(-60,60),m.y-rnd(0,20),rnd(-200,200),rnd(-400,-100),rnd(0.6,1.2),i%2?'#8a0a1a':'#ff5a6a',rnd(2,5),700);}},
   tick(m,B,dt,R,dx){
     const D=m.def.dmg,cy=m.y-m.h*0.5;B.open=Math.max(0,(B.open||0)-dt*2);
+    /* «застроился» лестницами под потолок и стреляет сверху — Мать это чувствует */
+    {const high=player.y<R.floor-3.2*TILE,lad=player.onLadder||getTile(Math.floor(player.x/TILE),Math.floor((player.y-4)/TILE))===T_LADDER;
+      B.camp=high&&(lad||!player.onGround)?(B.camp||0)+dt:Math.max(0,(B.camp||0)-dt*0.7);}
     if(!B.free){m.vx=0;m.vy=0;m.y=R.floor;m.facing=dx>=0?1:-1;}
     else if(B.atk!=='leap'){m.vx=lerp(m.vx,0,dt*4);hbGround(m,dt,R);if(B.atk!=='crawl')m.facing=dx>=0?1:-1;}
     switch(B.atk){
@@ -207,9 +221,20 @@ HB_AI.mother={
       case 'lash':{m.tele=Math.min(1,B.at/0.5);B.whip=m.tele;
         /* щупальца хлещут поперёк выступов: сначала верхний ярус, потом нижний */
         if(B.sub===0&&B.at>0.4){B.sub=1;const ys=[R.floor-4.6*TILE,R.floor-1.4*TILE];if(player.y>R.floor-2.5*TILE)ys.reverse();
+          if(player.y<R.floor-6*TILE)ys.unshift(player.y-player.h*0.5);           /* выше выступов — хлещет и там */
           ys.forEach((y,i)=>hbFx.push({type:'sweep',t:-i*0.75,warn:0.85,x:R.cx,y,w:2000,h:62,dmg:D*0.85,col:'#ff3a4a',fx:{bleed:2},src:'хлёст щупалец',style:'flesh'}));
           floatText(m.x,m.y-m.h-20,'Хлёст!','#ff8a9a');}
         if(B.at>2.4){B.whip=0;hbDone(B);}break;}
+      case 'grab':{m.tele=Math.min(1,B.at/0.5);B.open=1;
+        /* хватка плоти: щупальца вырастают до самого шахтёра и рвут поставленные лестницы */
+        if(B.sub===0){B.sub=1;B.camp=0;SFX.hit();floatText(player.x,player.y-player.h-30,'Плоть рвёт лестницы!','#ff5a6a');
+          const n=B.phase>=2?3:2;
+          for(let k=0;k<n;k++){const x=clamp(k===0?player.x:hbPredict(0.9).x+(k===1?-1:1)*rnd(50,100),R.minX,R.maxX);
+            const fy=hbFloorAt(x,player.y-8),h=Math.max(4*TILE,fy-player.y+2.5*TILE);
+            hbPillar(x,player.y-8,{t:-k*0.2,warn:0.9,w:54,h,dmg:D*1.35,col:'#c0142a',style:'tentacle',big:true,fx:{bleed:3,stun:0.4},src:'хватка Матери'});
+            if(k===0)hbFx.push({type:'mark',t:0,life:0.9,x,y:player.y,r:46,col:'#ff3a4a'});      /* красная метка у ног — успей уйти */
+            hbLater(0.9+k*0.2,()=>{if(hbFight())hbRipLadders(x,fy-h,fy);});}}
+        if(B.at>2.0)hbDone(B);break;}
       case 'leeches':{m.tele=Math.min(1,B.at/0.6);B.open=m.tele;
         if(B.sub===0&&B.at>0.6){B.sub=1;m.tele=0;SFX.hit();
           for(let k=0;k<(B.phase>=3?6:4);k++){const a=-Math.PI/2+(k-1.5)*0.6;hbShot(m.x,cy-10,a,180,D*0.45,'leech',{homing:1.25,size:7,life:5.5,ghost:true,fx:{bleed:2}});}

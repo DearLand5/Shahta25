@@ -11,6 +11,12 @@
    звуков с небольшим запасом по времени (иначе начало звука
    «проскакивает» и щёлкает) и ограничитель, который не срезает пики.
    ============================================================ */
+/* узел громкости для огибающей звука: с нуля сразу при создании.
+   По умолчанию громкость 1, и если источник успевал выдать первый отсчёт раньше,
+   чем срабатывала команда «начни с нуля», шум проскакивал на полной громкости —
+   одиночный выброс. Это и был хрип музыки на долях барабанов (до 0.9 при громкости тарелки 0.015). */
+function envGain(c){const g=c.createGain();g.gain.value=0;return g;}
+const AU_MUSIC_MK=1.6;   /* музыка мимо компрессора: громкость подобрана по записи — как была с компрессором */
 const AU_POST=1.1;   /* ×0.5 перед кривой: итоговое усиление ×0.55 — громкость как была до переделки */
 const AU={
   ctx:null,master:null,sfxBus:null,musicIn:null,musicBus:null,conv:null,sfxSend:null,musicSend:null,nbuf:null,
@@ -47,7 +53,12 @@ const AU={
       AU.LEAD=clamp((c.baseLatency||0.01)*0.6,0.008,0.03);
       AU.master=c.createGain();AU.master.gain.value=1;AU.master.connect(comp);
       AU.sfxBus=c.createGain();AU.sfxBus.gain.value=AU.volume;AU.sfxBus.connect(AU.master);
-      AU.musicBus=c.createGain();AU.musicBus.gain.value=AU.musicVol;AU.musicBus.connect(AU.master);
+      AU.musicBus=c.createGain();AU.musicBus.gain.value=AU.musicVol;
+      /* музыка идёт мимо компрессора: иначе выстрелы и взрывы «дёргали» её громкость
+         прямо внутри колебаний баса — это слышно как хрип музыки в бою.
+         Срез ниже 38 Гц: такой бас телефон не воспроизводит, а динамик от него дребезжит. */
+      {const hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=38;hp.Q.value=0.7;
+        const mk=c.createGain();mk.gain.value=AU_MUSIC_MK;AU.musicBus.connect(hp);hp.connect(mk);mk.connect(post);}
       AU.musicIn=c.createGain();AU.musicIn.gain.value=0.6;AU.musicIn.connect(AU.musicBus);
       const nl=c.sampleRate,nb=c.createBuffer(1,nl,c.sampleRate),nd=nb.getChannelData(0);
       for(let i=0;i<nl;i++)nd[i]=Math.random()*2-1;
@@ -108,7 +119,7 @@ const AU={
         else os.frequency.exponentialRampToValueAtTime(Math.max(20,o.to),t0+(o.glide||dur));
       }
       if(o.det)os.detune.value=o.det;
-      const g=c.createGain();
+      const g=envGain(c);
       const v=Math.min(0.6,vol||0.2),a=o.a||0.004;
       g.gain.setValueAtTime(0,t0);
       g.gain.linearRampToValueAtTime(v,t0+a);
@@ -138,7 +149,7 @@ const AU={
       f.frequency.setValueAtTime(Math.max(40,freq),t0);
       if(o.to)f.frequency.exponentialRampToValueAtTime(Math.max(40,o.to),t0+dur);
       f.Q.value=o.q||0.8;
-      const g=c.createGain();
+      const g=envGain(c);
       const v=Math.min(0.6,vol||0.2);
       g.gain.setValueAtTime(0,t0);
       g.gain.linearRampToValueAtTime(v,t0+(o.a||0.003));
@@ -159,7 +170,7 @@ const AU={
     try{
       o=o||{};
       const c=AU.ctx,t0=c.currentTime+AU.LEAD+(delay||0);
-      const car=c.createOscillator(),mod=c.createOscillator(),mg=c.createGain(),g=c.createGain();
+      const car=c.createOscillator(),mod=c.createOscillator(),mg=c.createGain(),g=envGain(c);
       car.type='sine';mod.type='sine';
       car.frequency.value=freq;mod.frequency.value=freq*(o.ratio||3.5);
       const idx=freq*(o.index||1.6);
