@@ -340,6 +340,7 @@ window.addEventListener('pointerleave',e=>{
 document.addEventListener('visibilitychange',()=>{ if(document.hidden) resetAllInputs(); });
 
 window.addEventListener('keydown',e=>{
+  if(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'))return;   /* печать в поле ввода — не управление */
   Input.keys[e.code]=true;
   if(e.code==='Space'){Input.jumpPressed=true;e.preventDefault();}
   if(e.code==='KeyF'&&G.scene==='mine'){usePlace();}

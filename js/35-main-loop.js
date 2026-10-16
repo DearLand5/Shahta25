@@ -125,36 +125,56 @@ function loadFromBrowser(key){
 }
 /* Полный сброс прогресса прямо в памяти — без перезагрузки страницы, которая в
    HTML-просмотрщиках и встроенных браузерах часто заблокирована. */
+/* чистое состояние игры в памяти (без настроек): для сброса и для перехода в другую сессию */
+function resetMemoryState(){
+  for(const k of Object.keys(player)){if(!(k in PLAYER_DEFAULTS))delete player[k];}   /* в т.ч. лишние поля, добавленные по ходу игры */
+  Object.assign(player,JSON.parse(JSON.stringify(PLAYER_DEFAULTS)));
+  player.digSpeedLvl=0;player.digSpeed=1;player.drillBought=false;player.drills=0;player.drillLvl=1;player.gunLvl=0;player.gunAmmo=0;
+  player.barricades=0;player.barricadeLvl=1;player.barricadeBought=false;
+  openedChests.clear();springT.clear();ventT=0;hotT=0;liqCount=0;liqAcc=0;
+  recomputeStats();player.hp=player.maxHp;
+  for(const k in DIMWORLD)delete DIMWORLD[k];
+  G.dim=0;G.wf={};G.resumeMine=null;buildings=BUILDINGS[0];LOBBY_W=LOBBY_WS[0];player.prog={};
+  placedLadders.clear();barricades.clear();tileMods.clear();tileModsByChunk.clear();dugTiles.clear();chunks.clear();
+  mobs.length=0;projectiles.length=0;beams.length=0;drills.length=0;grapple=null;aim.active=false;
+  G.seed=Math.floor(Math.random()*100000);G.oreEpoch=0;G.descents=0;regenTotal=0;
+  G.scene='menu';G.paused=false;G.mineActive=false;G.shootItem='';G.placeItem='ladder';
+  G.hb=null;G.bossCut=null;G.bossDeath=null;G.arenaFight=false;
+  lobbyPlayer.x=buildings[0].x+140;lobbyPlayer.y=0;lobbyPlayer.vy=0;
+  G.cam.x=lobbyPlayer.x;G.cam.y=0;
+  resetAllInputs();
+}
+/* Полный сброс прогресса текущей сессии прямо в памяти — без перезагрузки страницы,
+   которая в HTML-просмотрщиках и встроенных браузерах часто заблокирована.
+   Другие сессии не трогаются. */
 function resetProgress(){
   try{
     Save.wipe();
-    try{localStorage.clear();}catch(e){}
-    for(const k of Object.keys(player)){if(!(k in PLAYER_DEFAULTS))delete player[k];}   /* в т.ч. лишние поля, добавленные по ходу игры */
-    Object.assign(player,JSON.parse(JSON.stringify(PLAYER_DEFAULTS)));
-    player.digSpeedLvl=0;player.digSpeed=1;player.drillBought=false;player.drills=0;player.drillLvl=1;player.gunLvl=0;player.gunAmmo=0;
-    player.barricades=0;player.barricadeLvl=1;player.barricadeBought=false;
-    openedChests.clear();springT.clear();ventT=0;hotT=0;liqCount=0;liqAcc=0;
+    resetMemoryState();
     for(const k in settings)delete settings[k];
     Object.assign(settings,JSON.parse(JSON.stringify(SETTINGS_DEFAULTS)));
-    recomputeStats();player.hp=player.maxHp;
-    for(const k in DIMWORLD)delete DIMWORLD[k];
-    G.dim=0;G.wf={};G.resumeMine=null;buildings=BUILDINGS[0];LOBBY_W=LOBBY_WS[0];player.prog={};
-    placedLadders.clear();barricades.clear();tileMods.clear();tileModsByChunk.clear();dugTiles.clear();chunks.clear();
-    mobs.length=0;projectiles.length=0;beams.length=0;drills.length=0;grapple=null;aim.active=false;
-    G.seed=Math.floor(Math.random()*100000);G.oreEpoch=0;G.descents=0;regenTotal=0;
-    G.scene='menu';G.paused=false;G.mineActive=false;G.shootItem='';G.placeItem='ladder';
-    lobbyPlayer.x=buildings[0].x+140;lobbyPlayer.y=0;lobbyPlayer.vy=0;
-    G.cam.x=lobbyPlayer.x;G.cam.y=0;
-    resetAllInputs();
     resize();
     G.lastSaveTs=0;saveSettings();
     UI.mainMenu();
-    UI.toast('🗑 Прогресс стёрт');
+    UI.toast('🗑 Прогресс сессии стёрт');
   }catch(e){
-    try{Save.wipe();localStorage.clear();location.reload();}catch(e2){}
+    try{Save.wipe();location.reload();}catch(e2){}
   }
 }
-function loadGame(){const d=Save.read();let ok=false;if(d){ok=applySaveData(d);G.lastSaveTs=d.ts||0;}loadSettingsKey();return ok;}
+/* переход в другую сессию: текущая сохраняется, загружается выбранная (или начинается новая игра) */
+function switchProfile(id){
+  if(!Prof.data.list.some(p=>p.id===id))return false;
+  try{const d=buildSaveData();d.ts=Date.now();Save.write(d);}catch(e){}
+  Prof.data.cur=id;Prof.save();Prof.apply();
+  resetMemoryState();
+  const d=Save.read();
+  if(d){applySaveData(d);G.lastSaveTs=d.ts||0;}else{G.lastSaveTs=0;writeSave(false);}
+  ensureControls();applySettings();
+  G.scene='menu';G.paused=false;G.mineActive=false;G.cam.x=lobbyPlayer.x;G.cam.y=0;
+  resize();
+  return true;
+}
+function loadGame(){Prof.load();const d=Save.read();let ok=false;if(d){ok=applySaveData(d);G.lastSaveTs=d.ts||0;}loadSettingsKey();return ok;}
 
 function togglePause(){
   if(G.scene==='menu')return;

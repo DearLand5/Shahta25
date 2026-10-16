@@ -359,3 +359,17 @@ input[type=range],.sliderRow input[type=range]{accent-color:var(--brass);}
 @keyframes lilacSpin{to{transform:rotate(360deg)}}
 /* катсцены боссов: всплывающие сообщения не показываются */
 body.cutscene .toast{display:none!important}
+
+/* ===== Сессии ===== */
+.menuActions .sessBtn{width:min(88vw,380px);display:flex;align-items:center;gap:8px;justify-content:flex-start;min-height:46px;padding:8px 14px;font-size:14px;text-align:left}
+.menuActions .sessBtn span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.menuActions .sessBtn small{opacity:.7;font-size:11px;white-space:nowrap}
+@media (orientation:landscape) and (max-height:520px){.menuActions .sessBtn{width:100%}}
+.sessRow{flex-wrap:wrap}
+.sessRow.on{border-color:var(--brass,#d8a24a);background:rgba(255,200,110,.07)}
+.sessRow .ico .ic{width:18px;height:18px}
+.sessBtns{display:flex;gap:6px;align-items:center;margin-left:auto}
+.sessInput{width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,220,160,.35);background:rgba(0,0,0,.35);color:#f6ead6;font:600 16px Rubik,system-ui,sans-serif;outline:none}
+.sessInput:focus{border-color:#ffc870;box-shadow:0 0 0 3px rgba(255,200,110,.18)}
+.sessRow .txt{flex:1 1 170px;min-width:0}
+@media (max-width:560px){.sessBtns{width:100%;justify-content:flex-end;margin-top:2px}}

@@ -12,9 +12,37 @@ const cheats={
 /* ============================================================
    SAVE
    ============================================================ */
-const SAVE_KEY='deep_hope_v1';
-const SAVE_KEY_M='deep_hope_manual';     /* ручной слот */
-const SET_KEY='deep_hope_settings';      /* настройки хранятся отдельно от прогресса */
+/* ключи сохранения текущей сессии. Сессия 1 использует прежние ключи, поэтому
+   старый прогресс автоматически становится первой сессией. */
+let SAVE_KEY='deep_hope_v1';
+let SAVE_KEY_M='deep_hope_manual';       /* ручной слот */
+const SET_KEY='deep_hope_settings';      /* настройки хранятся отдельно от прогресса и общие для всех сессий */
+const PROF_KEY='deep_hope_profiles';     /* список сессий */
+/* ============================================================
+   СЕССИИ: несколько независимых игр, у каждой свой прогресс
+   ============================================================ */
+const Prof={
+  data:null,
+  keyOf(id){return id===1?'deep_hope_v1':'deep_hope_v1_p'+id;},
+  keyMOf(id){return id===1?'deep_hope_manual':'deep_hope_manual_p'+id;},
+  load(){
+    let d=null;try{d=JSON.parse(localStorage.getItem(PROF_KEY)||'null');}catch(e){d=null;}
+    if(!d||typeof d!=='object'||!Array.isArray(d.list)||!d.list.length)d={cur:1,next:2,list:[{id:1,name:'Сессия 1',created:Date.now()}]};
+    d.list=d.list.filter(p=>p&&isFinite(p.id)).map(p=>({id:p.id|0,name:String(p.name||('Сессия '+p.id)).slice(0,24),created:p.created||0}));
+    if(!d.list.length)d.list=[{id:1,name:'Сессия 1',created:Date.now()}];
+    if(!d.list.some(p=>p.id===d.cur))d.cur=d.list[0].id;
+    d.next=Math.max(d.next|0,...d.list.map(p=>p.id+1));
+    this.data=d;this.apply();
+  },
+  save(){try{localStorage.setItem(PROF_KEY,JSON.stringify(this.data));}catch(e){}},
+  apply(){SAVE_KEY=this.keyOf(this.data.cur);SAVE_KEY_M=this.keyMOf(this.data.cur);},
+  cur(){return this.data.list.find(p=>p.id===this.data.cur)||this.data.list[0];},
+  add(name){const id=this.data.next++;this.data.list.push({id,name:(name||'Сессия '+id).slice(0,24),created:Date.now()});this.save();return id;},
+  rename(id,name){const p=this.data.list.find(q=>q.id===id);if(p&&name&&name.trim()){p.name=name.trim().slice(0,24);this.save();}},
+  remove(id){if(this.data.list.length<=1||id===this.data.cur)return false;
+    try{localStorage.removeItem(this.keyOf(id));localStorage.removeItem(this.keyMOf(id));}catch(e){}
+    this.data.list=this.data.list.filter(p=>p.id!==id);this.save();return true;}
+};
 const Save={
   available:true,lastErr:'',
   /* ВАЖНО: раньше читалась только версия 1, а писалась версия 2 — сейв писался, но
@@ -43,7 +71,7 @@ const Save={
     }
   },
   wipe(){try{localStorage.removeItem(SAVE_KEY);localStorage.removeItem(SAVE_KEY_M);localStorage.removeItem(SET_KEY);}catch(e){}},
-  info(key){try{const d=Save.read(key);return d?{ts:d.ts||0,money:(d.player&&d.player.money)||0,dim:d.dim||0}:null;}catch(e){return null;}}
+  info(key){try{const d=Save.read(key);const p=d&&d.player||{};return d?{ts:d.ts||0,money:p.money||0,dim:d.dim||0,depth:p.maxDepth||0,hell:!!(p.prog&&p.prog.hellUnlocked),souls:p.souls||0}:null;}catch(e){return null;}}
 };
 function agoText(ts){
   if(!ts)return 'нет';

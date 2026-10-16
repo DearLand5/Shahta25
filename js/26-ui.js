@@ -137,6 +137,7 @@ const LOGO_WORD=`<svg class="wordmark" viewBox="0 0 380 118" aria-label="Глу�
 </svg>`;
 /* значки кнопок меню (простые линии в цвет текста) */
 const ICONS={
+  users:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.8"/><path d="M16.5 14.6c2.6.2 4.4 1.9 5 5"/></svg>',
   gear:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>',
   disk:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M4 4h12l4 4v12H4z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg>',
   book:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M4 5c3-1.5 5.5-1.5 8 0v15c-2.5-1.5-5-1.5-8 0zM20 5c-3-1.5-5.5-1.5-8 0v15c2.5-1.5 5-1.5 8 0z"/></svg>',
@@ -221,6 +222,7 @@ const UI={
         ${player.prog&&player.prog.key?'<span><i class="mi key"></i>Ключ</span>':''}${player.prog&&player.prog.heart&&!player.prog.hellUnlocked?'<span><i class="mi heart"></i>Сердце</span>':''}
       </div></div><div class="menuActions">
       <button class="btn big" id="mPlay">${canResumeMine()?'Продолжить':'Играть'}<small>${canResumeMine()?'Шахта · '+Math.max(0,Math.floor(G.resumeMine.y/TILE))+' м':G.dim===1?'Лобби Ада':'Лобби · '+dimName}</small></button>
+      <button class="btn alt sessBtn" id="mSess">${ICONS.users}<span>Сессия: <b>${escHtml(Prof.cur().name)}</b></span><small>${Prof.data.list.length>1?'всего '+Prof.data.list.length:'создать ещё'}</small></button>
       <div class="menuGrid">
         <button class="btn alt" id="mSet">${ICONS.gear}Настройки</button>
         <button class="btn alt" id="mSave">${ICONS.disk}Сохранения</button>
@@ -232,10 +234,60 @@ const UI={
     d.classList.add('menuPanel');
     d.querySelector('#mPlay').onclick=()=>{SFX.ui();AU.init();AU.resume();if(canResumeMine()){resumeMine();return;}G.scene='lobby';lobbyPlayer.x=200;UI.close();};
     d.querySelector('#mSave').onclick=()=>{SFX.ui();UI.saves();};
+    d.querySelector('#mSess').onclick=()=>{SFX.ui();UI.sessions();};
     d.querySelector('#mSet').onclick=()=>{SFX.ui();UI.settings();};
     d.querySelector('#mAbout').onclick=()=>{SFX.ui();UI.about();};
     if(d.querySelector('#mHow'))d.querySelector('#mHow').onclick=()=>{SFX.ui();UI.about();};
     if(d.querySelector('#mCheat'))d.querySelector('#mCheat').onclick=()=>{SFX.ui();UI.cheats();};
+  },
+  /* сессии: несколько независимых игр, у каждой свой прогресс; настройки общие */
+  sessions(){
+    const P=Prof.data,cur=P.cur;
+    const rows=P.list.map(p=>{const inf=Save.info(Prof.keyOf(p.id)),me=p.id===cur;
+      const ds=inf?`<i class="mi coin"></i> ${fmt(inf.money)} · рекорд ${fmt(inf.depth)} м · ${inf.dim===1?'Ад':'Земля надежды'}${inf.souls?' · 👻 '+fmt(inf.souls):''}<br>сохранено: ${agoText(inf.ts)}`:'новая игра';
+      return `<div class="item sessRow${me?' on':''}">
+        <div class="ico" style="background:${me?'rgba(255,200,110,.18)':'rgba(255,255,255,.06)'};display:flex;align-items:center;justify-content:center">${ICONS.users}</div>
+        <div class="txt"><div class="nm">${escHtml(p.name)}${me?' <span class="tiny" style="color:#ffd08a">· сейчас</span>':''}</div><div class="ds">${ds}</div></div>
+        <div class="sessBtns">${me?'':`<button class="btn small" data-sgo="${p.id}">Играть</button>`}
+          <button class="btn small alt" data-sren="${p.id}" title="Переименовать">✎</button>
+          ${me||P.list.length<=1?'':`<button class="btn small alt" data-sdel="${p.id}" title="Удалить">✕</button>`}</div></div>`;}).join('');
+    const d=this.build('sessions',`
+      <div class="card" style="max-width:520px;width:96vw">
+        <h3>Сессии</h3>
+        <p class="tiny" style="margin-bottom:8px">Каждая сессия — отдельная игра со своим прогрессом: деньги, снаряжение, мир, Ад. Настройки и управление общие для всех.</p>
+        <div class="scroll" style="max-height:52vh">${rows}</div>
+      </div>
+      <button class="btn" id="sNew">Новая сессия</button>
+      <button class="btn alt" id="sBack">Назад</button>`);
+    d.querySelectorAll('[data-sgo]').forEach(b=>b.onclick=()=>{SFX.ui();const id=+b.dataset.sgo;
+      if(switchProfile(id)){UI.mainMenu();UI.toast('Сессия: '+Prof.cur().name);}});
+    d.querySelectorAll('[data-sren]').forEach(b=>b.onclick=()=>{SFX.ui();UI.sessionName(+b.dataset.sren);});
+    d.querySelectorAll('[data-sdel]').forEach(b=>b.onclick=()=>{SFX.ui();const id=+b.dataset.sdel,p=P.list.find(q=>q.id===id);
+      const c=UI.build('sessions',`<div class="card" style="max-width:420px;width:94vw;text-align:center"><h3>Удалить сессию?</h3>
+        <p class="muted">«${escHtml(p.name)}» и весь её прогресс будут удалены навсегда.</p></div>
+        <button class="btn" id="sDelYes" style="background:linear-gradient(#b8463a,#7a2418)">Удалить</button><button class="btn alt" id="sDelNo">Отмена</button>`);
+      c.querySelector('#sDelYes').onclick=()=>{Prof.remove(id);SFX.uiBack();UI.toast('Сессия удалена');UI.sessions();};
+      c.querySelector('#sDelNo').onclick=()=>{SFX.uiBack();UI.sessions();};});
+    d.querySelector('#sNew').onclick=()=>{SFX.ui();UI.sessionName(0);};
+    d.querySelector('#sBack').onclick=()=>{SFX.uiBack();UI.mainMenu();};
+  },
+  /* имя сессии: id=0 — создать новую и сразу начать в ней игру */
+  sessionName(id){
+    const p=id?Prof.data.list.find(q=>q.id===id):null,def=p?p.name:'Сессия '+Prof.data.next;
+    const d=this.build('sessions',`
+      <div class="card" style="max-width:420px;width:94vw">
+        <h3>${p?'Переименовать сессию':'Новая сессия'}</h3>
+        ${p?'':'<p class="tiny" style="margin-bottom:8px">Начнётся новая игра с нуля. Текущая сессия сохранится, к ней можно вернуться в любой момент.</p>'}
+        <input id="sName" class="sessInput" maxlength="24" value="${escHtml(def)}" autocomplete="off">
+      </div>
+      <button class="btn" id="sOk">${p?'Сохранить':'Создать и играть'}</button>
+      <button class="btn alt" id="sCancel">Отмена</button>`);
+    const inp=d.querySelector('#sName');setTimeout(()=>{try{inp.focus();inp.select();}catch(e){}},60);
+    const ok=()=>{const v=(inp.value||'').trim()||def;SFX.ui();
+      if(p){Prof.rename(id,v);UI.sessions();}
+      else{const nid=Prof.add(v);switchProfile(nid);UI.mainMenu();UI.toast('Новая сессия: '+v);}};
+    d.querySelector('#sOk').onclick=ok;inp.onkeydown=(e)=>{if(e.key==='Enter')ok();};
+    d.querySelector('#sCancel').onclick=()=>{SFX.uiBack();UI.sessions();};
   },
   about(){
     const d=this.build('about',`
