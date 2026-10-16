@@ -209,6 +209,9 @@ function tileMat(t){
   if(t===3)return 'crystal';
   if(t===4||t===11||t===12)return 'magma';
   if(t===5)return 'obsidian';
+  if(t===40||t===42||t===46||t===49||t===53)return 'dirt';
+  if(t===44||t===47||t===51)return 'wood';
+  if(t===41||t===48||t===52)return 'crystal';
   return 'stone';
 }
 /* из чего сделан моб — для звуков ударов и гибели */

@@ -10,6 +10,7 @@ function makeTex(type,v){
   const col=TILECOL[type]||['#555555','#5b5b5b','#4f4f4f'];
   const base=col[v%3];
   g.fillStyle=base;g.fillRect(0,0,32,32);
+  if(type>=40&&type<=53){lilacTex(g,type,v,R,base);return c;}   /* Лиловые небеса — 47-lilac-art */
   const dots=(n,s0,s1,k)=>{for(let i=0;i<n;i++){const x=R()*32|0,y=R()*32|0,sz=Math.ceil(s0+R()*(s1-s0));g.fillStyle=shadeHex(base,(R()-0.5)*k);g.fillRect(x,y,sz,sz);}};
   const crack=(cc,w,n)=>{g.strokeStyle=cc;g.lineWidth=w;g.beginPath();let x=R()*32,y=R()*32;g.moveTo(x,y);for(let k=0;k<n;k++){x+=(R()-0.5)*14;y+=(R()-0.4)*12;g.lineTo(x,y);}g.stroke();};
   switch(type){
@@ -224,7 +225,8 @@ function makeTex(type,v){
   }
   return c;
 }
-const TEXABLE=new Set([60,T_BRICK,T_WOOD,T_DIRT,T_STONE,T_CRYSTAL,T_MAGMA,T_OBS,T_BEDROCK,T_SPRING,T_HOT,T_VENT,T_BONE,T_ASH,T_BASALT,T_FLESH,T_SULFUR,T_BONEROCK,T_HELLSTONE,T_SOULSTONE,T_ARENA,T_SOULSAND,T_ASHVENT,T_FLESHPOD,T_SULFBOMB,T_CRUST,T_BSPIKE]);
+const TEXABLE=new Set([60,T_BRICK,T_WOOD,T_DIRT,T_STONE,T_CRYSTAL,T_MAGMA,T_OBS,T_BEDROCK,T_SPRING,T_HOT,T_VENT,T_BONE,T_ASH,T_BASALT,T_FLESH,T_SULFUR,T_BONEROCK,T_HELLSTONE,T_SOULSTONE,T_ARENA,T_SOULSAND,T_ASHVENT,T_FLESHPOD,T_SULFBOMB,T_CRUST,T_BSPIKE,
+  T_LSOD,T_LGLASS,T_LWAX,T_LPORC,T_LTHORN,T_LMIRROR,T_LCRADLE,T_LROOT,T_LQUARTZ,T_LCOMB,T_LTOY,T_LBRIAR,T_LSILVER,T_LDOWN]);
 function texFor(type,tx,ty){
   if(type===T_ARENA&&G.dim===1){let a=TEX.hbw;if(!a)a=TEX.hbw=[10,11,12,13].map(v=>makeTex(type,v));return a[hash2(tx,ty,7)&3];}
   let a=TEX[type];
@@ -245,6 +247,7 @@ function texPat(g,type){
 }
 /* задняя стена пещеры: тёмная порода биома за пустотами */
 function makeWall(bi,v){
+  if(bi>=10)return lilacWall(bi,v);
   const c=texCanvas(),g=c.getContext('2d'),R=texRng(bi*3571+v*911+3);
   const rock=[T_DIRT,T_STONE,T_CRYSTAL,T_MAGMA,T_OBS,T_ASH,T_FLESH,T_SULFUR,T_BONEROCK,T_HELLSTONE][bi]||T_STONE;
   const base=shadeHex(TILECOL[rock][v%3],-0.56);

@@ -2221,6 +2221,7 @@ function drawOreShape(g,x,y,size,o,t){
     for(let k=0;k<3;k++){const p=pts[k];g.beginPath();g.arc(x+p[0]*size-r*0.25,y+p[1]*size-r*0.25,r*0.32,0,TAU);g.fill();}
     return;
   }
+  if(o.dim===2){drawLilacOre(g,x,y,size,o);return;}
   const h=hash2(Math.floor(x/32),Math.floor(y/32),o.id*31+5);
   const n=3+(h%3),rare=(o.rar||0)>=2;
   /* тёмное «гнездо» в породе */
@@ -2260,6 +2261,7 @@ function drawDecorStatic(g,tx,ty,t){
   const h=hash2(tx,ty,913);
   const x=tx*TILE,y=ty*TILE;
   const r=h%100;
+  if(b>=10)return;
   if(b>=5){
     if(t===T_ARENA||t===T_BASALT||t===T_SOULSTONE)return;
     if(b===5&&r<10){g.fillStyle='rgba(0,0,0,.25)';g.beginPath();g.ellipse(x+10+(h%12),y+12+((h>>4)%10),4,2,0.4,0,TAU);g.fill();}
@@ -2301,6 +2303,7 @@ function drawDecor(g,tx,ty,t){
   const b=biomeAt(ty);
   const h=hash2(tx,ty,913);
   const r=h%100;
+  if(b>=10){lilacDecor(g,tx,ty,t,h);return;}
   if(b>=5){
     if(t===T_ARENA)return;
     const x=tx*TILE,y=ty*TILE;
@@ -2368,6 +2371,10 @@ function footMat(){const t=getTile(Math.floor(player.x/TILE),Math.floor((player.
   if(t===T_CRYSTAL||t===T_SOULSTONE)return 'crystal';
   if(t===T_DIRT||t===T_FLESH||t===T_SOULSAND)return 'dirt';
   if(t===T_ASH)return 'ash';
+  if(t===T_LSOD)return 'grass';
+  if(t===T_LGLASS||t===T_LQUARTZ||t===T_LSILVER||t===T_LMIRROR)return 'crystal';
+  if(t===T_LTHORN||t===T_LROOT||t===T_LBRIAR)return 'wood';
+  if(t===T_LWAX||t===T_LCOMB||t===T_LCRADLE||t===T_LDOWN)return 'dirt';
   if(t===T_ARENA||t===T_BRICK)return 'metal';
   return 'stone';}
 function landDustCol(){const t=getTile(Math.floor(player.x/TILE),Math.floor((player.y+4)/TILE));const c=TILECOL[t];return c?shadeHex(c[0],0.25):'#a89880';}
@@ -2381,6 +2388,7 @@ function ambientParticles(dt){
   const x=G.cam.x+rnd(-hw,hw),y=G.cam.y+rnd(-hh,hh);
   const tt=getTile(Math.floor(x/TILE),Math.floor(y/TILE));
   if(tt!==T_AIR)return;
+  if(bi>=10){lilacAmbient(x,y,bi);return;}
   switch(bi){
     case 0:spawnPart(x,y,rnd(-6,6),rnd(-10,-2),rnd(3,5),'#b89a72',1.6,0);break;
     case 1:if(Math.random()<0.5)spawnPart(x,y,rnd(-4,4),rnd(-4,4),rnd(3,5),'#8a8e9a',1.4,0);else spawnPart(x,y,0,20,0.9,'#7aa8d8',1.4,380);break;

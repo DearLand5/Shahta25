@@ -220,7 +220,7 @@ function applyBalance16(){
   if(applyBalance16.done)return;applyBalance16.done=true;
   const PM={6:3,7:2.6,8:2.3,9:2.1,10:1.9};
   const old={};
-  for(let k=0;k<ORES.length;k++){const O=ORES[k];if(!O||!O.dim)continue;old[k]=O.price;O.price=Math.round(O.price*(PM[O.tier]||2)/50)*50;}
+  for(let k=0;k<ORES.length;k++){const O=ORES[k];if(!O||O.dim!==1)continue;old[k]=O.price;O.price=Math.round(O.price*(PM[O.tier]||2)/50)*50;}
   for(const r of SMELT){
     if(r.tab==='ingot'){const o=+r.out.slice(1);r.c=Math.max(100,Math.round((old[o]||0)*0.3/50)*50);r.time=Math.max(1.5,r.time*0.8);}
     else r.c=Math.round((r.c||0)*0.4/500)*500;

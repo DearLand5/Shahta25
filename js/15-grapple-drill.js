@@ -78,7 +78,7 @@ function updateDrills(dt){
         if(t===T_AIR||t===T_LADDER||t===T_LAVA||isLiq(t)||t===T_BARRICADE)continue;
         const ore=getOre(tx,ty);
         if(ore&&ORES[ore].tier>player.pickLvl){
-          if(center){dead=true;floatText(tx*TILE+16,ty*TILE,'Нужна '+PICKS[ORES[ore].tier-1].name,'#ff9a3c');}
+          if(center){dead=true;floatText(tx*TILE+16,ty*TILE,'Нужна '+pickName(ORES[ore].tier),'#ff9a3c');}
           continue;
         }
         const cost=((ROCK_HP[t]||20)*0.5+(ore?ORES[ore].hp*0.3:0))*4;   /* прочность стала ниже — цену блока для бура пересчитали */

@@ -163,6 +163,7 @@ function spawnLostSoul(x,y){
   const m=spawnMobAt(def,x,y+10);m.age=0;m.emerge=1;burst(x,y,14,'#9ad8ff',120,2.6);return m;
 }
 function updateHellBlocks(dt){
+  if(G.dim===2&&G.scene==='mine'){while(hsBreaks.length){const [o,tx,ty]=hsBreaks.shift();try{lilacSpecialBreak(o,tx,ty);}catch(e){}}return;}
   if(G.dim!==1||G.scene!=='mine'){hsBreaks.length=0;return;}
   while(hsBreaks.length){const [o,tx,ty]=hsBreaks.shift();try{hellSpecialBreak(o,tx,ty);}catch(e){}}
   const ftx=Math.floor(player.x/TILE),fty=Math.floor((player.y+3)/TILE);
@@ -262,6 +263,7 @@ function setDmg(tx,ty,v){
 function setTile(tx,ty,t){
   if(ty<0||tx<0||tx>=MW)return;
   if(t===T_AIR&&G.dim===1&&G.scene==='mine'){const old=getTile(tx,ty);if(old>=27&&old<=32)hsBreaks.push([old,tx,ty]);}
+  if(t===T_AIR&&G.dim===2&&G.scene==='mine'){const old=getTile(tx,ty);if(old===T_LCOMB||old===T_LDOWN)hsBreaks.push([old,tx,ty]);}
   ccMarkDirty(tx,ty);
   if(t===T_LADDER){
     placedLadders.add(tx+','+ty);

@@ -89,11 +89,11 @@ const Music={
     b12:{root:50,scale:[0,2,4,5,7,9,10],prog:[0,5,3,4],barsPer:2,bpm:58,
       pad:{type:'triangle',lp:1000,vol:0.05,att:2.8,rel:3.4,det:6},
       mel:{inst:'epiano',vol:0.07,dens:0.34,oct:1,dur:1.8},
-      bass:{vol:0.07,every:2},drone:{note:38,vol:0.025,lp:260},amb:{wind:0.012,wlp:380,drip:0.1,bubble:0.05}},
+      bass:{vol:0.07,every:2},drone:{note:38,vol:0.025,lp:260},amb:{wind:0.012,wlp:380,drip:0.1,buzz:0.08}},
     b13:{root:51,scale:[0,2,4,5,7,8,11],prog:[0,4,5,1],barsPer:2,bpm:54,
       pad:{type:'triangle',lp:1100,vol:0.045,att:3,rel:3.6,det:7},
       mel:{inst:'box',vol:0.06,dens:0.3,oct:2,dur:1.6},
-      bell:{prob:0.12,vol:0.028,oct:2},bass:{vol:0.06,every:2},amb:{wind:0.014,wlp:520,chime:0.04}},
+      bell:{prob:0.12,vol:0.028,oct:2},bass:{vol:0.06,every:2},amb:{wind:0.014,wlp:520,chime:0.02,creak:0.05}},
     b14:{root:47,scale:[0,2,3,5,7,8,11],prog:[0,5,3,4],barsPer:2,bpm:50,
       pad:{type:'sawtooth',lp:700,vol:0.04,att:3.2,rel:4,det:8},
       mel:{inst:'flute',vol:0.06,dens:0.26,oct:1,dur:2.2},
@@ -414,5 +414,20 @@ const Amb={
       for(let k=0;k<2;k++){const tt=t+k*rr(0.1,0.25),o=c.createOscillator(),g=envGain(c);o.type='sine';o.frequency.value=base*(k?1.5:1);
         g.gain.setValueAtTime(0,tt);g.gain.linearRampToValueAtTime(0.018,tt+0.01);g.gain.exponentialRampToValueAtTime(0.0008,tt+1.6);
         o.connect(g);g.connect(out);g.connect(AU.sfxSend);o.start(tt);o.stop(tt+1.65);}});
+    if(A.buzz&&P(A.buzz))Amb.ev((c,out,t)=>{          /* пчела пролетает мимо: тихое жужжание с допплером и панорамой */
+      const d=rr(1.2,2.2),f0=rr(190,240),o=c.createOscillator(),f=c.createBiquadFilter(),g=envGain(c),pn=c.createStereoPanner?c.createStereoPanner():null;
+      o.type='sawtooth';o.frequency.setValueAtTime(f0*1.04,t);o.frequency.linearRampToValueAtTime(f0*0.95,t+d);
+      const lfo=c.createOscillator(),lg=c.createGain();lfo.frequency.value=rr(18,26);lg.gain.value=f0*0.03;lfo.connect(lg);lg.connect(o.frequency);
+      f.type='bandpass';f.frequency.value=f0*3;f.Q.value=1.2;
+      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.012,t+d*0.45);g.gain.linearRampToValueAtTime(0,t+d);
+      o.connect(f);f.connect(g);if(pn){const s0=rr(-0.9,0.9);pn.pan.setValueAtTime(s0,t);pn.pan.linearRampToValueAtTime(-s0,t+d);g.connect(pn);pn.connect(out);}else g.connect(out);
+      o.start(t);lfo.start(t);o.stop(t+d+0.05);lfo.stop(t+d+0.05);});
+    if(A.creak&&P(A.creak))Amb.ev((c,out,t)=>{        /* далёкий скрип карусели и бренчание заводной игрушки */
+      const d=rr(0.5,0.9),s=c.createBufferSource();s.buffer=AU.nbuf;const f=c.createBiquadFilter();f.type='bandpass';f.Q.value=9;
+      f.frequency.setValueAtTime(rr(500,700),t);f.frequency.linearRampToValueAtTime(rr(800,1000),t+d*0.6);f.frequency.linearRampToValueAtTime(rr(450,600),t+d);
+      const g=envGain(c);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.03,t+0.08);g.gain.linearRampToValueAtTime(0,t+d);
+      s.connect(f);f.connect(g);g.connect(out);s.start(t,Math.random()*0.5);s.stop(t+d+0.05);
+      if(Math.random()<0.5){const sc=[1047,1175,1319,1568,1760];for(let k=0;k<3;k++){const tt=t+d+0.1+k*0.22,o=c.createOscillator(),g2=envGain(c);o.type='triangle';o.frequency.value=sc[Math.floor(Math.random()*5)];
+        g2.gain.setValueAtTime(0,tt);g2.gain.linearRampToValueAtTime(0.012,tt+0.005);g2.gain.exponentialRampToValueAtTime(0.0006,tt+0.5);o.connect(g2);g2.connect(out);g2.connect(AU.sfxSend);o.start(tt);o.stop(tt+0.55);}}});
   }
 };

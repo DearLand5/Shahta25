@@ -133,7 +133,7 @@ function applyLighting(){
   const depth=Math.max(0,player.y)/TILE;
   /* Чем глубже, тем темнее, а собственный свет игрока без факелов сужается:
      на дне без прокачанных факелов почти ничего не видно. */
-  let dark=G.dim===1?clamp(0.2+depth/900,0.2,0.94):G.dim===2?clamp(0.12+depth/1300,0.12,0.9):clamp(0.16+depth/650,0.16,0.975);
+  let dark=G.dim===1?clamp(0.2+depth/900,0.2,0.94):G.dim===2?clamp(0.14+depth/2900,0.14,0.8):clamp(0.16+depth/650,0.16,0.975);
   /* глубокие биомы Ада темнее: Топи, Катакомбы, Ядро (в Ядре немного светлее из-за лавы) */
   const hbi=G.dim===1?biomeAt(depth):-1;
   if(hbi===7)dark=Math.max(dark,0.95);else if(hbi===8)dark=Math.max(dark,0.978);else if(hbi>=9)dark=Math.max(dark,0.968);
@@ -146,12 +146,12 @@ function applyLighting(){
   const kx=lw/W,ky=lh/H;
   lctx.setTransform(1,0,0,1,0,0);
   lctx.clearRect(0,0,lw,lh);
-  lctx.fillStyle='rgba(0,0,0,'+dark.toFixed(3)+')';
+  lctx.fillStyle=(G.dim===2?'rgba(16,4,26,':'rgba(0,0,0,')+dark.toFixed(3)+')';
   lctx.fillRect(0,0,lw,lh);
 
   const px=(player.x-G.cam.x)*sc+W/2;
   const py=(player.y-player.h*0.5-G.cam.y)*sc+H/2;
-  const baseT=lerp(7.4,2.6,clamp(depth/900,0,1))*(hbi===8?0.62:hbi>=9?0.7:hbi===7?0.8:1);          /* радиус света без факела, в блоках */
+  const baseT=lerp(7.4,2.6,clamp(depth/(G.dim===2?2600:900),0,1))*(hbi===8?0.62:hbi>=9?0.7:hbi===7?0.8:1);          /* радиус света без факела, в блоках */
   const hellT=G.dim===1?Math.max(0,player.torchLvl-5):0;    /* уровни Адского фонаря */
   let R=(baseT*TILE*sc)*(1+Math.min(5,player.torchLvl)*0.42+Math.max(0,player.torchLvl-5)*(G.dim===1?0.6:0.3))*(cheats.megaLight?4:1)*(player.lightBuff>0?1.5:1);
   if(player.blind>0)R*=0.45;                                 /* слепота от Глаза Бездны */
@@ -186,6 +186,8 @@ function applyLighting(){
           if(t===T_LAVA){rad=3.4;a=0.85;}
           else if(t===T_HOT){rad=2.6;a=0.7;}
           else if(t===T_VENT){rad=2.4;a=0.6;}
+          else if(t===T_LQUARTZ&&((tx+ty*3)%4===0)){rad=1.8;a=0.42;}
+          else if(t===T_LCOMB&&((tx*3+ty)%5===0)){rad=1.6;a=0.38;}
           else{
             const o=getOre(tx,ty);
             if(o&&ORES[o].rar>=2&&(relicOn('eye')?oreHoles<22:(oreHoles<10&&((tx+ty)&1)))){rad=(relicOn('eye')?1.3:1.05)+ORES[o].rar*0.12;a=relicOn('eye')?0.5:0.32;oreHoles++;}

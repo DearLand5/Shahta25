@@ -184,7 +184,7 @@ function packWorldData(){
   };
 }
 /* версия генератора Лиловых небес: мир, выкопанный старым генератором, создаётся заново */
-const LILAC_GV=1;
+const LILAC_GV=2;
 function applyWorldData(d){
   d=d||{};
   if(G.dim===2&&d.gv!==LILAC_GV)d={};

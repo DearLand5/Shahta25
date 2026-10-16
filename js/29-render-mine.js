@@ -42,6 +42,7 @@ function drawEarthAtmos(W,H){
 /* парящие частицы атмосферы: одинаковый параллакс по обеим осям, плавный перенос по краям */
 function atmWrap(v,span){return ((v%span)+span)%span;}
 function drawHellAtmos(W,H,dt){
+  if(G.dim===2){drawLilacAtmos(W,H);return;}
   if(G.dim!==1||settings.quality==='low'){drawEarthAtmos(W,H);return;}
   const depth=Math.max(0,player.y)/TILE,bi=biomeAt(depth),T=G.time,cam=G.cam;
   if(!_atm){_atm=[];for(let i=0;i<70;i++)_atm.push({x:Math.random(),y:Math.random(),s:Math.random(),p:Math.random()*TAU});}
@@ -217,6 +218,8 @@ function drawBackdrop(g,W,H,cam,depth,bi,B){
     const px=shift(0.2,420);
     for(let i=-1;i<5;i++){const xx=px+i*140,hh=H*(0.18+(((i*31)%30)/100));
       g.beginPath();g.moveTo(xx,H);g.lineTo(xx+20,H-hh);g.lineTo(xx+46,H-hh*0.6);g.lineTo(xx+80,H-hh*1.1);g.lineTo(xx+120,H);g.closePath();g.fill();}
+  }else if(bi>=10){
+    drawLilacBackdrop(g,W,H,cam,bi,T,shift);
   }else if(bi>=5){
     drawHellBackdrop(g,W,H,cam,bi,T,shift);
   }else{
@@ -470,6 +473,7 @@ function drawBiomeDecor(g,tx0,tx1,ty0,ty1){
           }
           continue;
         }
+        if(bi>=10){lilacAirDecor(g,x,y,tx,ty,bi,h,up,dn,time,gl,solid);continue;}
         if(bi>=5){hellAirDecor(g,x,y,tx,ty,bi,h,up,dn,time,gl,solid);continue;}
         const gk=(bi===2)?geodeAt(tx,ty):0;
         if(gk===1){
@@ -570,7 +574,8 @@ function drawBiomeDecor(g,tx0,tx1,ty0,ty1){
       }else if(t!==T_BEDROCK){
         /* стенки: мох, трещины, грани, окаменелости */
         if(!solid(tx,ty-1)){
-          if(bi===0){g.fillStyle='rgba(95,110,52,.9)';g.fillRect(x,y,TILE,3);if(h%3===0){g.fillRect(x+4+(h>>>4)%20,y-2,2,2);}}
+          if(bi>=10)lilacEdge(g,x,y,bi,h);
+          else if(bi===0){g.fillStyle='rgba(95,110,52,.9)';g.fillRect(x,y,TILE,3);if(h%3===0){g.fillRect(x+4+(h>>>4)%20,y-2,2,2);}}
           else if(bi===1){g.fillStyle='rgba(150,160,180,.3)';g.fillRect(x,y,TILE,2);}
           else if(bi===2){g.fillStyle='rgba(185,168,255,.38)';g.fillRect(x,y,TILE,2);}
           else if(bi===3){g.fillStyle='rgba(255,140,60,.45)';g.fillRect(x,y,TILE,2);}

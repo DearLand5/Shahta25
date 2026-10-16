@@ -1904,7 +1904,7 @@ const UI={
         ${tog('infMoney','💰 ∞ Деньги')}${act('money','💵 +100 000')}${act('money10','💎 +10 000 000')}${act('money0','🚫 Деньги = 0')}
         ${act('souls','👻 +500 душ')}${act('ladders','🪜 +100 лестниц')}${act('ammo','🚀 +100 снарядов крюка')}${act('gunAmmo','🔸 +500 патронов')}
         ${act('potions','🧪 +50 аптечек')}${act('ice','🧊 +20 ледяных зелий')}${act('drills','🛠️ +50 буров')}${act('barr','🧱 +50 баррикад')}
-        ${act('earthOres','🎁 Руда Земли ×100')}${act('hellOres','🔥 Руда Ада ×100')}${act('clearInv','🗑 Очистить инвентарь')}
+        ${act('earthOres','🎁 Руда Земли ×100')}${act('hellOres','🔥 Руда Ада ×100')}${act('lilacOres','🌸 Руда Лиловых небес ×100')}${act('clearInv','🗑 Очистить инвентарь')}
         ${act('allMats','📦 Материалы Ада ×50')}${act('allCons','💣 Расходники Ада ×5')}${act('furnDone','🔥 Печь: готово сразу')}
       </div>`;
     }else if(tab==='prog'){
@@ -2026,7 +2026,8 @@ const UI={
           case 'drills': player.drillBought=true;player.drills+=50; UI.toast('🛠️ +50 буров'); break;
           case 'barr': player.barricadeBought=true;player.barricades+=50; UI.toast('🧱 +50 баррикад'); break;
           case 'earthOres': for(let i=1;i<=17;i++)player.inv[i]=(player.inv[i]||0)+100; UI.toast('🎁 Руда Земли ×100'); break;
-          case 'hellOres': for(let i=18;i<ORES.length;i++)player.inv[i]=(player.inv[i]||0)+100; UI.toast('🔥 Руда Ада ×100'); break;
+          case 'hellOres': for(let i=18;i<ORES.length;i++)if(ORES[i].dim===1)player.inv[i]=(player.inv[i]||0)+100; UI.toast('🔥 Руда Ада ×100'); break;
+          case 'lilacOres': for(let i=1;i<ORES.length;i++)if(ORES[i].dim===2)player.inv[i]=(player.inv[i]||0)+100; UI.toast('🌸 Руда Лиловых небес ×100'); break;
           case 'clearInv': player.inv={}; UI.toast('🗑 Очищено'); break;
           case 'maxAll': setMax(); UI.toast('⭐ Земля на максимуме'); break;
           case 'presetHell': setMax();player.prog.heart=true;player.prog.key=true;G.wf.heartTaken=true;player.money=Math.max(player.money,2000000); UI.toast('🔥 Всё готово: иди к порталу'); break;

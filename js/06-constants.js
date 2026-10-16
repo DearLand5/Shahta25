@@ -8,7 +8,10 @@ const MW=96;
 
 const T_AIR=0,T_DIRT=1,T_STONE=2,T_CRYSTAL=3,T_MAGMA=4,T_OBS=5,T_BEDROCK=6,T_LAVA=7,T_LADDER=8,T_WATER=9,T_SPRING=10,T_HOT=11,T_VENT=12,T_WOOD=13,T_BRICK=14,T_BONE=15,T_BARRICADE=16,
   T_ASH=17,T_FLESH=18,T_SULFUR=19,T_BONEROCK=20,T_HELLSTONE=21,T_ACID=22,T_BLOOD=23,T_SOULSTONE=24,T_ARENA=25,T_BASALT=26,
-  T_SOULSAND=27,T_ASHVENT=28,T_FLESHPOD=29,T_SULFBOMB=30,T_CRUST=31,T_BSPIKE=32;
+  T_SOULSAND=27,T_ASHVENT=28,T_FLESHPOD=29,T_SULFBOMB=30,T_CRUST=31,T_BSPIKE=32,
+  /* Лиловые небеса: породы биомов 40–46 и особые блоки 47–53 */
+  T_LSOD=40,T_LGLASS=41,T_LWAX=42,T_LPORC=43,T_LTHORN=44,T_LMIRROR=45,T_LCRADLE=46,
+  T_LROOT=47,T_LQUARTZ=48,T_LCOMB=49,T_LTOY=50,T_LBRIAR=51,T_LSILVER=52,T_LDOWN=53;
 const TILECOL={
   1:['#6b4a2e','#755132','#5f4129'],
   2:['#575c68','#606573','#4c515d'],
@@ -41,17 +44,32 @@ const TILECOL={
   29:['#5a1422','#64182a','#50101c'],
   30:['#6e6214','#786a18','#645810'],
   31:['#2a1410','#321814','#221008'],
-  32:['#cfc6b0','#d8cfba','#c4bba4']
+  32:['#cfc6b0','#d8cfba','#c4bba4'],
+  40:['#6a4e6e','#735676','#5f4562'],   /* цветочный дёрн */
+  41:['#4a5a80','#52648a','#425074'],   /* стеклокамень */
+  42:['#a87c2c','#b28634','#987026'],   /* воск */
+  43:['#b4a6b8','#beb0c2','#a698ac'],   /* фарфоровый камень */
+  44:['#4a1a2c','#542032','#401626'],   /* терновник */
+  45:['#3a5a66','#426470','#34525c'],   /* зеркальный сланец */
+  46:['#8a5a7c','#946484','#7e5072'],   /* пуховая плоть */
+  47:['#6a4a32','#745232','#5e422a'],   /* корни */
+  48:['#8ec8ec','#9ad4f4','#80b8e0'],   /* хрустальный столб */
+  49:['#e09a22','#e8a42a','#d08a1a'],   /* медовые соты */
+  50:['#c87a9a','#d084a2','#ba6e8c'],   /* кукольный кирпич */
+  51:['#2a3a24','#32422a','#24321e'],   /* шипастая лоза */
+  52:['#a8b8c4','#b4c4ce','#9aaab6'],   /* серебряная плита */
+  53:['#b8a0c8','#c0a8d0','#ae96be']    /* пух */
 };
 /* Прочность породы. Подобрана так, чтобы кирка «своего» уровня копала породу
    за 1-2 секунды, а руду — за 2-6 секунд. */
 /* Прочность породы. Земля копается почти мгновенно, дальше растёт вместе с
    прогрессом: с киркой «своего» биома порода уходит за ~0.15-0.6 с, руда — за 0.4-2 с. */
-const ROCK_HP={1:2,2:6,3:14,4:22,5:36,6:1e9,7:1e9,10:6,11:22,12:22,13:3,14:10,15:30,16:2,17:120,18:180,19:260,20:340,21:480,24:340,25:1e9,26:200,27:60,28:200,29:90,30:150,31:40,32:260};
+const ROCK_HP={1:2,2:6,3:14,4:22,5:36,6:1e9,7:1e9,10:6,11:22,12:22,13:3,14:10,15:30,16:2,17:120,18:180,19:260,20:340,21:480,24:340,25:1e9,26:200,27:60,28:200,29:90,30:150,31:40,32:260,
+  40:380,41:470,42:560,43:660,44:760,45:860,46:980,47:300,48:520,49:260,50:700,51:420,52:900,53:160};
 
 const RARITY=[
   {n:'Обычная',c:'#b9c0cc'},{n:'Необычная',c:'#5ee06a'},{n:'Редкая',c:'#4aa8ff'},
-  {n:'Эпическая',c:'#b45cff'},{n:'Легендарная',c:'#ffab2e'},{n:'Мифическая',c:'#ff4d6d'},{n:'Адская',c:'#ff7a1a'}
+  {n:'Эпическая',c:'#b45cff'},{n:'Легендарная',c:'#ffab2e'},{n:'Мифическая',c:'#ff4d6d'},{n:'Адская',c:'#ff7a1a'},{n:'Небесная',c:'#f0b0ff'}
 ];
 
 const ORES=[
@@ -92,7 +110,33 @@ const ORES=[
  {id:33,dim:1,name:'Костяной опал'   ,rar:2,dmin:850 ,dmax:1220,hp:500,price:16000,tier:9 ,color:'#e8e0f0',glow:'#ffb0e0',vein:0.840},
  {id:34,dim:1,name:'Призрачное серебро',rar:4,dmin:900,dmax:1240,hp:600,price:30000,tier:9 ,color:'#a8c8e8',glow:'#e8f8ff',vein:0.880},
  {id:35,dim:1,name:'Магмовый адамант',rar:4,dmin:1200,dmax:99999,hp:760,price:38000,tier:10,color:'#8a2a0a',glow:'#ff8a3a',vein:0.865},
- {id:36,dim:1,name:'Звезда преисподней',rar:6,dmin:1300,dmax:99999,hp:900,price:90000,tier:10,color:'#fff0a0',glow:'#ffffff',vein:0.925}
+ {id:36,dim:1,name:'Звезда преисподней',rar:6,dmin:1300,dmax:99999,hp:900,price:90000,tier:10,color:'#fff0a0',glow:'#ffffff',vein:0.925},
+ /* Лиловые небеса: sh — рисунок самородка (drawLilacOre в 47-lilac-art) */
+ {id:37,dim:2,name:'Росяной кварц'      ,rar:0,dmin:4   ,dmax:290  ,hp:820 ,price:60000  ,tier:10,color:'#bfe6ff',glow:'#ffffff',vein:0.815,sh:'drop'},
+ {id:38,dim:2,name:'Пыльцевый янтарь'   ,rar:1,dmin:30  ,dmax:300  ,hp:900 ,price:85000  ,tier:10,color:'#ffcf40',glow:'#fff4b0',vein:0.835,sh:'pollen'},
+ {id:39,dim:2,name:'Лепестковый родонит',rar:2,dmin:120 ,dmax:320  ,hp:1000,price:130000 ,tier:11,color:'#ff86c4',glow:'#ffd8ee',vein:0.855,sh:'petal'},
+ {id:40,dim:2,name:'Сонный жемчуг'      ,rar:3,dmin:180 ,dmax:330  ,hp:1100,price:190000 ,tier:11,color:'#ece2fa',glow:'#ffffff',vein:0.875,sh:'pearl'},
+ {id:41,dim:2,name:'Небесный хрусталь'  ,rar:0,dmin:250 ,dmax:580  ,hp:980 ,price:110000 ,tier:11,color:'#96d4ff',glow:'#e8f8ff',vein:0.820,sh:'shard'},
+ {id:42,dim:2,name:'Звонкий берилл'     ,rar:2,dmin:280 ,dmax:600  ,hp:1080,price:160000 ,tier:11,color:'#6af0cc',glow:'#d8fff2',vein:0.850,sh:'shard'},
+ {id:43,dim:2,name:'Призрачный опалит'  ,rar:3,dmin:360 ,dmax:600  ,hp:1200,price:260000 ,tier:12,color:'#dcc0ff',glow:'#fff0ff',vein:0.870,sh:'shard'},
+ {id:44,dim:2,name:'Слеза рассвета'     ,rar:4,dmin:440 ,dmax:600  ,hp:1320,price:420000 ,tier:12,color:'#ffb0d4',glow:'#fff0f8',vein:0.890,sh:'drop'},
+ {id:45,dim:2,name:'Восковой цитрин'    ,rar:0,dmin:550 ,dmax:880  ,hp:1150,price:180000 ,tier:12,color:'#ffd050',glow:'#fff2b8',vein:0.825,sh:'hex'},
+ {id:46,dim:2,name:'Медовый топаз'      ,rar:1,dmin:580 ,dmax:900  ,hp:1250,price:240000 ,tier:12,color:'#ff9a1a',glow:'#ffd890',vein:0.845,sh:'hex'},
+ {id:47,dim:2,name:'Пчелиное золото'    ,rar:3,dmin:680 ,dmax:900  ,hp:1400,price:380000 ,tier:12,color:'#ffe060',glow:'#fffad0',vein:0.875,sh:'nugget'},
+ {id:48,dim:2,name:'Фарфоровая глазурь' ,rar:0,dmin:850 ,dmax:1180 ,hp:1350,price:280000 ,tier:13,color:'#f2eefa',glow:'#ffffff',vein:0.825,sh:'button'},
+ {id:49,dim:2,name:'Пуговичный агат'    ,rar:1,dmin:880 ,dmax:1200 ,hp:1450,price:360000 ,tier:13,color:'#c466d8',glow:'#f0c8ff',vein:0.845,sh:'button'},
+ {id:50,dim:2,name:'Заводной латунит'   ,rar:2,dmin:950 ,dmax:1200 ,hp:1580,price:480000 ,tier:13,color:'#d8a64a',glow:'#fff0b8',vein:0.860,sh:'gear'},
+ {id:51,dim:2,name:'Стеклянный глаз'    ,rar:4,dmin:1050,dmax:1200 ,hp:1750,price:800000 ,tier:13,color:'#78b4ff',glow:'#e0f0ff',vein:0.895,sh:'eye'},
+ {id:52,dim:2,name:'Шипастый гранат'    ,rar:0,dmin:1150,dmax:1480 ,hp:1600,price:450000 ,tier:14,color:'#c41e3c',glow:'#ff9aac',vein:0.825,sh:'thorn'},
+ {id:53,dim:2,name:'Бутонит'            ,rar:2,dmin:1200,dmax:1500 ,hp:1750,price:650000 ,tier:14,color:'#ff6aa2',glow:'#ffd0e4',vein:0.860,sh:'petal'},
+ {id:54,dim:2,name:'Кровь розы'         ,rar:4,dmin:1320,dmax:1500 ,hp:1950,price:1100000,tier:14,color:'#900c30',glow:'#ff5a7a',vein:0.895,sh:'drop'},
+ {id:55,dim:2,name:'Ртутное серебро'    ,rar:1,dmin:1450,dmax:1780 ,hp:1700,price:560000 ,tier:14,color:'#c4d4de',glow:'#ffffff',vein:0.835,sh:'pearl'},
+ {id:56,dim:2,name:'Озёрный аквамарин'  ,rar:2,dmin:1480,dmax:1800 ,hp:1850,price:720000 ,tier:14,color:'#44d4cc',glow:'#c8fff8',vein:0.855,sh:'drop'},
+ {id:57,dim:2,name:'Зазеркальный лунит' ,rar:3,dmin:1580,dmax:1800 ,hp:2000,price:950000 ,tier:14,color:'#a4ecff',glow:'#ffffff',vein:0.880,sh:'shard'},
+ {id:58,dim:2,name:'Пуховый лунный камень',rar:1,dmin:1750,dmax:99999,hp:2050,price:900000,tier:15,color:'#dcccff',glow:'#ffffff',vein:0.835,sh:'pearl'},
+ {id:59,dim:2,name:'Колыбельный сердолик',rar:3,dmin:1800,dmax:99999,hp:2250,price:1400000,tier:15,color:'#ff7a8c',glow:'#ffd8de',vein:0.870,sh:'heart'},
+ {id:60,dim:2,name:'Сердце сна'         ,rar:5,dmin:1900,dmax:99999,hp:2500,price:2600000,tier:15,color:'#ff48d4',glow:'#ffd0f6',vein:0.905,sh:'heart'},
+ {id:61,dim:2,name:'Звезда Рассвета'    ,rar:7,dmin:2000,dmax:99999,hp:2800,price:4000000,tier:15,color:'#fff0ff',glow:'#ffffff',vein:0.930,sh:'star'}
 ];
 
 const DIM_NAMES=['Земля надежды','Ад','Лиловые небеса'];
@@ -115,13 +159,13 @@ const BIOMES=[
   {n:'Серные топи'       ,dim:1,d0:550 ,d1:850 ,bg:'#26230c',bg2:'#100e04',fog:'#1c1a08'},
   {n:'Костяные катакомбы',dim:1,d0:850 ,d1:1200,bg:'#1c1c26',bg2:'#08080e',fog:'#15151e'},
   {n:'Огненное ядро'     ,dim:1,d0:1200,d1:1e9 ,bg:'#300a04',bg2:'#140302',fog:'#240704'},
-  {n:'Цветущие луга'     ,dim:2,d0:0   ,d1:250 ,bg:'#2a1e34',bg2:'#120c18',fog:'#21182a'},
-  {n:'Хрустальный сад'   ,dim:2,d0:250 ,d1:550 ,bg:'#1a1e36',bg2:'#0a0c1a',fog:'#151a2e'},
-  {n:'Медовые соты'      ,dim:2,d0:550 ,d1:850 ,bg:'#30220e',bg2:'#140e04',fog:'#261a0a'},
-  {n:'Кукольный городок' ,dim:2,d0:850 ,d1:1150,bg:'#2c1a28',bg2:'#120a10',fog:'#22141f'},
-  {n:'Розарий'           ,dim:2,d0:1150,d1:1450,bg:'#2e0e1e',bg2:'#12040a',fog:'#240a17'},
-  {n:'Зеркальные топи'   ,dim:2,d0:1450,d1:1750,bg:'#14262c',bg2:'#060e12',fog:'#0f1e24'},
-  {n:'Колыбель'          ,dim:2,d0:1750,d1:1e9 ,bg:'#2a0e22',bg2:'#10040c',fog:'#200a1a'}
+  {n:'Цветущие луга'     ,dim:2,d0:0   ,d1:250 ,bg:'#4a3462',bg2:'#22162e',fog:'#3a2a4c'},
+  {n:'Хрустальный сад'   ,dim:2,d0:250 ,d1:550 ,bg:'#2a3460',bg2:'#121630',fog:'#222a50'},
+  {n:'Медовые соты'      ,dim:2,d0:550 ,d1:850 ,bg:'#4a3214',bg2:'#201406',fog:'#3a280e'},
+  {n:'Кукольный городок' ,dim:2,d0:850 ,d1:1150,bg:'#40263c',bg2:'#1c0f1a',fog:'#321e2e'},
+  {n:'Розарий'           ,dim:2,d0:1150,d1:1450,bg:'#401428',bg2:'#1a0610',fog:'#320f20'},
+  {n:'Зеркальные топи'   ,dim:2,d0:1450,d1:1750,bg:'#1c3640',bg2:'#0a161c',fog:'#162a32'},
+  {n:'Колыбель'          ,dim:2,d0:1750,d1:1e9 ,bg:'#3a1430',bg2:'#160614',fog:'#2c1026'}
 ];
 function oreUnlockText(lv){
   const list=ORES.filter(o=>o&&o.tier===lv&&(lv<=6?!o.dim:true));
@@ -142,6 +186,8 @@ const PICKS=[
   {lv:9,name:'Кирка IX: Серная'      ,cost:0,speed:8.50,hell:1},
   {lv:10,name:'Кирка X: Адская'      ,cost:0,speed:10.6,hell:1}
 ];
+/* название кирки уровня lv; кирки XI–XV (Кузница Зари) появятся позже — пока по номеру */
+function pickName(lv){const p=PICKS[lv-1];return p?p.name:'Кирка '+['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV'][lv];}
 const SWORDS=[
   {lv:1,name:'Кулак'      ,cost:0     ,dmg:8},
   {lv:2,name:'Кинжал'     ,cost:400   ,dmg:16},
