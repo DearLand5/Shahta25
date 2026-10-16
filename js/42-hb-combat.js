@@ -65,8 +65,15 @@ function hbStaggerTick(m,B,dt,R){
 }
 /* короткий «отдых» после тяжёлой атаки — окно для ответного удара */
 function hbRest(m,B,t){B.atk='rest';B.at=0;B.sub=0;B.restT=t;B.weak=Math.max(B.weak||0,t*0.9);m.tele=0;}
+/* отложенные действия боссов по игровому времени (раньше — setTimeout:
+   срабатывали даже на паузе и в замедлении) */
+const hbLaterQ=[];
+function hbLater(sec,fn){hbLaterQ.push({t:G.time+sec,fn});}
 function hbCombatTick(dt){
-  const H=hbFight();if(!H)return;const m=H.m;
+  if(hbLaterQ.length){const now=G.time,due=[];
+    for(let i=0;i<hbLaterQ.length;)if(now>=hbLaterQ[i].t)due.push(hbLaterQ.splice(i,1)[0]);else i++;
+    for(const q of due){try{q.fn();}catch(e){}}}
+  const H=hbFight();if(!H){hbLaterQ.length=0;return;}const m=H.m;
   if(m._dnT>0){m._dnT-=dt;if(m._dnT<=0&&m._dn>0){floatText(m.x+rnd(-10,10),m.y-m.h-10,fmt(Math.round(m._dn)),m.b&&m.b.weak>0?'#ffd040':'#ffe8c0');m._dn=0;}}
   if(m._dnPop>0)m._dnPop-=dt*4;
   if(m.flinch>0)m.flinch=Math.max(0,m.flinch-dt*5);

@@ -33,7 +33,7 @@ function rawSet(tx,ty,t){
   if(!c)return;
   c.tiles[((ty&15)<<4)|(tx&15)]=t;
 }
-function liqFree(tx,ty){return rawGet(tx,ty)===T_AIR&&!placedLadders.has(tx+','+ty);}
+function liqFree(tx,ty){return rawGet(tx,ty)===T_AIR&&!placedLadders.hasXY(tx,ty);}
 function liqSteam(x,y){
   for(let k=0;k<5;k++)spawnPart(x*TILE+16+rnd(-8,8),y*TILE+16,rnd(-14,14),rnd(-60,-20),0.9,'#cfd8e6',3,-20);
 }

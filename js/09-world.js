@@ -20,8 +20,22 @@ function getSafeZoneTile(wx,wy){
 }
 
 const chunks=new Map();
-{const _clr=chunks.clear.bind(chunks);chunks.clear=function(){_clr();if(typeof CC!=='undefined')CC.clear();};}
-const placedLadders=new Set();
+/* номер «версии» мира: растёт при любом изменении клеток (кэш источников света и т.п.) */
+let tileEpoch=0;
+/* последний запрошенный участок — getTile чаще всего спрашивает соседние клетки */
+let _gcK=-1,_gcC=null;
+{const _clr=chunks.clear.bind(chunks);chunks.clear=function(){_clr();_gcK=-1;_gcC=null;tileEpoch++;if(typeof CC!=='undefined')CC.clear();};}
+/* поставленные лестницы: ключи-строки «x,y» как раньше (так они лежат в сохранении),
+   плюс числовая копия — проверка клетки без склеивания строки на каждый вызов */
+class LadderSet extends Set{
+  constructor(){super();this.num=new Set();}
+  static nk(k){const i=k.indexOf(',');return (+k.slice(i+1))*65536+(+k.slice(0,i));}
+  add(k){super.add(k);if(this.num)this.num.add(LadderSet.nk(String(k)));return this;}
+  delete(k){const r=super.delete(k);if(r)this.num.delete(LadderSet.nk(String(k)));return r;}
+  clear(){super.clear();this.num.clear();}
+  hasXY(tx,ty){return this.num.size>0&&this.num.has(ty*65536+tx);}
+}
+const placedLadders=new LadderSet();
 /* ---------- БАРРИКАДЫ ---------- */
 const BARR=[
   {name:'Деревянная',  hp:60,  col:'#8a5a30'},
@@ -61,7 +75,7 @@ function canPlaceBarr(tx,ty){
   if(tx<1||tx>=MW-1||ty<1)return false;
   const t=getTile(tx,ty);
   if(t!==T_AIR&&!isLiq(t))return false;
-  if(placedLadders.has(tx+','+ty)||crateAtTile(tx,ty))return false;
+  if(placedLadders.hasXY(tx,ty)||crateAtTile(tx,ty))return false;
   const x0=tx*TILE+1,x1=tx*TILE+TILE-1,y0=ty*TILE+1,y1=ty*TILE+TILE-1;
   const pl=player.x-player.w/2,pr=player.x+player.w/2,pt=player.y-player.h,pb=player.y;
   if(x0<pr&&x1>pl&&y0<pb&&y1>pt)return false;

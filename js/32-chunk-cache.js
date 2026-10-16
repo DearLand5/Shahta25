@@ -8,7 +8,10 @@
    ============================================================ */
 const CC=new Map();
 const CC_MAX=14;
+/* холсты выброшенных участков: берём их повторно, а не заводим новые (каждый — несколько МБ) */
+const ccSpare=[];
 function ccMarkDirty(tx,ty){
+  tileEpoch++;
   if(CC.size===0)return;
   for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
     const x=tx+dx,y=ty+dy;if(y<0||x<0||x>=MW)continue;
@@ -53,10 +56,11 @@ function ccGet(cx,cy){
   let e=CC.get(k);
   const S=CHUNK*TILE;
   if(!e||e.sc!==sc){
-    const cv=e&&e.cv&&e.sc===sc?e.cv:document.createElement('canvas');
+    const cv=(e&&e.cv)||ccSpare.pop()||document.createElement('canvas');
     const px=Math.ceil(S*sc);
-    if(cv.width!==px){cv.width=px;cv.height=px;}
     const g=cv.getContext('2d');
+    /* чужой холст: сбрасываем и размер, и все настройки рисования, как у нового */
+    if(cv.width!==px||cv.height!==px){cv.width=px;cv.height=px;}else if(g.reset)g.reset();else cv.width=px;
     g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,px,px);
     g.setTransform(sc,0,0,sc,-cx*S*sc,-cy*S*sc);
     g.imageSmoothingEnabled=false;
@@ -78,7 +82,7 @@ function ccGet(cx,cy){
     }
   }
   CC.delete(k);CC.set(k,e);
-  while(CC.size>CC_MAX){const first=CC.keys().next().value;CC.delete(first);}
+  while(CC.size>CC_MAX){const first=CC.keys().next().value,old=CC.get(first);CC.delete(first);if(old&&old.cv&&ccSpare.length<3)ccSpare.push(old.cv);}
   return e;
 }
 function drawStaticCached(tx0,tx1,ty0,ty1,ox,oy){
@@ -115,6 +119,7 @@ function drawTileRun(g,x0,y,count,type){
 }
 
 let _lightSpr=null;
+const _lightSrc={k:'',L:[]};
 function lightSprite(){
   if(_lightSpr)return _lightSpr;
   const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');
@@ -168,45 +173,53 @@ function applyLighting(){
     const halfW=W/(2*sc),halfH=H/(2*sc);
     const tx0=Math.floor((G.cam.x-halfW)/TILE),tx1=Math.ceil((G.cam.x+halfW)/TILE);
     const ty0=Math.floor((G.cam.y-halfH)/TILE),ty1=Math.ceil((G.cam.y+halfH)/TILE);
-    let n=0,oreHoles=0;
-    for(let ty=ty0;ty<=ty1&&n<26;ty++){
-      for(let tx=tx0;tx<=tx1&&n<26;tx++){
-        const t=getTile(tx,ty);
-        let rad=0,a=0;
-        if(t===T_LAVA){rad=3.4;a=0.85;}
-        else if(t===T_HOT){rad=2.6;a=0.7;}
-        else if(t===T_VENT){rad=2.4;a=0.6;}
-        else{
-          const o=getOre(tx,ty);
-          if(o&&ORES[o].rar>=2&&(relicOn('eye')?oreHoles<22:(oreHoles<10&&((tx+ty)&1)))){rad=(relicOn('eye')?1.3:1.05)+ORES[o].rar*0.12;a=relicOn('eye')?0.5:0.32;oreHoles++;}
-        }
-        if(rad>0){
-          if(((tx*7+ty*13)&1)&&t===T_LAVA)continue;
-          hole((tx*TILE+16-G.cam.x)*sc+W/2,(ty*TILE+16-G.cam.y)*sc+H/2,rad*TILE*sc,a);n++;
-        }
-      }
-    }
-    /* фонари душ в галереях Катакомб рассеивают тьму */
-    if(G.dim===1&&ty1>=850&&ty0<1200){
-      for(let ty=Math.max(ty0,850);ty<=Math.min(ty1,1199);ty++){const c=catBand(ty);if(c.row!==1)continue;
-        for(let tx=Math.max(tx0,c.x0+11);tx<=Math.min(tx1,c.x1);tx++){if((tx-c.x0)%11!==0)continue;
-          if(getTile(tx,ty)!==T_AIR||getTile(tx,ty-1)===T_AIR)continue;const lx=((tx%12)+12)%12;if(lx>=3&&lx<=8&&hash2(Math.floor(tx/12),c.band,G.seed+50053)%3===0)continue;
-          hole((tx*TILE+16-G.cam.x)*sc+W/2,(ty*TILE+20-G.cam.y)*sc+H/2,3.2*TILE*sc,0.6);}}
-    }
-    {
-      const sl=structList(tx0,tx1,ty0,ty1);
-      for(const q of sl){
-        for(let r=0;r<q.th;r++){
-          const wy=q.py+r;if(wy<ty0||wy>ty1)continue;
-          for(let c=0;c<q.tw;c++){
-            const wx=q.px+c;if(wx<tx0||wx>tx1)continue;
-            const ch=q.st.tpl[r][c];
-            const rad=ch==='L'?3.8:ch==='F'?4.2:ch==='E'?3.6:ch==='V'?4.5:ch==='P'||ch==='M'?3.4:ch==='U'||ch==='J'?2.6:ch==='c'||ch==='m'||ch==='C'?2.2:0;
-            if(rad)hole((wx*TILE+16-G.cam.x)*sc+W/2,(wy*TILE+16-G.cam.y)*sc+H/2,rad*TILE*sc,0.85);
+    /* источники света в кадре (лава, руда, фонари, огни структур) пересчитываем только
+       когда камера сдвинулась на клетку или мир изменился, а не каждый кадр */
+    const LK=tx0+'|'+tx1+'|'+ty0+'|'+ty1+'|'+tileEpoch+'|'+G.dim+'|'+(relicOn('eye')?1:0);
+    if(LK!==_lightSrc.k){
+      const L=[];
+      let n=0,oreHoles=0;
+      for(let ty=ty0;ty<=ty1&&n<26;ty++){
+        for(let tx=tx0;tx<=tx1&&n<26;tx++){
+          const t=getTile(tx,ty);
+          let rad=0,a=0;
+          if(t===T_LAVA){rad=3.4;a=0.85;}
+          else if(t===T_HOT){rad=2.6;a=0.7;}
+          else if(t===T_VENT){rad=2.4;a=0.6;}
+          else{
+            const o=getOre(tx,ty);
+            if(o&&ORES[o].rar>=2&&(relicOn('eye')?oreHoles<22:(oreHoles<10&&((tx+ty)&1)))){rad=(relicOn('eye')?1.3:1.05)+ORES[o].rar*0.12;a=relicOn('eye')?0.5:0.32;oreHoles++;}
+          }
+          if(rad>0){
+            if(((tx*7+ty*13)&1)&&t===T_LAVA)continue;
+            L.push(tx*TILE+16,ty*TILE+16,rad,a);n++;
           }
         }
       }
+      /* фонари душ в галереях Катакомб рассеивают тьму */
+      if(G.dim===1&&ty1>=850&&ty0<1200){
+        for(let ty=Math.max(ty0,850);ty<=Math.min(ty1,1199);ty++){const c=catBand(ty);if(c.row!==1)continue;
+          for(let tx=Math.max(tx0,c.x0+11);tx<=Math.min(tx1,c.x1);tx++){if((tx-c.x0)%11!==0)continue;
+            if(getTile(tx,ty)!==T_AIR||getTile(tx,ty-1)===T_AIR)continue;const lx=((tx%12)+12)%12;if(lx>=3&&lx<=8&&hash2(Math.floor(tx/12),c.band,G.seed+50053)%3===0)continue;
+            L.push(tx*TILE+16,ty*TILE+20,3.2,0.6);}}
+      }
+      {
+        const sl=structList(tx0,tx1,ty0,ty1);
+        for(const q of sl){
+          for(let r=0;r<q.th;r++){
+            const wy=q.py+r;if(wy<ty0||wy>ty1)continue;
+            for(let c=0;c<q.tw;c++){
+              const wx=q.px+c;if(wx<tx0||wx>tx1)continue;
+              const ch=q.st.tpl[r][c];
+              const rad=ch==='L'?3.8:ch==='F'?4.2:ch==='E'?3.6:ch==='V'?4.5:ch==='P'||ch==='M'?3.4:ch==='U'||ch==='J'?2.6:ch==='c'||ch==='m'||ch==='C'?2.2:0;
+              if(rad)L.push(wx*TILE+16,wy*TILE+16,rad,0.85);
+            }
+          }
+        }
+      }
+      _lightSrc.k=LK;_lightSrc.L=L;
     }
+    {const L=_lightSrc.L;for(let i=0;i<L.length;i+=4)hole((L[i]-G.cam.x)*sc+W/2,(L[i+1]-G.cam.y)*sc+H/2,L[i+2]*TILE*sc,L[i+3]);}
     hbLightHoles(hole,W,H,sc);
     for(const m of mobs){
       if(m.def.light&&m.alive){hole((m.x-G.cam.x)*sc+W/2,(m.y-m.h*0.5-G.cam.y)*sc+H/2,m.def.light*TILE*sc,0.8);}

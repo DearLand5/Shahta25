@@ -234,7 +234,7 @@ function plArm(g,x,y,a1,k,sleeve,hand,lv,front){
 }
 function playerGroundY(){
   const tx=Math.floor(player.x/TILE),ty0=Math.floor((player.y-2)/TILE);
-  for(let ty=ty0;ty<ty0+8;ty++){if(ty<0)continue;if(isSolid(tx,ty)||(placedLadders&&placedLadders.has(tx+','+ty)&&ty>ty0))return Math.max(player.y,ty*TILE);}
+  for(let ty=ty0;ty<ty0+8;ty++){if(ty<0)continue;if(isSolid(tx,ty)||(placedLadders&&placedLadders.hasXY(tx,ty)&&ty>ty0))return Math.max(player.y,ty*TILE);}
   return player.y+999;
 }
 function drawPlayerSprite(g,x,y,st,anim,facing,opts){
@@ -373,6 +373,21 @@ function olLight(g,fn){
   if(OL.active&&g===OL.g){OL.defer.push({m:g.getTransform(),fn:fn,a:g.globalAlpha});return;}
   g.save();g.globalCompositeOperation='lighter';fn(g);g.restore();
 }
+/* черновики для обводки: свой для каждой фигуры в кадре и по размеру фигуры.
+   Раньше был один общий черновик, который вырастал до размера босса: браузер при каждом
+   повторном использовании копировал его целиком — обводка шахтёра стоила вдвое дороже.
+   Теперь каждый черновик используется не больше раза за кадр, и копий нет. */
+const OL_CLS=[128,192,256,384,512,768,1024],OL_POOL=new Map();
+function olPair(w,h){
+  const need=Math.max(w,h),S=OL_CLS.find(s=>s>=need)||Math.ceil(need/256)*256;
+  let A=OL_POOL.get(S);if(!A){A={n:0,ft:-1,list:[]};OL_POOL.set(S,A);}
+  if(A.ft!==G.time){A.ft=G.time;A.n=0;}
+  const i=A.n++%(S>=512?3:16);
+  let P=A.list[i];
+  if(!P){const cv=document.createElement('canvas'),scv=document.createElement('canvas');cv.width=cv.height=scv.width=scv.height=S;
+    P=A.list[i]={cv,g:cv.getContext('2d'),scv,sg:scv.getContext('2d')};}
+  return P;
+}
 const OL_OFF8=[[1,0],[-1,0],[0,1],[0,-1],[0.72,0.72],[-0.72,0.72],[0.72,-0.72],[-0.72,-0.72]],OL_OFF4=[[1,0.35],[-1,0.35],[0.35,1],[-0.35,-1]];
 function withOutline(g,cx,cy,rx,ry,col,th,fn){
   const SH=OL.active?null:OL.shade;if(!OL.active)OL.shade=null;
@@ -383,13 +398,13 @@ function withOutline(g,cx,cy,rx,ry,col,th,fn){
   const M=g.getTransform();
   if(th<0)th=clamp(-th*Math.hypot(M.a,M.b),1.1,3.6);
   let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
-  for(const [px,py] of [[cx-rx,cy-ry],[cx+rx,cy-ry],[cx-rx,cy+ry],[cx+rx,cy+ry]]){const X=M.a*px+M.c*py+M.e,Y=M.b*px+M.d*py+M.f;if(X<x0)x0=X;if(X>x1)x1=X;if(Y<y0)y0=Y;if(Y>y1)y1=Y;}
+  for(let q=0;q<4;q++){const px=q&1?cx+rx:cx-rx,py=q&2?cy+ry:cy-ry,X=M.a*px+M.c*py+M.e,Y=M.b*px+M.d*py+M.f;if(X<x0)x0=X;if(X>x1)x1=X;if(Y<y0)y0=Y;if(Y>y1)y1=Y;}
   const cw=g.canvas.width,ch=g.canvas.height,pad=Math.ceil(th)+2;
   x0=Math.floor(Math.max(-pad,x0-pad));y0=Math.floor(Math.max(-pad,y0-pad));x1=Math.ceil(Math.min(cw+pad,x1+pad));y1=Math.ceil(Math.min(ch+pad,y1+pad));
   const w=x1-x0,h=y1-y0;
   if(w<=2||h<=2)return;
   if(w*h>700*700){fn(g);return;}
-  if(OL.cv.width<w||OL.cv.height<h){const nw=Math.max(OL.cv.width,w),nh=Math.max(OL.cv.height,h);OL.cv.width=OL.scv.width=nw;OL.cv.height=OL.scv.height=nh;}
+  {const P=olPair(w,h);OL.cv=P.cv;OL.g=P.g;OL.scv=P.scv;OL.sg=P.sg;}
   const sg=OL.g;sg.setTransform(1,0,0,1,0,0);sg.globalAlpha=1;sg.globalCompositeOperation='source-over';sg.clearRect(0,0,w,h);
   sg.setTransform(M.a,M.b,M.c,M.d,M.e-x0,M.f-y0);sg.imageSmoothingEnabled=true;
   OL.active=true;OL.defer.length=0;

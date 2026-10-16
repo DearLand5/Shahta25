@@ -197,7 +197,7 @@ HB_AI.mother={
       case 'wave':{m.tele=Math.min(1,B.at/0.7);
         if(B.sub===0&&B.at>0.7){B.sub=1;m.tele=0;shake(10);SFX.boom();
           for(const s of [-1,1])hbWall(m.x+s*(m.w*0.5),R.floor,s*320,{h:52,dmg:D*0.7,col:'#c0142a',style:'blood',life:4,fx:{bleed:2},src:'кровавая волна'});
-          if(B.phase>=3)setTimeout(()=>{if(hbFight())for(const s of [-1,1])hbWall(m.x+s*(m.w*0.5),R.floor,s*300,{h:52,dmg:D*0.7,col:'#c0142a',style:'blood',life:4,src:'кровавая волна'});},700);}
+          if(B.phase>=3)hbLater(0.7,()=>{if(hbFight())for(const s of [-1,1])hbWall(m.x+s*(m.w*0.5),R.floor,s*300,{h:52,dmg:D*0.7,col:'#c0142a',style:'blood',life:4,src:'кровавая волна'});});}
         if(B.at>1.4)hbDone(B);break;}
       case 'flood':{m.tele=Math.min(1,B.at/0.8);B.open=1;
         /* кровь заливает пол — спасайся на верхних выступах */
@@ -357,7 +357,7 @@ HB_AI.emperor={
       case 'army':{hov(30);m.tele=Math.min(1,B.at/0.8);B.armor=0.4;hand=[{x:m.x-90,y:cy-70},{x:m.x+90,y:cy-70}];
         if(B.sub===0&&B.at>0.8){B.sub=1;m.tele=0;floatText(m.x,m.y-m.h-20,'Восстаньте!','#bfe8ff');
           for(const s of [-1,1]){const x=clamp(player.x+s*rnd(150,260),R.minX-m.w*0.4,R.maxX+m.w*0.4);hbPillar(x,R.floor-8,{warn:0.5,w:40,h:2.5*TILE,dmg:0,col:'#e8e0cc',style:'bone'});
-            setTimeout(()=>{if(hbFight()){const c=hbMinion('skelminion',x,hbFloorAt(x,R.floor-3*TILE));if(c)c.vy=-200;}},500);}}
+            hbLater(0.5,()=>{if(hbFight()){const c=hbMinion('skelminion',x,hbFloorAt(x,R.floor-3*TILE));if(c)c.vy=-200;}});}}
         if(B.at>1.6)hbDone(B);break;}
       case 'curse':{hov(40);m.tele=Math.min(1,B.at/0.6);hand=[{x:m.x-40,y:cy+20},{x:m.x+40,y:cy+20}];
         if(B.sub===0&&B.at>0.6){B.sub=1;m.tele=0;
@@ -561,7 +561,7 @@ HB_AI.archdemon={
           const sx=clamp(player.x+(Math.random()<0.5?-1:1)*rnd(220,320),R.minX,R.maxX),sy=id==='herald'||id==='emperor'?player.y-170:R.floor;
           hbFx.push({type:'shade',t:0,life:2.6,id,x:sx,y:sy,f:player.x<sx?-1:1});
           floatText(sx,sy-120,'Тень: '+hbById(id).name,hbById(id).col);SFX.portal();
-          setTimeout(()=>{if(!hbFight())return;HB_SHADE_ATK[id](sx,sy,D);},900);}
+          hbLater(0.9,()=>{if(!hbFight())return;HB_SHADE_ATK[id](sx,sy,D);});}
         if(B.at>2.0)hbDone(B);break;}
     }
     if(B.fly&&B.atk!=='dive'&&B.atk!=='trans')m.y=Math.min(m.y,R.floor-TILE);

@@ -209,6 +209,7 @@ const Music={
       o.connect(f);o.start(t);o.stop(t+dur+0.05);
     }
     f.connect(g);g.connect(Music.tg);
+    AU.ends.push(t+dur);                     /* музыка тоже в общем счёте голосов */
   },
   /* одиночная мягкая нота (бас, флейта) */
   soft(freq,t,dur,type,vol,att,rel,lp,vib){
@@ -221,7 +222,7 @@ const Music={
     g.gain.setValueAtTime(vol,t+Math.max(att+0.01,dur-rel));g.gain.linearRampToValueAtTime(0,t+dur);
     o.connect(f);f.connect(g);g.connect(Music.tg);
     if(vib)g.connect(Music.echo().inp);
-    o.start(t);o.stop(t+dur+0.05);
+    o.start(t);o.stop(t+dur+0.05);AU.ends.push(t+dur);
   },
   /* FM-нота: калимба / электропиано / шкатулка / стекло */
   fm(freq,t,dur,vol,ratio,index,send){
@@ -234,7 +235,7 @@ const Music={
     g.gain.exponentialRampToValueAtTime(0.0008,t+dur);g.gain.linearRampToValueAtTime(0,t+dur+0.02);
     car.connect(g);g.connect(Music.tg);
     if(send){const s=c.createGain();s.gain.value=send;g.connect(s);s.connect(Music.echo().inp);}
-    car.start(t);mod.start(t);car.stop(t+dur+0.05);mod.stop(t+dur+0.05);
+    car.start(t);mod.start(t);car.stop(t+dur+0.05);mod.stop(t+dur+0.05);AU.ends.push(t+dur);
   },
   note(inst,freq,t,dur,vol){
     switch(inst){
@@ -348,7 +349,7 @@ const Amb={
       setTimeout(()=>{n.stop();try{n.g.disconnect();}catch(e){}},2300);}
   },
   /* одно событие: короткий звук прямо в шину фона */
-  ev(fn){if(!Amb.node||!AU.ctx||AU.ctx.state!=='running')return;try{fn(AU.ctx,Amb.node.g,AU.ctx.currentTime+Math.random()*0.3);}catch(e){}},
+  ev(fn){if(!Amb.node||!AU.ctx||AU.ctx.state!=='running'||AU.busy())return;AU.ends.push(AU.ctx.currentTime+0.6);try{fn(AU.ctx,Amb.node.g,AU.ctx.currentTime+AU.LEAD+Math.random()*0.3);}catch(e){}},
   events(A){
     if(G.paused||document.hidden)return;
     const P=(p)=>Math.random()<p*0.4;
@@ -367,11 +368,11 @@ const Amb={
         o.type='sine';o.frequency.setValueAtTime(f0,tt);o.frequency.exponentialRampToValueAtTime(f0*1.9,tt+0.07);
         g.gain.setValueAtTime(0,tt);g.gain.linearRampToValueAtTime(0.045,tt+0.01);g.gain.exponentialRampToValueAtTime(0.0008,tt+0.12);
         o.connect(g);g.connect(out);o.start(tt);o.stop(tt+0.14);}});
-    if(A.crackle&&P(A.crackle*2))Amb.ev((c,out,t)=>{  /* треск углей */
-      for(let k=0;k<2+Math.floor(Math.random()*4);k++){const tt=t+k*rr(0.02,0.09),s=c.createBufferSource();s.buffer=AU.nbuf;
-        const f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=rr(2000,5000);f.Q.value=3;const g=c.createGain();
-        g.gain.setValueAtTime(rr(0.02,0.05),tt);g.gain.exponentialRampToValueAtTime(0.0008,tt+0.025);
-        s.connect(f);f.connect(g);g.connect(out);s.start(tt,Math.random()*0.8);s.stop(tt+0.04);}});
+    if(A.crackle&&P(A.crackle))Amb.ev((c,out,t)=>{    /* треск углей: мягкие тёплые щелчки, а не резкие — резкие звучали как сломанный динамик */
+      for(let k=0;k<1+Math.floor(Math.random()*3);k++){const tt=t+k*rr(0.05,0.14),s=c.createBufferSource();s.buffer=AU.nbuf;
+        const f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=rr(900,2200);f.Q.value=1.4;const g=c.createGain();
+        g.gain.setValueAtTime(0,tt);g.gain.linearRampToValueAtTime(rr(0.012,0.03),tt+0.003);g.gain.exponentialRampToValueAtTime(0.0008,tt+0.06);
+        s.connect(f);f.connect(g);g.connect(out);s.start(tt,Math.random()*0.8);s.stop(tt+0.08);}});
     if(A.chime&&P(A.chime))Amb.ev((c,out,t)=>{        /* хрустальный перезвон где-то вдали */
       const base=[1568,1760,2093,2349,2637][Math.floor(Math.random()*5)];
       for(let k=0;k<2;k++){const tt=t+k*rr(0.1,0.25),o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=base*(k?1.5:1);

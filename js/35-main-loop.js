@@ -2,7 +2,7 @@
 /* ============================================================
    MAIN LOOP
    ============================================================ */
-let lastTs=0,acc=0;
+let lastTs=0,acc=0,frameDue=0;
 let perfAcc=0,perfN=0,perfWin=0,perfGood=0;
 function adaptRenderScale(work,dt){
   if(document.hidden||dt>0.1||UI.modal||G.paused||(G.scene!=='mine'&&G.scene!=='lobby'))return;
@@ -20,8 +20,19 @@ function adaptRenderScale(work,dt){
   else perfGood=0;
 }
 let fpsAcc=0,fpsCount=0;
+/* автосохранение — в свободную минуту между кадрами, а не посреди кадра (не больше чем через 1,5 с) */
+let saveIdleQ=false;
+function saveIdle(){
+  if(saveIdleQ)return;saveIdleQ=true;
+  const run=()=>{saveIdleQ=false;try{if(G.scene==='mine'||G.scene==='lobby')saveGame();}catch(e){}};
+  if(window.requestIdleCallback)requestIdleCallback(run,{timeout:1500});else setTimeout(run,0);
+}
 function frame(ts){
   requestAnimationFrame(frame);
+  /* экраны 90/120/144 Гц: мир всё равно обновляется 60 раз в секунду, поэтому
+     лишние кадры показывали бы ту же картинку — пропускаем их (вдвое меньше работы) */
+  if(ts<frameDue-2.5)return;
+  frameDue=(ts-frameDue>50)?ts+1000/60:frameDue+1000/60;
   try{
     if(!lastTs)lastTs=ts;
     let dt=(ts-lastTs)/1000;
@@ -68,7 +79,7 @@ function frame(ts){
     }
     if(G.scene==='mine'||G.scene==='lobby'){
       G.saveTimer+=dt;
-      if(settings.autoSave!==false&&G.saveTimer>(settings.autoSaveInt||30)){G.saveTimer=0;saveGame();}
+      if(settings.autoSave!==false&&G.saveTimer>(settings.autoSaveInt||30)){G.saveTimer=0;saveIdle();}
       else if(settings.autoSave===false)G.saveTimer=0;
     }
   }catch(e){

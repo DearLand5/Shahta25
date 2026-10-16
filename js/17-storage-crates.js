@@ -63,7 +63,7 @@ function placeCrate(){
   cands.push([fx,fty],[fx,fty-1],[Math.floor(player.x/TILE),fty]);
   for(const [tx,ty] of cands){
     if(tx<1||tx>=MW-1||ty<2)continue;
-    if(getTile(tx,ty)!==T_AIR||getOre(tx,ty)||crateAtTile(tx,ty)||placedLadders.has(tx+','+ty))continue;
+    if(getTile(tx,ty)!==T_AIR||getOre(tx,ty)||crateAtTile(tx,ty)||placedLadders.hasXY(tx,ty))continue;
     if(!(isSolid(tx,ty+1)||crateAtTile(tx,ty+1)))continue;
     const c=L.shift();c.where='mine';c.x=tx;c.y=ty;worldCrates().push(c);
     burst(tx*TILE+16,ty*TILE+20,10,'#c89a60',110,2.6);SFX.place();vib(15);validateSelection();saveGame();

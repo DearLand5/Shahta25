@@ -211,6 +211,8 @@ function genChunk(cx,cy){
   return {tiles,ores,dmg,cx,cy};
 }
 function getChunk(cx,cy){
+  const nk=cx*8192+cy;
+  if(nk===_gcK)return _gcC;
   const k=ckey(cx,cy);
   let c=chunks.get(k);
   if(!c){
@@ -225,33 +227,34 @@ function getChunk(cx,cy){
       if(worst&&wd>10)chunks.delete(worst);
     }
   }
+  _gcK=nk;_gcC=c;
   return c;
 }
 function getTile(tx,ty){
   if(ty<0)return T_AIR;
   if(tx<0||tx>=MW)return T_BEDROCK;
-  if(placedLadders.has(tx+','+ty))return T_LADDER;
+  if(placedLadders.hasXY(tx,ty))return T_LADDER;
   const cx=Math.floor(tx/CHUNK),cy=Math.floor(ty/CHUNK);
   const c=getChunk(cx,cy);
   return c.tiles[(ty-cy*CHUNK)*CHUNK+(tx-cx*CHUNK)];
 }
 function getOre(tx,ty){
   if(ty<0||tx<0||tx>=MW)return 0;
-  if(placedLadders.has(tx+','+ty))return 0;
+  if(placedLadders.hasXY(tx,ty))return 0;
   const cx=Math.floor(tx/CHUNK),cy=Math.floor(ty/CHUNK);
   const c=getChunk(cx,cy);
   return c.ores[(ty-cy*CHUNK)*CHUNK+(tx-cx*CHUNK)];
 }
 function getDmg(tx,ty){
   if(ty<0||tx<0||tx>=MW)return 0;
-  if(placedLadders.has(tx+','+ty))return 0;
+  if(placedLadders.hasXY(tx,ty))return 0;
   const cx=Math.floor(tx/CHUNK),cy=Math.floor(ty/CHUNK);
   const c=getChunk(cx,cy);
   return c.dmg[(ty-cy*CHUNK)*CHUNK+(tx-cx*CHUNK)];
 }
 function setDmg(tx,ty,v){
   if(ty<0||tx<0||tx>=MW)return;
-  if(placedLadders.has(tx+','+ty))return;
+  if(placedLadders.hasXY(tx,ty))return;
   const cx=Math.floor(tx/CHUNK),cy=Math.floor(ty/CHUNK);
   const c=getChunk(cx,cy);
   c.dmg[(ty-cy*CHUNK)*CHUNK+(tx-cx*CHUNK)]=clamp(v,0,255);

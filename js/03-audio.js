@@ -5,14 +5,16 @@
 /* ============================================================
    АУДИО-ДВИЖОК
    Цепочка: голоса → шины (звуки / музыка) → мастер → мягкий
-   компрессор → мягкий ограничитель (tanh) → динамики.
-   Против хрипа: большой буфер (latencyHint 'playback'), лимит
-   одновременных голосов, один лёгкий тёплый ревербератор,
-   мягкое ограничение пиков вместо жёсткого цифрового клиппинга.
+   компрессор → ограничитель с запасом → динамики.
+   Против хрипа: большой буфер (latencyHint 'playback'), общий лимит
+   голосов (звуки + музыка + фон), один лёгкий ревербератор, запуск
+   звуков с небольшим запасом по времени (иначе начало звука
+   «проскакивает» и щёлкает) и ограничитель, который не срезает пики.
    ============================================================ */
+const AU_POST=1.1;   /* ×0.5 перед кривой: итоговое усиление ×0.55 — громкость как была до переделки */
 const AU={
   ctx:null,master:null,sfxBus:null,musicIn:null,musicBus:null,conv:null,sfxSend:null,musicSend:null,nbuf:null,
-  ready:false,volume:0.6,musicVol:0.5,active:0,MAXV:30,ends:[],
+  ready:false,volume:0.6,musicVol:0.5,active:0,MAXV:38,ends:[],LEAD:0.012,
   init(){
     if(AU.ready)return;
     try{
@@ -21,21 +23,28 @@ const AU={
       let c;
       try{c=new AC({latencyHint:'playback'});}catch(e){c=new AC();}
       AU.ctx=c;
-      /* ограничитель-предохранитель: до 0.7 сигнал проходит без изменений
-         (никакой окраски/хрипа), выше — плавно поджимается к 1.0.
+      /* ограничитель-предохранитель с запасом: принимает сигнал до ×2.
+         До 0.8 звук проходит без изменений, выше — плавно поджимается к 1.0.
+         Раньше кривая кончалась на 1.0: всё громче просто срезалось —
+         это и был хрип в бою (замер: до 230 срезов в секунду).
          Без передискретизации: она сильно грузила аудиопоток телефона. */
       const clip=c.createWaveShaper();
-      const n=4096,curve=new Float32Array(n);
+      const n=4096,curve=new Float32Array(n),K=0.8;
       for(let i=0;i<n;i++){
-        const x=i/(n-1)*2-1,ax=Math.abs(x);
-        curve[i]=ax<0.7?x:Math.sign(x)*(0.7+0.3*Math.tanh((ax-0.7)/0.3));
+        const x=(i/(n-1)*2-1)*2,ax=Math.abs(x);
+        curve[i]=ax<K?x:Math.sign(x)*(K+(1-K)*Math.tanh((ax-K)/(1-K)));
       }
       clip.curve=curve;clip.oversample='none';
       clip.connect(c.destination);
+      const half=c.createGain();half.gain.value=0.5;half.connect(clip);   /* кривая рассчитана на вход ×2 */
+      /* компрессор мягче и медленнее: при атаке 6 мс он «сжимал» звук прямо
+         внутри одного колебания баса и искажал удары и взрывы.
+         Он сам добавляет громкость (≈+4 дБ), поэтому отдельного усиления больше нет. */
       const comp=c.createDynamicsCompressor();
-      comp.threshold.value=-10;comp.knee.value=8;comp.ratio.value=3;comp.attack.value=0.006;comp.release.value=0.2;
-      const post=c.createGain();post.gain.value=1.35;
-      comp.connect(post);post.connect(clip);
+      comp.threshold.value=-16;comp.knee.value=12;comp.ratio.value=4;comp.attack.value=0.012;comp.release.value=0.25;
+      const post=c.createGain();post.gain.value=AU_POST;
+      comp.connect(post);post.connect(half);
+      AU.LEAD=clamp((c.baseLatency||0.01)*0.6,0.008,0.03);
       AU.master=c.createGain();AU.master.gain.value=1;AU.master.connect(comp);
       AU.sfxBus=c.createGain();AU.sfxBus.gain.value=AU.volume;AU.sfxBus.connect(AU.master);
       AU.musicBus=c.createGain();AU.musicBus.gain.value=AU.musicVol;AU.musicBus.connect(AU.master);
@@ -91,7 +100,7 @@ const AU={
     if(!AU.ok())return;
     try{
       o=o||{};
-      const c=AU.ctx,t0=c.currentTime+(delay||0);
+      const c=AU.ctx,t0=c.currentTime+AU.LEAD+(delay||0);
       const os=c.createOscillator();os.type=type||'sine';
       os.frequency.setValueAtTime(Math.max(20,freq),t0);
       if(o.to){
@@ -123,7 +132,7 @@ const AU={
     if(!AU.ok()||!AU.nbuf)return;
     try{
       o=o||{};
-      const c=AU.ctx,t0=c.currentTime+(delay||0);
+      const c=AU.ctx,t0=c.currentTime+AU.LEAD+(delay||0);
       const src=c.createBufferSource();src.buffer=AU.nbuf;src.loop=true;
       const f=c.createBiquadFilter();f.type=o.type||'bandpass';
       f.frequency.setValueAtTime(Math.max(40,freq),t0);
@@ -149,7 +158,7 @@ const AU={
     if(!AU.ok())return;
     try{
       o=o||{};
-      const c=AU.ctx,t0=c.currentTime+(delay||0);
+      const c=AU.ctx,t0=c.currentTime+AU.LEAD+(delay||0);
       const car=c.createOscillator(),mod=c.createOscillator(),mg=c.createGain(),g=c.createGain();
       car.type='sine';mod.type='sine';
       car.frequency.value=freq;mod.frequency.value=freq*(o.ratio||3.5);
