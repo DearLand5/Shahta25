@@ -72,6 +72,40 @@ const Music={
       mel:{inst:'flute',vol:0.055,dens:0.24,oct:1,dur:2.4},
       bass:{vol:0.08,every:2},drone:{note:23,vol:0.045,lp:160},
       amb:{wind:0.02,wlp:300,rumble:0.05,bubble:0.14,crackle:0.05}},
+    /* Лиловые небеса: музыкальная шкатулка — светло и тихо, но в ладу прячется
+       чужая нота (пониженная ступень), а глубже мелодия редеет и звучит неуютнее */
+    llobby:{root:53,scale:[0,2,4,7,9],prog:[0,5,3,4],barsPer:2,bpm:64,
+      pad:{type:'triangle',lp:1400,vol:0.045,att:2.4,rel:3,det:5,shimmer:true},
+      mel:{inst:'glass',vol:0.075,dens:0.4,oct:2,dur:1.8},
+      bell:{prob:0.14,vol:0.03,oct:2},bass:{vol:0.06,every:2}},
+    b10:{root:52,scale:[0,2,4,7,9],prog:[0,3,5,4],barsPer:2,bpm:60,
+      pad:{type:'triangle',lp:1300,vol:0.05,att:2.6,rel:3,det:5},
+      mel:{inst:'kalimba',vol:0.085,dens:0.38,oct:1,dur:1.5},
+      bell:{prob:0.1,vol:0.03,oct:2},bass:{vol:0.06,every:2},amb:{wind:0.012,wlp:700,chime:0.03}},
+    b11:{root:54,scale:[0,2,4,6,7,9,11],prog:[0,4,2,5],barsPer:2,bpm:56,
+      pad:{type:'sine',lp:1700,vol:0.05,att:3,rel:3.6,det:4,shimmer:true},
+      mel:{inst:'glass',vol:0.07,dens:0.32,oct:2,dur:2.6},
+      bell:{prob:0.14,vol:0.032,oct:2},bass:{vol:0.05,every:2},amb:{wind:0.01,wlp:1100,chime:0.07,drip:0.05}},
+    b12:{root:50,scale:[0,2,4,5,7,9,10],prog:[0,5,3,4],barsPer:2,bpm:58,
+      pad:{type:'triangle',lp:1000,vol:0.05,att:2.8,rel:3.4,det:6},
+      mel:{inst:'epiano',vol:0.07,dens:0.34,oct:1,dur:1.8},
+      bass:{vol:0.07,every:2},drone:{note:38,vol:0.025,lp:260},amb:{wind:0.012,wlp:380,drip:0.1,bubble:0.05}},
+    b13:{root:51,scale:[0,2,4,5,7,8,11],prog:[0,4,5,1],barsPer:2,bpm:54,
+      pad:{type:'triangle',lp:1100,vol:0.045,att:3,rel:3.6,det:7},
+      mel:{inst:'box',vol:0.06,dens:0.3,oct:2,dur:1.6},
+      bell:{prob:0.12,vol:0.028,oct:2},bass:{vol:0.06,every:2},amb:{wind:0.014,wlp:520,chime:0.04}},
+    b14:{root:47,scale:[0,2,3,5,7,8,11],prog:[0,5,3,4],barsPer:2,bpm:50,
+      pad:{type:'sawtooth',lp:700,vol:0.04,att:3.2,rel:4,det:8},
+      mel:{inst:'flute',vol:0.06,dens:0.26,oct:1,dur:2.2},
+      bass:{vol:0.07,every:2},drone:{note:35,vol:0.03,lp:220},amb:{wind:0.018,wlp:340,drip:0.04}},
+    b15:{root:49,scale:[0,2,4,7,9],prog:[0,3,1,4],barsPer:2,bpm:46,
+      pad:{type:'sine',lp:1200,vol:0.055,att:4,rel:5,det:4,wide:true,shimmer:true},
+      mel:{inst:'glass',vol:0.06,dens:0.22,oct:2,dur:3.2},
+      bass:{vol:0.05,every:4},drone:{note:37,vol:0.03,lp:300},amb:{wind:0.016,wlp:600,drip:0.12,bubble:0.06}},
+    b16:{root:45,scale:[0,1,4,5,7,8,11],prog:[0,1,5,4],barsPer:2,bpm:44,
+      pad:{type:'triangle',lp:560,vol:0.05,att:3.6,rel:4.4,det:7},
+      mel:{inst:'box',vol:0.05,dens:0.2,oct:2,dur:2.4},
+      bass:{vol:0.07,every:4},drone:{note:33,vol:0.04,lp:180},amb:{wind:0.022,wlp:300,rumble:0.02,drip:0.05}},
     /* бой с боссом: напряжённо, но без грохота — мягкая перкуссия и пульс баса */
     boss:{root:38,scale:[0,2,3,5,7,8,10],prog:[0,5,6,4],barsPer:1,bpm:84,
       pad:{type:'sawtooth',lp:700,vol:0.045,att:0.8,rel:1.2,det:9},
@@ -122,7 +156,7 @@ const Music={
     if(G.scene==='mine'&&G.hb&&G.hb.m&&G.hb.m.alive){const ph=(G.hb.m.b&&G.hb.m.b.phase)||1;return G.hb.id==='archdemon'?(ph<=2?'hbf':'hb3'):'hb'+Math.min(3,ph);}
     if(G.scene==='mine'&&G.arenaFight){const b=bossAlive();return 'boss'+((b&&b.b&&b.b.phase)||1);}
     if(G.scene==='mine')return 'b'+biomeAt(Math.max(0,player.y)/TILE);
-    return G.dim===1?'hlobby':'lobby';
+    return G.dim===1?'hlobby':G.dim===2?'llobby':'lobby';
   },
   update(){
     if(!AU.ready||!AU.ctx||AU.ctx.state!=='running')return;

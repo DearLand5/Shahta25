@@ -20,6 +20,7 @@ function isNaturalAir(wx,wy){
   const s=G.seed,d=wy;
   if(wy<4)return false;
   if(G.dim===1)return hellAir(wx,wy);
+  if(G.dim===2)return lilacAir(wx,wy);
   let air=(vnoise(wx/13,wy/13,s+11)>0.612)||(vnoise(wx/6.2,wy/6.2,s+23)>0.742);
   if(d>=7&&d<190&&Math.abs(vnoise(wx/11,wy/11,s+301)-0.5)<0.012)air=true;
   if(d>=1000&&Math.abs(vnoise((wx+wy*0.6)/12,(wy-wx*0.4)/12,s+606)-0.5)<0.017)air=true;
@@ -209,10 +210,10 @@ function structInterior(tx0,tx1,ty0,ty1){
 }
 function structOre(wx,wy,d,kind){
   let cand;
-  if(G.dim===1){
-    cand=ORES.filter(o=>o&&o.dim===1&&d>=o.dmin-(kind==='g'?90:0)&&d<=o.dmax).map(o=>o.id);
+  if(G.dim>=1){
+    cand=ORES.filter(o=>o&&o.dim===G.dim&&d>=o.dmin-(kind==='g'?90:0)&&d<=o.dmax).map(o=>o.id);
     if(kind==='i')cand=cand.slice(0,Math.max(1,Math.ceil(cand.length/2)));else cand=cand.slice(-2);
-    if(!cand.length)cand=[18];
+    if(!cand.length){if(G.dim!==1)return 0;cand=[18];}
     return cand[Math.floor(rnd2(wx,wy,G.seed+9777)*cand.length)];
   }
   if(kind==='g'){

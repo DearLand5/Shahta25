@@ -133,7 +133,7 @@ function applyLighting(){
   const depth=Math.max(0,player.y)/TILE;
   /* Чем глубже, тем темнее, а собственный свет игрока без факелов сужается:
      на дне без прокачанных факелов почти ничего не видно. */
-  let dark=G.dim===1?clamp(0.2+depth/900,0.2,0.94):clamp(0.16+depth/650,0.16,0.975);
+  let dark=G.dim===1?clamp(0.2+depth/900,0.2,0.94):G.dim===2?clamp(0.12+depth/1300,0.12,0.9):clamp(0.16+depth/650,0.16,0.975);
   /* глубокие биомы Ада темнее: Топи, Катакомбы, Ядро (в Ядре немного светлее из-за лавы) */
   const hbi=G.dim===1?biomeAt(depth):-1;
   if(hbi===7)dark=Math.max(dark,0.95);else if(hbi===8)dark=Math.max(dark,0.978);else if(hbi>=9)dark=Math.max(dark,0.968);
@@ -358,6 +358,7 @@ function drawLobbyScenery(g,cam,t,W,sc,glowList){
 }
 function renderLobby(){
   if(G.dim===1){renderHellLobby();return;}
+  if(G.dim===2){renderLilacLobby();return;}
   const W=view.W,H=view.H,sc=view.scale;
   const t=performance.now()/1000;
   const cam=G.cam;

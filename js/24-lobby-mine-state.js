@@ -2,7 +2,7 @@
 /* ============================================================
    LOBBY
    ============================================================ */
-const LOBBY_WS=[2800,4760];
+const LOBBY_WS=[2800,4760,4300];
 let LOBBY_W=LOBBY_WS[0];
 const BUILDINGS=[
   [
@@ -21,6 +21,15 @@ const BUILDINGS=[
     {id:'altar',  name:'Алтарь душ',    x:3260,tip:'Благословения, ритуалы, реликвии'},
     {id:'board',  name:'Доска контрактов',x:3840,tip:'Задания с наградой'},
     {id:'portal3',name:'Врата Пустоты', x:4420,tip:'Портал обратно на Землю надежды'}
+  ],
+  [ /* Лиловые небеса — Деревня Вечного Рассвета (46-lilac-lobby) */
+    {id:'lmine',   name:'Шахта Рассвета',   x:360 ,tip:'Спуститься под цветущие луга'},
+    {id:'lfurnace',name:'Перегонный куб',   x:940 ,tip:'Перегонка руды в слитки и эссенции'},
+    {id:'lforge',  name:'Кузница Зари',     x:1520,tip:'Снаряжение и предметы'},
+    {id:'lmarket', name:'Цветочная ярмарка',x:2100,tip:'Продать руду'},
+    {id:'lcasino', name:'Карусель удачи',   x:2680,tip:'Игры на удачу'},
+    {id:'lboard',  name:'Доска пропавших',  x:3260,tip:'Задания жителей'},
+    {id:'lportal', name:'Лиловые врата',    x:3840,tip:'Дорога домой'}
   ]
 ];
 let buildings=BUILDINGS[0];
@@ -66,6 +75,7 @@ function nearestBuilding(){
 }
 function openBuilding(b){
   vib(12);SFX.ui();
+  if(G.dim===2){lilacOpen(b);return;}
   if(b.id==='mine')enterMine();
   else if(b.id==='market')UI.market();
   else if(b.id==='forge')UI.forge();

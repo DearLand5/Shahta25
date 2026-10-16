@@ -95,8 +95,15 @@ const ORES=[
  {id:36,dim:1,name:'Звезда преисподней',rar:6,dmin:1300,dmax:99999,hp:900,price:90000,tier:10,color:'#fff0a0',glow:'#ffffff',vein:0.925}
 ];
 
-const DIM_NAMES=['Земля надежды','Ад'];
-/* 0-4 — Земля надежды, 5-9 — Ад */
+const DIM_NAMES=['Земля надежды','Ад','Лиловые небеса'];
+/* Измерения: первый биом в BIOMES, сколько их, глубина шкалы и её подпись */
+const DIMS=[
+  {b0:0 ,bn:5,maxD:2016,mark:'2000'},
+  {b0:5 ,bn:5,maxD:1600,mark:'1600'},
+  {b0:10,bn:7,maxD:2100,mark:'2100'}
+];
+function dimInfo(d){return DIMS[d==null?((typeof G!=='undefined'&&G.dim)||0):d]||DIMS[0];}
+/* 0-4 — Земля надежды, 5-9 — Ад, 10-16 — Лиловые небеса */
 const BIOMES=[
   {n:'Рыхлая почва'      ,dim:0,d0:0   ,d1:50  ,bg:'#241a12',bg2:'#100b07',fog:'#1a120b'},
   {n:'Каменный пояс'     ,dim:0,d0:50  ,d1:200 ,bg:'#15181f',bg2:'#080a0e',fog:'#0e1116'},
@@ -107,14 +114,21 @@ const BIOMES=[
   {n:'Кровавые копи'     ,dim:1,d0:250 ,d1:550 ,bg:'#2c0a12',bg2:'#120406',fog:'#20070c'},
   {n:'Серные топи'       ,dim:1,d0:550 ,d1:850 ,bg:'#26230c',bg2:'#100e04',fog:'#1c1a08'},
   {n:'Костяные катакомбы',dim:1,d0:850 ,d1:1200,bg:'#1c1c26',bg2:'#08080e',fog:'#15151e'},
-  {n:'Огненное ядро'     ,dim:1,d0:1200,d1:1e9 ,bg:'#300a04',bg2:'#140302',fog:'#240704'}
+  {n:'Огненное ядро'     ,dim:1,d0:1200,d1:1e9 ,bg:'#300a04',bg2:'#140302',fog:'#240704'},
+  {n:'Цветущие луга'     ,dim:2,d0:0   ,d1:250 ,bg:'#2a1e34',bg2:'#120c18',fog:'#21182a'},
+  {n:'Хрустальный сад'   ,dim:2,d0:250 ,d1:550 ,bg:'#1a1e36',bg2:'#0a0c1a',fog:'#151a2e'},
+  {n:'Медовые соты'      ,dim:2,d0:550 ,d1:850 ,bg:'#30220e',bg2:'#140e04',fog:'#261a0a'},
+  {n:'Кукольный городок' ,dim:2,d0:850 ,d1:1150,bg:'#2c1a28',bg2:'#120a10',fog:'#22141f'},
+  {n:'Розарий'           ,dim:2,d0:1150,d1:1450,bg:'#2e0e1e',bg2:'#12040a',fog:'#240a17'},
+  {n:'Зеркальные топи'   ,dim:2,d0:1450,d1:1750,bg:'#14262c',bg2:'#060e12',fog:'#0f1e24'},
+  {n:'Колыбель'          ,dim:2,d0:1750,d1:1e9 ,bg:'#2a0e22',bg2:'#10040c',fog:'#200a1a'}
 ];
 function oreUnlockText(lv){
   const list=ORES.filter(o=>o&&o.tier===lv&&(lv<=6?!o.dim:true));
   if(!list.length)return '';
   return list.map(o=>o.name).join(', ')+' (с глубины '+Math.min(...list.map(o=>o.dmin))+' м)';
 }
-function biomeAt(d){const off=(typeof G!=='undefined'&&G.dim===1)?5:0;for(let i=off+4;i>=off;i--)if(d>=BIOMES[i].d0)return i;return off;}
+function biomeAt(d){const D=dimInfo();for(let i=D.b0+D.bn-1;i>=D.b0;i--)if(d>=BIOMES[i].d0)return i;return D.b0;}
 
 const PICKS=[
   {lv:1,name:'Кирка I'   ,cost:0     ,speed:1.00},

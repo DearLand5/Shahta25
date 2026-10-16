@@ -207,6 +207,7 @@ function updateVentsAndHot(dt){
   const _pd=player.y/TILE;
   if(G.dim===0&&(_pd<500||_pd>1060))return;
   if(G.dim===1&&!(_pd<260||(_pd>540&&_pd<860)))return;
+  if(G.dim===2)return;
   const tx0=Math.floor(player.x/TILE)-3,ty0=Math.floor(player.y/TILE)-8;
   for(let tx=tx0;tx<=tx0+6;tx++){
     for(let ty=ty0;ty<=ty0+9;ty++){

@@ -218,10 +218,10 @@ const UI={
       <div class="menuStats">
         <span><i class="mi coin"></i>${fmt(player.money)}</span><span><i class="mi depth"></i>рекорд ${fmt(player.maxDepth||0)} м</span>
         ${(player.souls||0)>0||G.dim===1?`<span><i class="mi soul"></i>${fmt(player.souls||0)}</span>`:''}
-        <span><i class="mi ${G.dim===1?'hell':'earth'}"></i>${dimName}</span>
+        <span><i class="mi ${['earth','hell','lilac'][G.dim]||'earth'}"></i>${dimName}</span>
         ${player.prog&&player.prog.key?'<span><i class="mi key"></i>Ключ</span>':''}${player.prog&&player.prog.heart&&!player.prog.hellUnlocked?'<span><i class="mi heart"></i>Сердце</span>':''}
       </div></div><div class="menuActions">
-      <button class="btn big" id="mPlay">${canResumeMine()?'Продолжить':'Играть'}<small>${canResumeMine()?'Шахта · '+Math.max(0,Math.floor(G.resumeMine.y/TILE))+' м':G.dim===1?'Лобби Ада':'Лобби · '+dimName}</small></button>
+      <button class="btn big" id="mPlay">${canResumeMine()?'Продолжить':'Играть'}<small>${canResumeMine()?'Шахта · '+Math.max(0,Math.floor(G.resumeMine.y/TILE))+' м':G.dim===1?'Лобби Ада':G.dim===2?'Деревня Вечного Рассвета':'Лобби · '+dimName}</small></button>
       <button class="btn alt sessBtn" id="mSess">${ICONS.users}<span>Сессия: <b>${escHtml(Prof.cur().name)}</b></span><small>${Prof.data.list.length>1?'всего '+Prof.data.list.length:'создать ещё'}</small></button>
       <div class="menuGrid">
         <button class="btn alt" id="mSet">${ICONS.gear}Настройки</button>
@@ -244,7 +244,7 @@ const UI={
   sessions(){
     const P=Prof.data,cur=P.cur;
     const rows=P.list.map(p=>{const inf=Save.info(Prof.keyOf(p.id)),me=p.id===cur;
-      const ds=inf?`<i class="mi coin"></i> ${fmt(inf.money)} · рекорд ${fmt(inf.depth)} м · ${inf.dim===1?'Ад':'Земля надежды'}${inf.souls?' · 👻 '+fmt(inf.souls):''}<br>сохранено: ${agoText(inf.ts)}`:'новая игра';
+      const ds=inf?`<i class="mi coin"></i> ${fmt(inf.money)} · рекорд ${fmt(inf.depth)} м · ${DIM_NAMES[inf.dim]||DIM_NAMES[0]}${inf.souls?' · 👻 '+fmt(inf.souls):''}<br>сохранено: ${agoText(inf.ts)}`:'новая игра';
       return `<div class="item sessRow${me?' on':''}">
         <div class="ico" style="background:${me?'rgba(255,200,110,.18)':'rgba(255,255,255,.06)'};display:flex;align-items:center;justify-content:center">${ICONS.users}</div>
         <div class="txt"><div class="nm">${escHtml(p.name)}${me?' <span class="tiny" style="color:#ffd08a">· сейчас</span>':''}</div><div class="ds">${ds}</div></div>
@@ -725,9 +725,10 @@ const UI={
   },
 
   bestiary(tab){
-    tab=tab||(G.dim===1?'hell':'earth');
+    const lilMobs=MOBDEFS.some(d=>d.dim===2);
+    tab=tab||(G.dim===1?'hell':G.dim===2&&lilMobs?'lilac':'earth');
     const B=player.bestiary||{},S=player.stats||{};
-    const TABS=[['earth','🌍 Земля'],['hell','🔥 Ад'],['stats','📊 Статистика']];
+    const TABS=[['earth','🌍 Земля'],['hell','🔥 Ад'],...(lilMobs?[['lilac','🌸 Небеса']]:[]),['stats','📊 Статистика']];
     let body='';
     if(tab==='stats'){
       const row=(a,b)=>`<div class="row spread"><span class="muted">${a}</span><b>${b}</b></div>`;
@@ -737,12 +738,12 @@ const UI={
         ${row('Врагов повержено',fmt(S.kills||0))}${row('Видов в бестиарии',known+' / '+totalKinds)}${row('Охотничьих трофеев 🏆',trophies)}
         ${row('Блоков выкопано',fmt(S.blocks||0))}${row('Руды добыто',fmt(S.ore||0))}${row('Сундуков открыто',fmt((S.chests||0)+(S.bigChests||0)))}
         ${row('Событий Пустошей пережито',fmt(S.events||0))}${row('Смертей',fmt(S.deaths||0))}
-        ${row('Глубочайшая точка Земли',Math.floor(player.maxDepth||0)+' м')}${row('Глубочайшая точка Ада',(player.prog.hellDepth||0)+' м')}
+        ${row('Глубочайшая точка Земли',Math.floor(player.maxDepth||0)+' м')}${row('Глубочайшая точка Ада',(player.prog.hellDepth||0)+' м')}${player.prog.lilacDepth?row('Глубочайшая точка Лиловых небес',player.prog.lilacDepth+' м'):''}
         ${row('Пожиратель Бездны',player.prog.key?'повержен ✅':'жив')}
         ${row('Владыки Преисподней',HB_MINIS.filter(b=>hbKills(b.id)).length+' / 5')}${row('Архидемон Инферналис',hbKills('archdemon')?'повержен ✅':'жив')}
       </div><p class="tiny muted" style="text-align:center">Убей ${TROPHY_N} врагов одного вида — получишь трофей: +15% урона по ним навсегда.</p>`;
     }else{
-      const dim=tab==='hell'?1:0;
+      const dim=tab==='hell'?1:tab==='lilac'?2:0;
       const list=MOBDEFS.filter(d=>(d.dim||0)===dim&&d.id!=='spirit'&&d.mech!=='hbecho');
       body='<div class="scroll"><div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
       for(const d of list){const n=B[d.id]||0,k=n>0;
@@ -1191,7 +1192,7 @@ const UI={
     dd.querySelector('#poBack').onclick=()=>{SFX.uiBack();UI.close();};
   },
   anchor(a){
-    const tg=anchorTargets(a),off=G.dim===1?5:0;
+    const tg=anchorTargets(a);
     const lbl=(d,dir)=>{if(!d)return '';
       if(d.exit)return 'К выходу из шахты';
       if(d.arena)return 'На арену Пожирателя ('+ARENA_FLOOR+' м)';
@@ -1868,6 +1869,8 @@ const UI={
     tab=tab||UI._chTab||'quick';UI._chTab=tab;
     const tog=(key,label)=>`<button class="btn small ${cheats[key]?'cheatOn':''}" data-cheat="${key}">${label}</button>`;
     const act=(a,label,cls)=>`<button class="btn small ${cls||''}" data-action="${a}">${label}</button>`;
+    /* переход между измерениями: кнопки на все, кроме текущего */
+    const dimBtns=(suf)=>[['🌄 На Землю',0],['🔥 В Ад',1],['🌸 В Лиловые небеса',2]].filter(q=>q[1]!==G.dim).map(q=>act('dim'+q[1],q[0]+suf)).join('');
     const step=(key,label,min,max,val)=>`<div class="setting"><span>${label}</span><span class="row" style="width:auto;gap:6px;flex-wrap:nowrap">
       <button class="btn small alt" data-step="${key}:-1" style="min-width:40px">−</button><b style="min-width:42px;text-align:center">${val}</b>
       <button class="btn small alt" data-step="${key}:1" style="min-width:40px">+</button></span></div>`;
@@ -1884,7 +1887,7 @@ const UI={
       </div>
       <div class="sect">Быстрый переход</div>
       <div class="cheatGrid">
-        ${act('dimSwap',G.dim===0?'🔥 В Ад (без катсцены)':'🌄 На Землю (без катсцены)')}${act('cutscene','🎬 Показать катсцену')}
+        ${dimBtns(' (без катсцены)')}${act('cutscene','🎬 Показать катсцену')}
         ${G.dim===0?act('tpArena','☠ На арену босса')+act('tpHeart','💜 К Сердцу Бездны'):act('tpCore','🌋 В Огненное ядро')+act('heat0','🧊 Жар = 0')}
         ${act('heal','❤️ Полное HP')}${act('killMobs','💀 Убить всех мобов')}
       </div>`;
@@ -1923,11 +1926,11 @@ const UI={
         <div class="sect">Наборы</div>
         <div class="cheatGrid">${act('maxAll','⭐ Земля на максимум')}${act('presetHellMax','👑 Ад на максимум')}${act('resetUpgrades','↩️ Сброс улучшений')}</div>`;
     }else if(tab==='world'){
-      const off=G.dim===1?5:0;
+      const off=dimInfo().b0;
       body=`<div class="sect" style="border:none;margin-top:0;padding-top:0">Измерение: ${DIM_NAMES[G.dim]}</div>
-        <div class="cheatGrid">${act('dimSwap',G.dim===0?'🔥 Переключить на Ад':'🌄 Переключить на Землю')}${act('toLobby','🏠 В лобби')}</div>
+        <div class="cheatGrid">${dimBtns('')}${act('toLobby','🏠 В лобби')}</div>
         <div class="sect">Телепорт по биомам</div>
-        <div class="cheatGrid">${[0,1,2,3,4].map(b=>act('tpB'+(off+b),'⬇ '+BIOMES[off+b].n+' ('+BIOMES[off+b].d0+' м)')).join('')}</div>
+        <div class="cheatGrid">${Array.from({length:dimInfo().bn},(_,b)=>act('tpB'+(off+b),'⬇ '+BIOMES[off+b].n+' ('+BIOMES[off+b].d0+' м)')).join('')}</div>
         <div class="row" style="gap:6px;margin-top:8px">
           <input type="number" id="tpDepth" class="cheatInput" placeholder="Глубина, м" style="flex:1;min-width:0">
           <button class="btn small" id="tpBtn">ТП</button>
@@ -2003,7 +2006,7 @@ const UI={
         const a=btn.getAttribute('data-action');
         SFX.ui();
         if(a.startsWith('hb')&&hbCheat(a))return;
-        if(a.startsWith('tpB')){const bi=+a.slice(3);const B=BIOMES[bi];if((B.dim||0)!==G.dim)switchDimension(B.dim);teleportToDepth(B.d0+(bi%5===0?20:12));UI.clear();return;}
+        if(a.startsWith('tpB')){const bi=+a.slice(3);const B=BIOMES[bi];if((B.dim||0)!==G.dim)switchDimension(B.dim||0);teleportToDepth(B.d0+(bi===dimInfo().b0?20:12));UI.clear();return;}
         switch(a){
           case 'heal': player.hp=player.maxHp;player.heat=0; UI.toast('❤️ HP восстановлено'); break;
           case 'maxhp': player.maxHp+=1000; player.hp=player.maxHp; UI.toast('+1000 макс HP'); break;
@@ -2045,6 +2048,7 @@ const UI={
           case 'contractsDone': ensureContracts();for(const c of player.contracts.list){c.have=c.need;c.ready=true;} UI.toast('📜 Контракты выполнены — забери на Доске'); break;
           case 'mask': player.gasMask=!player.gasMask; UI.toast('😷 Противогаз: '+(player.gasMask?'есть':'нет')); break;
           case 'dimSwap': switchDimension(G.dim===0?1:0); UI.toast('Измерение: '+DIM_NAMES[G.dim]); UI.clear(); return;
+          case 'dim0': case 'dim1': case 'dim2': switchDimension(+a.slice(3)); UI.toast('Измерение: '+DIM_NAMES[G.dim]); UI.clear(); return;
           case 'cutscene': startCutscene(G.dim===0?1:0); return;
           case 'toLobby': if(G.scene==='mine')exitMine();UI.clear();return;
           case 'tpArena': if(G.dim!==0)switchDimension(0); teleportToDepth(ARENA_FLOOR-1); UI.clear(); return;
@@ -2374,9 +2378,10 @@ function drawHUD(){
     const jbr=getBtnRect('joy'),jTop=(jbr.x<W*0.4)?jbr.y-jbr.r-18:H*0.7;
     const bx=12,bw=8,by=Math.max(H*0.2,G.dim===1?84:62),bh=Math.max(50,Math.min(H*0.42,jTop-by-6));
     hudPlate(bx-3,by-3,bw+6,bh+6);
-    const maxD=G.dim===1?1600:2016;
-    const cols=['#7a5a34','#6a7180','#5a4aa0','#a0442a','#3a2a6a','#6a5a52','#8a2030','#a09a2a','#b8b8c8','#e04a10'];
-    for(let i=(G.dim===1?5:0);i<(G.dim===1?10:5);i++){
+    const DI=dimInfo(),maxD=DI.maxD;
+    const cols=['#7a5a34','#6a7180','#5a4aa0','#a0442a','#3a2a6a','#6a5a52','#8a2030','#a09a2a','#b8b8c8','#e04a10',
+      '#c98ad8','#7ab8e8','#e8b040','#d87aa8','#c0304a','#5ab8b0','#9a3a7a'];
+    for(let i=DI.b0;i<DI.b0+DI.bn;i++){
       const b=BIOMES[i];
       const y0=by+bh*(clamp(b.d0,0,maxD)/maxD);
       const y1=by+bh*(clamp(b.d1,0,maxD)/maxD);
@@ -2389,7 +2394,7 @@ function drawHUD(){
     ctx.fillStyle='rgba(230,217,196,.8)';ctx.font='700 9.5px '+HUDF;ctx.textAlign='left';
     ctx.shadowColor='rgba(0,0,0,.9)';ctx.shadowBlur=2;
     ctx.fillText('0',bx+bw+6,by+8);
-    ctx.fillText(G.dim===1?'1600':'2000',bx+bw+6,by+bh);ctx.shadowBlur=0;
+    ctx.fillText(DI.mark,bx+bw+6,by+bh);ctx.shadowBlur=0;
     if(G.dim===0){const ay=by+bh*(ARENA_Y0/maxD);ctx.fillStyle=G.wf.bossDead?'#5ab8ff':'#ff5aff';ctx.fillRect(bx-3,ay-1,bw+6,3);ctx.font='12px system-ui';ctx.fillText(G.wf.bossDead?'✔':'☠',bx+bw+4,ay+4);}
   }
   {const boss=G.scene==='mine'&&!G.bossCut?bossAlive():null;

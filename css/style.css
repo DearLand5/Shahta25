@@ -339,6 +339,7 @@ input[type=range],.sliderRow input[type=range]{accent-color:var(--brass);}
 .mi.soul{background:radial-gradient(circle at 40% 35%,#e8fbff,#7fd8ff 60%,#2a6a98);}
 .mi.earth{background:radial-gradient(circle at 40% 35%,#c8f0a0,#5d8a3a 55%,#2e4a1a);}
 .mi.hell{background:radial-gradient(circle at 40% 35%,#ffe0a0,#ff6a2a 55%,#8a1a08);}
+.mi.lilac{background:radial-gradient(circle at 40% 35%,#ffe8ff,#c58bff 55%,#5a2a8a);}
 .mi.key{border-radius:2px;transform:rotate(45deg);background:linear-gradient(135deg,#ffe9a8,#c8862f);}
 .mi.heart{transform:rotate(45deg);border-radius:2px;background:linear-gradient(135deg,#e0b0ff,#8a3ad0);}
 .mi.inl{width:.82em;height:.82em;flex:0 0 .82em;vertical-align:-.08em;margin:0 .12em;}

@@ -179,11 +179,15 @@ function packWorldData(){
     seed:G.seed,oreEpoch:G.oreEpoch||0,chests:Array.from(openedChests),
     placed:Array.from(placedLadders),
     barr:Array.from(barricades,([k,b])=>[k,b.lvl,Math.round(b.hp)]),
-    tileMods:tileModsArr,dug:dugArr,wf:JSON.parse(JSON.stringify(G.wf||{}))
+    tileMods:tileModsArr,dug:dugArr,wf:JSON.parse(JSON.stringify(G.wf||{})),
+    ...(G.dim===2?{gv:LILAC_GV}:{})
   };
 }
+/* версия генератора Лиловых небес: мир, выкопанный старым генератором, создаётся заново */
+const LILAC_GV=1;
 function applyWorldData(d){
   d=d||{};
+  if(G.dim===2&&d.gv!==LILAC_GV)d={};
   G.seed=(typeof d.seed==='number')?(d.seed|0):Math.floor(Math.random()*100000);
   G.oreEpoch=(typeof d.oreEpoch==='number')?(d.oreEpoch|0):0;
   G.wf=(d.wf&&typeof d.wf==='object')?d.wf:{};
@@ -271,7 +275,7 @@ function buildSaveData(){
 function applySaveData(d){
   if(!d||typeof d!=='object')return false;
   try{
-    G.dim=(d.dim===1)?1:0;
+    G.dim=(d.dim===1||d.dim===2)?d.dim:0;
     for(const k in DIMWORLD)delete DIMWORLD[k];
     if(d.dims&&typeof d.dims==='object'){for(const k in d.dims){if(+k!==G.dim&&d.dims[k])DIMWORLD[k]=d.dims[k];}}
     buildings=BUILDINGS[G.dim];LOBBY_W=LOBBY_WS[G.dim];
@@ -360,7 +364,7 @@ function applySaveData(d){
     applyWorldData(d);
 
     if(typeof d.lobbyX==='number')lobbyPlayer.x=clamp(d.lobbyX,60,LOBBY_W-60);
-    G.resumeMine=(d.mine&&typeof d.mine.x==='number'&&typeof d.mine.y==='number'&&d.mine.dim===G.dim)?{x:d.mine.x,y:d.mine.y,dim:d.mine.dim,live:false}:null;
+    G.resumeMine=(d.mine&&typeof d.mine.x==='number'&&typeof d.mine.y==='number'&&d.mine.dim===G.dim&&!(G.dim===2&&d.gv!==LILAC_GV))?{x:d.mine.x,y:d.mine.y,dim:d.mine.dim,live:false}:null;
     return true;
   }catch(e){return false;}
 }

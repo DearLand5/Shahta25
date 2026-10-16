@@ -120,7 +120,7 @@ function genHellTileAt(wx,wy){
   let o=0;
   for(let oi=ORES.length-1;oi>=18;oi--){
     const or=ORES[oi];
-    if(d<or.dmin||d>or.dmax)continue;
+    if(or.dim!==1||d<or.dmin||d>or.dmax)continue;
     const v=vnoise(wx/3.4+or.id*17.3,wy/3.4+or.id*29.7,s+or.id*997+(G.oreEpoch||0)*7919);
     if(v>getOreThreshold(or)){o=or.id;break;}
   }

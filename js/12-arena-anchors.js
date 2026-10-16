@@ -45,10 +45,10 @@ function anchorList(){
   const key=G.seed+':'+G.dim;
   if(key===_anKey)return _anList;
   _anKey=key;_anList=[];
-  const off=G.dim===1?5:0;
-  for(let b=0;b<5;b++){
+  const DI=dimInfo(),off=DI.b0,last=DI.bn-1;
+  for(let b=0;b<DI.bn;b++){
     const B=BIOMES[off+b];
-    const y0=B.d0+14,y1=(b===4?(G.dim===0?1940:1800):B.d1-12);
+    const y0=B.d0+14,y1=(b===last?(G.dim===0?1940:G.dim===1?1800:2050):B.d1-12);
     for(let k=0;k<3;k++){
       const h=hash2(b*7+k,G.dim*13+3,G.seed+8181);
       const span=Math.max(10,(y1-y0)/3);
@@ -88,6 +88,7 @@ function genTileAt(wx,wy){
   if(G.dim===1){const hb=hbTile(wx,wy);if(hb)return hb;}
   {const at=anchorTile(wx,wy);if(at!==-1)return {t:at,o:0};}
   if(G.dim===1)return genHellTileAt(wx,wy);
+  if(G.dim===2)return genLilacTileAt(wx,wy);
   if(wy>=ARENA_Y0-12){const at=arenaTile(wx,wy);if(at!==-1)return {t:at,o:0};}
   if(wy>=HEART_D0-8&&wy<=HEART_D1+8){const hz=heartTile(wx,wy);if(hz!==-1)return {t:hz,o:0};}
   const s=G.seed;

@@ -162,7 +162,7 @@ function drawHellBackdrop(g,W,H,cam,bi,T,shift){
 }
 function drawBackdrop(g,W,H,cam,depth,bi,B){
   let c1=B.bg,c2=B.bg2,fog=B.fog;
-  const nb=(bi%5!==4)?BIOMES[bi+1]:null;
+  const nb=(BIOMES[bi+1]&&BIOMES[bi+1].dim===B.dim)?BIOMES[bi+1]:null;
   if(nb){const left=B.d1-depth;if(left<25){const t=1-left/25;c1=mixHex(B.bg,nb.bg,t);c2=mixHex(B.bg2,nb.bg2,t);fog=mixHex(B.fog,nb.fog,t);}}
   const bg=g.createLinearGradient(0,0,0,H);
   bg.addColorStop(0,c1);bg.addColorStop(1,c2);
