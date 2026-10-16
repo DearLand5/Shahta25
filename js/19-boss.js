@@ -197,7 +197,7 @@ function bossUpdate(m,dt,dx,dy,dist){
   }
   if(m.invuln>0)m.invuln-=dt;
   if(G.bossPhaseFlash>0)G.bossPhaseFlash-=dt*1.5;
-  const rage=B.phase===3?1.35:B.phase===2?1.12:1;
+  const rage=(B.phase===3?1.35:B.phase===2?1.12:1)*(B.enr?1.3:1);
   B.at+=dt*rage;
   m.facing=dx>=0?1:-1;
   const minX=6*TILE,maxX=(MW-6)*TILE,minY=(ARENA_Y0+5)*TILE,maxY=(ARENA_FLOOR-4)*TILE;
@@ -218,6 +218,7 @@ function bossUpdate(m,dt,dx,dy,dist){
       if(Math.random()<0.5)spawnPart(m.x+rnd(-60,60),cy+rnd(-60,60),rnd(-40,40),rnd(-40,40),0.6,B.phase===3?'#ff6a6a':'#ff8aff',3,0);
       if(B.at>2.4){B.atk='idle';B.at=0;}
       break;
+    case 'ult':bfBossUlt(m,B,dt,bfEarthR());break;   /* коронный удар (44-bossfight) */
     case 'idle':
       hover(def.spd*rage);
       if(B.at>(B.queue&&B.queue.length?0.12:Math.max(B.phase>=3?0.38:B.phase>=2?0.5:0.65,B.next-0.45*B.phase)))bossPick(m,B);

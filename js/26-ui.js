@@ -2326,6 +2326,7 @@ function drawHUD(){
     grd.addColorStop(0,low?'#ff7a6a':'#ff6a5a');grd.addColorStop(1,low?'#b8201a':'#c8302a');
     ctx.fillStyle=grd;roundRect(ctx,bx0,top+5,Math.max(12,bw0*hpF),12,6);ctx.fill();
     ctx.fillStyle='rgba(255,255,255,.22)';ctx.fillRect(bx0+5,top+6,Math.max(2,bw0*hpF-10),2);}
+  bfDrawHpExtra(bx0+2,top+6,bw0-4,10);               /* рана и лечение в бою с боссом */
   ctx.fillStyle='#fff';ctx.font='700 10.5px '+HUDF;ctx.textAlign='center';
   ctx.shadowColor='rgba(0,0,0,.8)';ctx.shadowBlur=2;ctx.fillText(Math.ceil(player.hp)+' / '+player.maxHp,bx0+bw0/2,top+15);ctx.shadowBlur=0;
   if(G.dim===1&&G.scene==='mine'){
@@ -2619,6 +2620,7 @@ function drawTouchControls(){
     if(medk){
       ctx.fillRect(sb.x-gs*0.28,sb.y+so-gs*1.0,gs*0.56,gs*2.0);
       ctx.fillRect(sb.x-gs*1.0,sb.y+so-gs*0.28,gs*2.0,gs*0.56);
+      bfCdPie(sb.x,sb.y+so,sb.r);
     }else if(gunk){
       ctx.beginPath();
       ctx.rect(sb.x-gs*1.1,sb.y+so-gs*0.55,gs*1.9,gs*0.55);ctx.fill();

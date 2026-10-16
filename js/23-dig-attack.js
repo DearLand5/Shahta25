@@ -161,7 +161,9 @@ function damageMob(m,dmg,kb,src){
   if((def.boss||def.hp>=1500||def.w>=44)&&player.perks&&player.perks.slayer)dmg=Math.round(dmg*(1+0.1*player.perks.slayer));
   if(m.eShield){m.eShieldT=(m.eShieldT||0);if(G.time>m.eShieldT){dmg=Math.round(dmg*0.35);floatText(m.x,m.y-m.h-16,'щит','#9ad8ff');}}
   if(def.hb)dmg=Math.max(1,Math.round(dmg*hbDmgMul(m)));
+  if(def.boss)dmg=Math.max(1,Math.round(dmg*bfDmgMul(m)));     /* окна ×2, вне окон ×0.7 */
   m.hp-=dmg;m.hurt=0.24;SFX.mobHit(def);
+  if(def.boss)bfOnBossDamage(m,dmg);
   if(settings.quality!=='low'){const hd=Math.sign(m.x-player.x)||1,hx=m.x-hd*m.w*0.3,hy=m.y-m.h*0.55;
     for(let k=0;k<5;k++){const a=(hd>0?0:Math.PI)+rnd(-0.9,0.9);spawnPart(hx,hy,Math.cos(a)*rnd(220,420),Math.sin(a)*rnd(220,420)-60,rnd(0.12,0.25),k%2?'#fff6d0':'#ffc060',rnd(1.6,2.6),600);}
     if(dmg>=m.maxHp*0.12)shockRings.push({x:hx,y:hy,r:4,max:26,t:0.2,col:'#ffe8b0'});}if(m.eShield&&G.time>(m.eShieldT||0)&&Math.random()<0.15)m.eShieldT=G.time+3;

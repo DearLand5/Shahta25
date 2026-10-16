@@ -34,15 +34,16 @@ function hbById(id){return HB_ALL.find(b=>b.id===id)||null;}
 
 /* ---------- боссы как мобы (бой ведёт свой ИИ, mech:'hboss') ---------- */
 /* hp и урон потом умножаются правкой баланса (×1.15 и ×1.3, как у всех боссов).
-   Подобрано ботом-бойцом (без уворотов, стреляет и бьёт постоянно) на рекомендуемом снаряжении HB_REC:
-   мини-боссы ~60–70 с боя и ~30–40 с до гибели без аптечек; Владыка Магмы ~85 с; Архидемон ~145 с. */
+   Подобрано честным ботом-бойцом (смертен, 8 аптечек, уворачивается от коронных ударов, но в 25% случаев
+   прозёвывает их и не уворачивается от обычных атак) на рекомендуемом снаряжении HB_REC:
+   мини-боссы — 2–3 победы из 4, Владыка Магмы ~1 из 4, Архидемон — бот гибнет на 8–15% здоровья босса. */
 const HB_DEFS={
-  herald:  {name:'Пепельный Вестник',  hp:26000,  dmg:215, spd:150,w:64, h:88, fly:true, light:4,c1:'#7a6a64',c2:'#2a1e1c',phases:3},
+  herald:  {name:'Пепельный Вестник',  hp:26000,  dmg:185, spd:150,w:64, h:88, fly:true, light:4,c1:'#7a6a64',c2:'#2a1e1c',phases:3},
   mother:  {name:'Мать Плоти',         hp:80000,  dmg:190,spd:60, w:120,h:120,fly:true, light:3,c1:'#a8283a',c2:'#4a0a14',phases:3},
-  toadking:{name:'Король Топей',       hp:100000,  dmg:185,spd:90, w:132,h:96, fly:true, light:3,c1:'#7a8a2a',c2:'#3a4210',phases:3},
-  emperor: {name:'Костяной Император', hp:126000,  dmg:270,spd:120,w:72, h:112,fly:true, light:4,c1:'#e8e0cc',c2:'#3a3048',phases:3},
-  warden:  {name:'Владыка Магмы',      hp:300000, dmg:250,spd:70, w:150,h:170,fly:true, light:6,c1:'#3a2620',c2:'#ff7a1a',phases:3},
-  archdemon:{name:'Архидемон Инферналис',hp:420000,dmg:310,spd:140,w:220,h:220,fly:true,light:8,c1:'#3a1418',c2:'#ff5a1a',phases:4}
+  toadking:{name:'Король Топей',       hp:88000,  dmg:140,spd:90, w:132,h:96, fly:true, light:3,c1:'#7a8a2a',c2:'#3a4210',phases:3},
+  emperor: {name:'Костяной Император', hp:126000,  dmg:245,spd:120,w:72, h:112,fly:true, light:4,c1:'#e8e0cc',c2:'#3a3048',phases:3},
+  warden:  {name:'Владыка Магмы',      hp:240000, dmg:175,spd:70, w:150,h:170,fly:true, light:6,c1:'#3a2620',c2:'#ff7a1a',phases:3},
+  archdemon:{name:'Архидемон Инферналис',hp:265000,dmg:225,spd:140,w:220,h:220,fly:true,light:8,c1:'#3a1418',c2:'#ff5a1a',phases:4}
 };
 for(const id in HB_DEFS){const D=HB_DEFS[id];
   MOBDEFS.push({id:'hb_'+id,dim:1,name:D.name,shape:'hb_'+id,boss:true,hb:id,d0:99999,d1:1e9,hp:D.hp,dmg:D.dmg,spd:D.spd,aggro:3000,

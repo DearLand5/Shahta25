@@ -30,7 +30,7 @@ function hbGround(m,dt,R){
   m.onGround=false;
   if(m.y>=fl&&m.vy>=0){m.y=fl;m.vy=0;m.onGround=true;}
 }
-function hbIdleTime(B,base){return Math.max(0.28,base-(B.phase-1)*0.18)*(B.queue&&B.queue.length?0.25:1);}
+function hbIdleTime(B,base){return Math.max(0.28,base-(B.phase-1)*0.18)*(B.queue&&B.queue.length?0.25:1)*(B.enr?0.6:1);}
 function hbPick(m,B,A){
   if(B.queue&&B.queue.length){const a=B.queue.shift();B.last2=B.last;B.last=a;B.atk=a;B.at=0;B.sub=0;return;}
   const pool=A.pool(B);
@@ -79,7 +79,8 @@ function hbBossUpdate(m,dt,dx,dy,dist){
   {const mv=Math.abs(player.x-(B.px===undefined?player.x:B.px))+Math.abs(player.y-(B.py===undefined?player.y:B.py));B.px=player.x;B.py=player.y;
     B.stillT=mv<1.2*dt*60?(B.stillT||0)+dt:Math.max(0,(B.stillT||0)-dt*2);}
   if(!(B.sideT>0)){B.sideT=rnd(3,5.5)/B.rage;B.side=Math.random()<0.5?-1:1;}else B.sideT-=dt;
-  if(B.stagT>0||B.atk==='rest'||B.atk==='stagger')hbStaggerTick(m,B,dt,R);
+  if(B.atk==='ult')bfBossUlt(m,B,dt,R);             /* коронный удар (44-bossfight) */
+  else if(B.stagT>0||B.atk==='rest'||B.atk==='stagger')hbStaggerTick(m,B,dt,R);
   else A.tick(m,B,dt,R,dx,dy,dist);
   m.x=clamp(m.x,R.minX,R.maxX);
   if(m.y-m.h<R.top){m.y=R.top+m.h;if(m.vy<0)m.vy=0;}

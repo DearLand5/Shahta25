@@ -757,6 +757,7 @@ function renderMine(dt){
   drawClouds(ctx);
   drawBossFx(ctx);
   drawHbFx(ctx);
+  bfDrawWorld(ctx);
   drawHz(ctx);
   drawHellFx(ctx);
   drawFxLists(ctx);

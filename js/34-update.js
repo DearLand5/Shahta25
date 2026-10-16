@@ -152,7 +152,7 @@ function update(dt){
       player.onGround = false;
       SFX.jump();
     } else if(inWaterP||inLavaP){
-      player.vy = inLavaP?-200:-290;SFX.jump();
+      player.vy = inLavaP?(bfOn()?-360:-200):-290;SFX.jump();   /* в святилище кладку не прокопать — из лавы надо уметь выпрыгнуть */
     } else if(onLadder){
       player.vy = -340;player.ladderCd = 0.35;SFX.jump();
     }
@@ -183,6 +183,7 @@ function update(dt){
       if(l>pm.w*0.5+18){player.vx=ax/l*player.pull.str;player.vy=ay/l*player.pull.str*0.85;}else player.pull=null;
       player.peakY=player.y;}
   }
+  bfDashMove(dt);                                   /* рывок с неуязвимостью */
   const wasGround=player.wasGround,vyPre=player.vy;
   player.onGround=false;
   moveX(player,player.vx*dt);
@@ -244,7 +245,7 @@ function update(dt){
   updateBeams(dt);
   updateClouds(dt);
   updateArena(dt);
-  hbUpdate(dt);hbCombatTick(dt);
+  hbUpdate(dt);hbCombatTick(dt);bfTick(dt);
   checkHeartPickup();
   updateHell(dt);
   updateHellBlocks(dt);

@@ -170,6 +170,8 @@ function hurtPlayer(dmg,src,fx){
   if(HAZ_PCT[src]&&!(src==='метеор'&&G.dim!==1))dmg+=player.maxHp*HAZ_PCT[src]*(G.dim===1?1:0.6);
   if(!env&&src!=='падение'&&src!=='своя бомба'&&src!=='чит')dmg*=hellThreat();
   if(ashEv&&ashEv.id==='bloodmoon'&&G.dim===1)dmg*=1.25;
+  if(player.dashI>0&&!env){if(!player._dodgeT||G.time-player._dodgeT>0.4){player._dodgeT=G.time;floatText(player.x,player.y-player.h-30,'Уклон!','#cfe8ff');}return;}
+  if(G.bf&&G.bf.enr&&!env)dmg*=1.3;                 /* босс в ярости */
   if(player.hurtCd>0)return;
   /* дух-хранитель поглощает один удар раз в 25 секунд */
   for(const o of mobs){
@@ -186,6 +188,7 @@ function hurtPlayer(dmg,src,fx){
   const d=Math.max(1,Math.round(dmg*keep));
   if(window.__dmgLog)window.__dmgLog[src]=(window.__dmgLog[src]||0)+d;
   player.hp-=d;
+  bfOnHurt(d,env);
   player.hurtCd=G.dim===1?[0.7,0.7,0.7,0.7,0.7,0.65,0.6,0.55,0.5,0.5][clamp(biomeAt(Math.max(0,player.y)/TILE),0,9)]:0.7;player.lastHurtT=G.time;
   if(fx){for(const k in fx)player.fx[k]=Math.max(player.fx[k]||0,fx[k]);}
   shake(4);SFX.hurt();vib(28);
@@ -254,7 +257,7 @@ function getShootItems(){
   const a=[];
   if(player.grappleUnlocked)a.push({id:'grapple',icon:'🪝',name:'Пушка-крюк',count:player.grappleAmmo,
     desc:'Тап — направление, «Стрелять» — выстрел. Джойстик: качаться, вверх/вниз по верёвке. Прыжок — слезть.'});
-  if(player.potions>0)a.push({id:'medkit',icon:'🧪',name:'Аптечка',count:player.potions,
+  if(player.potions>0)a.push({id:'medkit',icon:'🧪',name:'Аптечка',count:medkitAvail(),
     desc:'Каждое нажатие «Стрелять» восстанавливает 30% здоровья.'});
   if((player.hitems&&player.hitems.beacons)>0)a.push({id:'beacon',icon:'📡',name:'Рудный маяк',count:player.hitems.beacons,desc:'Продаёт весь рюкзак прямо из шахты по 75% рыночной цены.'});
   if((player.hitems&&player.hitems.scrolls)>0)a.push({id:'scroll',icon:'📜',name:'Свиток возврата',count:player.hitems.scrolls,desc:'Мгновенный возврат в лобби, рюкзак сохраняется.'});
@@ -344,6 +347,7 @@ function fireGun(g,holdRepeat){
 }
 function useMedkit(){
   if(player.potions<=0){floatText(player.x,player.y-64,'Нет аптечек','#ff8a8a');SFX.uiBack();return;}
+  if(bfOn()){bfMedkit();return;}                   /* бой с боссом: пояс, лечение за 2 с, перерыв 6 с */
   if(player.hp>=player.maxHp-0.5){floatText(player.x,player.y-64,'Здоровье полное','#9be8ff');SFX.uiBack();return;}
   if((player.potionCd||0)>0)return;
   player.potions--;

@@ -63,7 +63,7 @@ UI.hbSummon=function(b){
             :`<p class="muted">Нужна <b>${M.n}</b>. Её можно создать в Алтаре душ во вкладке «Призыв».</p>`}
       <div class="chk ${have?'':'no'}">${M.ic} ${M.n}<b>${have} шт.</b></div>
       <div class="chk">${trophy?trophy.ic+' Трофей: '+trophy.n:'🗝 Ключ Лиловых небес'}<b>${k?'побед: '+k:'ещё не побеждён'}</b></div>
-      ${hbRecHtml(b)}
+      ${hbRecHtml(b)}${bfRulesHtml()}
       <p class="tiny" style="margin:8px 0 2px">${k?'Повторная победа даёт меньше душ и монет, но трофей выпадает всегда.':'Если погибнешь или уйдёшь из шахты, печать вернётся.'}</p>
     </div>
     ${have?'<button class="btn" id="hbGo">Пробудить</button>':''}
@@ -308,7 +308,6 @@ function hbMinion(id,x,y){const d=MOBDEFS.find(q=>q.id===id);if(!d||mobs.length>
 /* множитель урона по боссу: уязвимые моменты, броня */
 function hbDmgMul(m){
   const B=m.b||{};let k=1;
-  if(B.weak>0)k*=1.6;
   if(B.armor>0)k*=0.35;
   if(m.def.hb==='warden'&&B.phase>=3)k*=1.25;
   return k;

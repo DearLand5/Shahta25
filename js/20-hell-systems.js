@@ -801,7 +801,7 @@ function minimapBuild(r){
   MM.x0=x0;MM.y0=y0;MM.n=n;
 }
 function drawMinimap(){
-  if(!settings.minimap||G.scene!=='mine'||hbFight())return;   /* в бою с Владыкой арена закрыта — карта не нужна */
+  if(!settings.minimap||G.scene!=='mine'||hbFight()||(G.arenaFight&&bossAlive()))return;   /* в бою с боссом арена закрыта — карта не нужна, а место нужно табличкам */
   const r=minimapRect();
   MM.t-=1/60;
   if(MM.t<=0||MM.n!==r.n||Math.abs(Math.floor(player.x/TILE)-(MM.x0+(r.n>>1)))>3||Math.abs(Math.floor(player.y/TILE)-(MM.y0+(r.n>>1)))>3){MM.t=0.45;minimapBuild(r);}
@@ -876,7 +876,7 @@ function drawMinimap(){
   g.restore();
 }
 function minimapHit(x,y){
-  if(!settings.minimap||G.scene!=='mine')return false;
+  if(!settings.minimap||G.scene!=='mine'||hbFight()||(G.arenaFight&&bossAlive()))return false;   /* скрытая карта не ловит касания */
   const r=minimapRect();
   if(x>=r.x-4&&x<=r.x+r.s+4&&y>=r.y-4&&y<=r.y+r.s+4){MM.big=!MM.big;MM.t=0;SFX.ui();return true;}
   if(MM.big){MM.big=false;return true;}

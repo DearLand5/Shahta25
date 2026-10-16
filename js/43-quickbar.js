@@ -40,7 +40,7 @@ function qsMeta(code){
     case 'drill':n=player.drillBought?player.drills:0;icon='🛠️';name='Бур';break;
     case 'sorter':n=botUnits().filter(u=>!u.placed).length;icon='🤖';name='Робот-кладовщик';break;
     case 'grapple':n=player.grappleUnlocked?player.grappleAmmo:0;icon='🪝';name='Пушка-крюк';break;
-    case 'medkit':n=player.potions;icon='🧪';name='Аптечка';break;
+    case 'medkit':n=medkitAvail();icon='🧪';name='Аптечка';break;
     case 'beacon':n=h.beacons||0;icon='📡';name='Рудный маяк';break;
     case 'scroll':n=h.scrolls||0;icon='📜';name='Свиток возврата';break;
     case 'ice':n=player.icePotions||0;icon='🧊';name='Ледяное зелье';break;
@@ -195,6 +195,7 @@ function drawQuickBar(){
     }
     ctrlDisc(s.x,s.y+(fl>0.4?2:0),s.r,fl>0.05,'iron',warn?'red':on?'green':undefined);
     qsIcon(s.x,s.y+(fl>0.4?2:0),s.r,m.icon,ok?1:0.35);
+    if(m.id==='medkit')bfCdPie(s.x,s.y,s.r);
     ctrlCount(s.x,s.y+1,s.r,m.n,ok);
     qsBadge(s.x-s.r*0.74,s.y-s.r*0.74,String(i+1));
     if(fl>0){ctx.globalAlpha=s.a*fl;ctx.strokeStyle='#fff0c0';ctx.lineWidth=3;ctx.beginPath();ctx.arc(s.x,s.y,s.r*(1+0.4*(1-fl)),0,TAU);ctx.stroke();}
