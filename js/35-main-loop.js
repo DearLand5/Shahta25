@@ -56,9 +56,9 @@ function frame(ts){
       else if(G.scene==='cutscene')renderCutscene(dt);
 
       if(G.scene==='lobby'||G.scene==='mine'){
-        drawTouchControls();
-        drawHUD();
-        drawMinimap();
+        {const hh=hudHidden();if(hh!==G._hh){G._hh=hh;document.body.classList.toggle('cutscene',hh);}}
+        if(hudHidden())drawCutOverlay();
+        else{drawTouchControls();drawHUD();drawMinimap();}
       }
       adaptRenderScale(performance.now()-_workT0,dt);
       if(G.fadeIn>0&&G.scene!=='cutscene'){ctx.fillStyle='rgba(0,0,0,'+Math.min(1,G.fadeIn)+')';ctx.fillRect(0,0,view.W,view.H);G.fadeIn-=dt*1.3;}

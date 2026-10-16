@@ -69,7 +69,8 @@ function hbBossUpdate(m,dt,dx,dy,dist){
   {const mv=Math.abs(player.x-(B.px===undefined?player.x:B.px))+Math.abs(player.y-(B.py===undefined?player.y:B.py));B.px=player.x;B.py=player.y;
     B.stillT=mv<1.2*dt*60?(B.stillT||0)+dt:Math.max(0,(B.stillT||0)-dt*2);}
   if(!(B.sideT>0)){B.sideT=rnd(3,5.5)/B.rage;B.side=Math.random()<0.5?-1:1;}else B.sideT-=dt;
-  A.tick(m,B,dt,R,dx,dy,dist);
+  if(B.stagT>0||B.atk==='rest'||B.atk==='stagger')hbStaggerTick(m,B,dt,R);
+  else A.tick(m,B,dt,R,dx,dy,dist);
   m.x=clamp(m.x,R.minX,R.maxX);
   if(m.y-m.h<R.top){m.y=R.top+m.h;if(m.vy<0)m.vy=0;}
   /* касание тела */
@@ -88,7 +89,7 @@ HB_AI.herald={
   follow:{storm:['fan','rain'],tornado:['dash','fan'],nova:['dash'],dash:['fan','nova'],rain:['dash']},
   tick(m,B,dt,R,dx){
     const D=m.def.dmg,cy=m.y-m.h*0.5;m.facing=dx>=0?1:-1;B.horn=0;
-    const hov=(sp)=>hbHover(m,clamp(player.x+B.side*(210+40*Math.sin(G.time*0.9)),R.minX,R.maxX),clamp(player.y-170,R.top+m.h,R.floor-3*TILE),sp,dt);
+    const hov=(sp)=>hbHover(m,clamp(player.x+B.side*(210+40*Math.sin(G.time*0.9)),R.minX,R.maxX),clamp(player.y-95,R.top+m.h,R.floor-1.5*TILE),sp,dt);
     switch(B.atk){
       case 'trans':m.vx*=0.9;m.vy*=0.9;hbHover(m,R.cx,R.top+m.h+3*TILE,120,dt);B.horn=1;
         if(Math.random()<0.6)spawnPart(m.x+rnd(-80,80),cy+rnd(-80,80),rnd(-60,60),rnd(-60,60),0.7,B.phase>=3?'#ff7a2a':'#9a8a80',3,0);
@@ -106,7 +107,7 @@ HB_AI.herald={
         if(B.at<0.75){m.tele=B.at/0.75;m.vx*=0.88;m.vy*=0.88;m.x+=m.vx*dt;m.y+=m.vy*dt;}
         else{m.tele=0;const ax=B.tx-m.x,ay=B.ty-cy,l=Math.hypot(ax,ay),sp=980*dt*B.rage;B.dashing=1;
           if(l>sp){m.x+=ax/l*sp;m.y+=ay/l*sp;m.vx=ax/l*300;m.vy=ay/l*300;}
-          else{B.dashing=0;B.chain--;if(B.chain>0){B.sub=0;B.at=0.25;}else hbDone(B);}
+          else{B.dashing=0;B.chain--;if(B.chain>0){B.sub=0;B.at=0.25;}else hbRest(m,B,1.3);}
           if(Math.random()<0.9)spawnPart(m.x+rnd(-20,20),cy+rnd(-30,30),0,0,0.5,Math.random()<0.5?'#ff7a2a':'#9a8a80',5,0);
           if(Math.abs(player.x-m.x)<m.w*0.5+14&&Math.abs(player.y-player.h*0.5-cy)<m.h*0.5&&m.atkCd<=0){m.atkCd=0.9;mobMelee(m,D*0.9,{burn:3},460,-280);}}
         break;}
@@ -150,10 +151,12 @@ HB_AI.herald={
    швыряет сгустки, рожает мясных клочков. В 3-й фазе вырывает корни и прыгает. */
 HB_AI.mother={
   intro(m,B,c,dt,R){m.x=m.home.x;m.y=R.floor;m.facing=player.x<m.x?-1:1;B.open=c.t>c.roarT-0.5&&c.t<c.roarT+1.2?1:0;},
-  pool(B){const p=['tentacles','clots','birth','slam'];if(B.phase>=2)p.push('bloodrain','wave');if(B.phase>=3)p.push('leap','leap','crawl');return p;},
-  w(m,B,S){return {tentacles:S.still?2.6:1.2,clots:S.dist>300?1.6:0.9,birth:S.minions>=5?0.05:0.8,slam:S.dist<190?3:0.05,bloodrain:1.2,wave:S.air?0.4:1.4,leap:S.dist>260?2:1,crawl:S.dist>200?1.2:0.4};},
-  follow:{wave:['tentacles','clots'],leap:['wave','clots'],bloodrain:['tentacles'],slam:['wave']},
-  onPhase(m,B,p){if(p===3){B.free=true;shake(20);for(let i=0;i<40;i++)spawnPart(m.x+rnd(-60,60),m.y-rnd(0,20),rnd(-200,200),rnd(-400,-100),rnd(0.6,1.2),i%2?'#8a0a1a':'#ff5a6a',rnd(2,5),700);}},
+  pool(B){const p=['tentacles','clots','birth','slam'];if(B.phase>=2)p.push('bloodrain','wave','flood','lash','leeches','leap');if(B.phase>=3)p.push('leap','crawl','flood');return p;},
+  w(m,B,S){const up=player.y<(m.hbB.y0+m.hbB.FY-1.5)*TILE;
+    return {tentacles:S.still?2.6:1.2,clots:S.dist>300?1.6:0.9,birth:S.minions>=5?0.05:0.8,slam:S.dist<190?3:0.05,bloodrain:1.2,wave:S.air?0.4:1.4,
+      flood:up?0.3:1.6,lash:up?2.6:0.8,leeches:S.dist>240?1.6:0.9,leap:up||S.dist>260?2.2:1,crawl:S.dist>200?1.2:0.4};},
+  follow:{wave:['tentacles','clots'],leap:['wave','lash'],bloodrain:['tentacles','leeches'],slam:['wave'],flood:['clots','leeches'],lash:['leap']},
+  onPhase(m,B,p){if(p===2){B.free=true;}if(p===2||p===3){B.free=true;shake(20);for(let i=0;i<40;i++)spawnPart(m.x+rnd(-60,60),m.y-rnd(0,20),rnd(-200,200),rnd(-400,-100),rnd(0.6,1.2),i%2?'#8a0a1a':'#ff5a6a',rnd(2,5),700);}},
   tick(m,B,dt,R,dx){
     const D=m.def.dmg,cy=m.y-m.h*0.5;B.open=Math.max(0,(B.open||0)-dt*2);
     if(!B.free){m.vx=0;m.vy=0;m.y=R.floor;m.facing=dx>=0?1:-1;}
@@ -187,7 +190,7 @@ HB_AI.mother={
         if(B.sub===0){B.sub=1;B.gap=clamp(player.x+rnd(-200,200),R.minX,R.maxX);floatText(m.x,m.y-m.h-20,'Кровавый дождь!','#ff5a6a');}
         if(B.at>0.6&&B.at<3.6){B.rt=(B.rt||0)-dt;if(B.rt<=0){B.rt=0.06;
           let x=rnd(R.minX-m.w*0.4,R.maxX+m.w*0.4);if(Math.abs(x-B.gap)<90)x+=Math.sign(x-B.gap||1)*180;
-          hbShot(x,R.top+6,Math.PI/2,260,D*0.35,'drop',{size:4,grav:500,life:3,ghost:false,fx:{slow:1}});}
+          hbShot(x,R.top+6,Math.PI/2,260,D*0.35,'drop',{size:4,grav:500,life:3,ghost:true,fx:{slow:1}});}
           B.gapShow=B.gap;}
         else B.gapShow=null;
         if(B.at>3.9)hbDone(B);break;}
@@ -196,10 +199,26 @@ HB_AI.mother={
           for(const s of [-1,1])hbWall(m.x+s*(m.w*0.5),R.floor,s*320,{h:52,dmg:D*0.7,col:'#c0142a',style:'blood',life:4,fx:{bleed:2},src:'кровавая волна'});
           if(B.phase>=3)setTimeout(()=>{if(hbFight())for(const s of [-1,1])hbWall(m.x+s*(m.w*0.5),R.floor,s*300,{h:52,dmg:D*0.7,col:'#c0142a',style:'blood',life:4,src:'кровавая волна'});},700);}
         if(B.at>1.4)hbDone(B);break;}
+      case 'flood':{m.tele=Math.min(1,B.at/0.8);B.open=1;
+        /* кровь заливает пол — спасайся на верхних выступах */
+        if(B.sub===0&&B.at>0.8){B.sub=1;m.tele=0;shake(8);SFX.boom();floatText(m.x,m.y-m.h-20,'Прилив крови!','#ff5a6a');
+          hbFx.push({type:'flood',t:0,rise:1.1,hold:B.phase>=3?3.2:2.6,fall:1,y:R.floor,h:(B.phase>=3?3.1:2.6)*TILE,x0:(m.hbB.x0+2)*TILE,x1:(m.hbB.x0+m.hbB.W-2)*TILE,dps:D*0.55,col:'#a0101e',src:'прилив крови'});}
+        if(B.at>2.2)hbDone(B);break;}
+      case 'lash':{m.tele=Math.min(1,B.at/0.5);B.whip=m.tele;
+        /* щупальца хлещут поперёк выступов: сначала верхний ярус, потом нижний */
+        if(B.sub===0&&B.at>0.4){B.sub=1;const ys=[R.floor-4.6*TILE,R.floor-1.4*TILE];if(player.y>R.floor-2.5*TILE)ys.reverse();
+          ys.forEach((y,i)=>hbFx.push({type:'sweep',t:-i*0.75,warn:0.85,x:R.cx,y,w:2000,h:62,dmg:D*0.85,col:'#ff3a4a',fx:{bleed:2},src:'хлёст щупалец',style:'flesh'}));
+          floatText(m.x,m.y-m.h-20,'Хлёст!','#ff8a9a');}
+        if(B.at>2.4){B.whip=0;hbDone(B);}break;}
+      case 'leeches':{m.tele=Math.min(1,B.at/0.6);B.open=m.tele;
+        if(B.sub===0&&B.at>0.6){B.sub=1;m.tele=0;SFX.hit();
+          for(let k=0;k<(B.phase>=3?6:4);k++){const a=-Math.PI/2+(k-1.5)*0.6;hbShot(m.x,cy-10,a,180,D*0.45,'leech',{homing:1.25,size:7,life:5.5,ghost:true,fx:{bleed:2}});}
+          floatText(m.x,m.y-m.h-20,'Пиявки!','#ff8a9a');}
+        if(B.at>1.3)hbDone(B);break;}
       case 'leap':{
-        if(B.sub===0){B.sub=1;B.tx=clamp(hbPredict(1).x,R.minX,R.maxX);hbLine(m.x,m.y-20,B.tx,R.floor-20,0.6,'#ff5a6a',3);}
+        if(B.sub===0){B.sub=1;B.tx=clamp(hbPredict(1).x,R.minX,R.maxX);B.ty=Math.min(R.floor,hbFloorAt(B.tx,player.y-10));hbLine(m.x,m.y-20,B.tx,B.ty-20,0.6,'#ff5a6a',3);}
         if(B.at<0.6){m.tele=B.at/0.6;m.vx=0;hbGround(m,dt,R);}
-        else if(B.sub===1){B.sub=2;m.tele=0;const T=1.0;m.vx=(B.tx-m.x)/T;m.vy=-0.5*1900*T;m.onGround=false;}
+        else if(B.sub===1){B.sub=2;m.tele=0;const T=1.0;m.vx=(B.tx-m.x)/T;m.vy=(B.ty-m.y-0.5*1900*T*T)/T;m.onGround=false;}
         else{hbGround(m,dt,R);
           if(m.onGround&&B.sub===2){B.sub=3;m.vx=0;shake(18);SFX.boom();vib(120);B.weak=1.6;
             hbBoom(m.x,m.y-10,140,'#c0142a');for(const s of [-1,1])hbWall(m.x+s*m.w*0.5,R.floor,s*340,{h:46,dmg:D*0.7,col:'#c0142a',style:'blood',life:3,src:'кровавая волна'});
@@ -258,7 +277,7 @@ HB_AI.toadking={
         if(B.sub===0){B.sub=1;B.hops=3;}
         if(B.sub===1){m.tele=Math.min(1,B.at/0.35);ground();if(B.at>0.35&&m.onGround){B.sub=2;m.tele=0;const tx=clamp(hbPredict(0.7).x,R.minX,R.maxX),T=0.75;m.vx=(tx-m.x)/T;m.vy=-0.5*1900*T;m.onGround=false;}}
         else if(B.sub===2){ground();if(m.onGround){m.vx=0;this.land(m,B,R,D);B.hops--;if(B.hops>0){B.sub=1;B.at=0;}else B.sub=3;}}
-        else if(B.at>1.0){hbDone(B);}
+        else if(B.at>1.0){hbRest(m,B,1.0);}
         break;}
       case 'croak':{m.tele=Math.min(1,B.at/0.8);B.croak=m.tele;
         if(B.sub===0&&B.at>0.8){B.sub=1;m.tele=0;shake(12);SFX.boom();
@@ -310,7 +329,7 @@ HB_AI.emperor={
   },
   tick(m,B,dt,R,dx){
     const D=m.def.dmg,cy=m.y-m.h*0.5;m.facing=dx>=0?1:-1;
-    const hov=(sp)=>hbHover(m,clamp(player.x+B.side*(220+30*Math.sin(G.time*0.7)),R.minX,R.maxX),clamp(player.y-150,R.top+m.h,R.floor-2.5*TILE),sp,dt,2);
+    const hov=(sp)=>hbHover(m,clamp(player.x+B.side*(220+30*Math.sin(G.time*0.7)),R.minX,R.maxX),clamp(player.y-100,R.top+m.h,R.floor-1.5*TILE),sp,dt,2);
     let hand=null;
     switch(B.atk){
       case 'trans':m.vx*=0.9;m.vy*=0.9;hbHover(m,R.cx,R.floor-5*TILE,100,dt);B.armor=0.5;
@@ -353,7 +372,7 @@ HB_AI.emperor={
           const c2=m.y-m.h*0.5;hand=[{x:player.x-60,y:player.y-player.h*0.5},{x:player.x+60,y:player.y-player.h*0.5}];
           if(B.at>0.55){B.sub=3;m.tele=0;shake(8);SFX.boom();hbBoom(player.x,player.y-player.h*0.5,70,'#bfe8ff');
             if(B.hx&&Math.hypot(player.x-(B.hx[0]+B.hx[1])/2,player.y-player.h*0.5-(B.hy[0]+B.hy[1])/2)<110)hbHit(D*1.0,'ладони Императора',{stun:0.4});B.clap=0.3;void c2;}}
-        else{if(B.at>1.0){m.untargetable=false;m.alpha=1;hbDone(B);}}
+        else{if(B.at>1.0){m.untargetable=false;m.alpha=1;hbRest(m,B,1.2);}}
         if(B.sub>=2)hand=hand||[{x:player.x-30,y:player.y-player.h*0.5},{x:player.x+30,y:player.y-player.h*0.5}];
         break;}
       case 'echo':{hbHover(m,R.cx,R.floor-6*TILE,140,dt,2);m.tele=Math.min(1,B.at/0.9);B.armor=0.6;
@@ -446,7 +465,12 @@ HB_AI.warden={
    3: призывает тени поверженных Владык.
    4: пол арены рушится в лаву, всё быстрее. */
 HB_AI.archdemon={
-  intro(m,B,c,dt,R){const k=eOut((c.t-1.6)/(c.roarT-2.2));m.x=m.home.x;m.y=m.home.y+m.h*0.35*(1-k);m.facing=player.x<m.x?-1:1;B.wings=k;B.sword=c.t>c.roarT-1?1:0;},
+  /* оживает статуя: до раскола боса не видно (на троне стоит каменная статуя), потом он в той же позе
+     расправляет крылья и поднимает клинок к рёву; после катсцены спрыгивает с трона на помост */
+  intro(m,B,c,dt,R){const sh=c.shatterT||0;m.x=m.home.x;m.y=m.home.y;m.vx=m.vy=0;B.fly=false;m.onGround=true;B.flap=0;B.raise=0;
+    m.alpha=c.t<sh?0:1;m.facing=c.t<sh+1.0?1:(player.x<m.x?-1:1);
+    const k=clamp((c.t-sh-0.4)/Math.max(0.5,c.roarT-sh-0.8),0,1);B.wings=lerp(0.55,1,eOut(k));
+    B.swing=c.t>c.roarT-1.0&&c.t<c.roarT+0.6?-clamp((c.t-(c.roarT-1.0))/0.6,0,1):0;B.breath=c.t>c.roarT&&c.t<c.roarT+1.2?1:0;},
   pool(B){
     if(B.phase===1)return ['cleave','breath','stomp','cleave'];
     if(B.phase===2)return ['dive','meteors','chains','breath'];
@@ -488,7 +512,7 @@ HB_AI.archdemon={
           hbWall(fx,fl,B.cs*420,{h:64,dmg:D*0.75,col:'#ff5a1a',style:'fire',life:3.4,fx:{burn:3},src:'огненная волна'});
           if(B.phase>=4)hbWall(m.x-B.cs*m.w*0.4,fl,-B.cs*380,{h:64,dmg:D*0.7,col:'#ff5a1a',style:'fire',life:3,fx:{burn:3},src:'огненная волна'});}
         B.swing=B.at<0.85?B.swing:Math.min(1,(B.at-0.85)/0.2);
-        if(B.at>1.6){B.swing=0;hbDone(B);}break;}
+        if(B.at>1.6){B.swing=0;hbRest(m,B,0.7);}break;}
       case 'breath':{
         if(B.fly)flyHov(60);else groundFollow(20);
         m.tele=Math.min(1,B.at/0.7);B.breath=B.at>0.7&&B.at<2.4?1:0;
@@ -510,7 +534,7 @@ HB_AI.archdemon={
           B.tx=clamp(P.x+Math.cos(a)*220,R.minX,R.maxX);B.ty=clamp(P.y+Math.sin(a)*220,R.top+m.h*0.5,R.floor-m.h*0.5);hbLine(m.x,cy,B.tx,B.ty,0.85,'#ff5a1a',8);}
         if(B.at<0.85){m.tele=B.at/0.85;m.vx*=0.9;m.vy*=0.9;m.x+=m.vx*dt;m.y+=m.vy*dt;if(!B.fly&&m.y<R.floor)m.vy+=400*dt;}
         else{m.tele=0;const ax=B.tx-m.x,ay=B.ty-(m.y-m.h*0.5),l=Math.hypot(ax,ay),sp=1250*dt*B.rage;B.diving=1;m.facing=ax>=0?1:-1;
-          if(l>sp){m.x+=ax/l*sp;m.y+=ay/l*sp;}else{B.diving=0;shake(10);if(!B.fly){m.vy=0;}hbDone(B);}
+          if(l>sp){m.x+=ax/l*sp;m.y+=ay/l*sp;}else{B.diving=0;shake(10);if(!B.fly){m.vy=0;}hbRest(m,B,1.2);}
           if(Math.random()<0.9)spawnPart(m.x+rnd(-60,60),m.y-m.h*0.5+rnd(-60,60),0,0,0.5,'#ff5a1a',6,0);
           if(Math.abs(player.x-m.x)<m.w*0.45+12&&Math.abs(player.y-player.h*0.5-(m.y-m.h*0.5))<m.h*0.45&&m.atkCd<=0){m.atkCd=1;mobMelee(m,D*1.2,{burn:3},560,-320);}}
         break;}

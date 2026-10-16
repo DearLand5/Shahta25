@@ -16,23 +16,25 @@ Object.assign(MOB_LORE,{
 /* ---------- полоска здоровья ---------- */
 function hbDrawBar(ctx,boss,W,top){
   const H=hbById(boss.def.hb),B=boss.b||{phase:1},n=boss.def.hbPhases||3;
-  /* на узком экране — под мини-картой, чтобы не наезжать на верхнюю панель */
-  let by=top+30;if(W<600){const r=minimapRect();by=(settings.minimap&&G.scene==='mine'?r.y+r.s:HUDL.rb)+10;}
-  const bw=Math.min(W-28,460),bx=W/2-bw/2;
+  /* тонкая полоска сразу под верхней панелью: на телефоне мини-карта в бою скрыта, поле боя свободно */
+  const narrow=W<600,by=narrow?HUDL.rb+6:top+30,bw=narrow?W-20:Math.min(W-40,460),bx=W/2-bw/2,bh=narrow?6:8;
   ctx.save();
-  ctx.fillStyle='rgba(10,6,8,.86)';roundRect(ctx,bx-6,by-4,bw+12,32,9);ctx.fill();
-  ctx.strokeStyle=hexA(H.col,0.55);ctx.lineWidth=1.2;roundRect(ctx,bx-6,by-4,bw+12,32,9);ctx.stroke();
-  const f=clamp(boss.hp/boss.maxHp,0,1);
+  ctx.fillStyle='rgba(10,6,8,.78)';roundRect(ctx,bx-5,by-3,bw+10,bh+20,7);ctx.fill();
+  ctx.strokeStyle=hexA(H.col,0.45);ctx.lineWidth=1;roundRect(ctx,bx-5,by-3,bw+10,bh+20,7);ctx.stroke();
+  const f=clamp(boss.hp/boss.maxHp,0,1),yb=by+12;
   boss._hpShow=boss._hpShow===undefined?f:Math.max(f,boss._hpShow-0.25/60);
-  ctx.fillStyle='rgba(255,255,255,.08)';ctx.fillRect(bx,by+15,bw,9);
-  ctx.fillStyle='rgba(255,240,220,.45)';ctx.fillRect(bx,by+15,bw*boss._hpShow,9);
+  ctx.fillStyle='rgba(255,255,255,.08)';ctx.fillRect(bx,yb,bw,bh);
+  ctx.fillStyle='rgba(255,240,220,.45)';ctx.fillRect(bx,yb,bw*boss._hpShow,bh);
   const gg=ctx.createLinearGradient(bx,0,bx+bw,0);gg.addColorStop(0,shadeHex(H.col,-0.35));gg.addColorStop(1,H.col);
-  ctx.fillStyle=gg;ctx.fillRect(bx,by+15,bw*f,9);
-  ctx.fillStyle='rgba(255,255,255,.18)';ctx.fillRect(bx,by+15,bw*f,2);
-  ctx.fillStyle='rgba(255,255,255,.55)';for(let k=1;k<n;k++)ctx.fillRect(bx+bw*k/n-1,by+13,2,13);
-  if(boss.invuln>0){ctx.fillStyle='rgba(255,255,255,'+(0.2+0.2*Math.sin(G.time*20))+')';ctx.fillRect(bx,by+15,bw*f,9);}
-  ctx.fillStyle='#f6e8d8';ctx.font='700 12px '+HUDF;ctx.textAlign='center';
-  ctx.fillText(boss.def.name.toUpperCase()+' · фаза '+B.phase+'/'+n,W/2,by+11);
+  ctx.fillStyle=gg;ctx.fillRect(bx,yb,bw*f,bh);ctx.fillStyle='rgba(255,255,255,.2)';ctx.fillRect(bx,yb,bw*f,1.5);
+  ctx.fillStyle='rgba(255,255,255,.55)';for(let k=1;k<n;k++)ctx.fillRect(bx+bw*k/n-1,yb-2,2,bh+4);
+  if(boss.invuln>0&&B.atk==='trans'){ctx.fillStyle='rgba(255,255,255,'+(0.2+0.2*Math.sin(G.time*20))+')';ctx.fillRect(bx,yb,bw*f,bh);}
+  /* шкала оглушения */
+  const th=boss.maxHp*(boss.def.hb==='archdemon'?0.05:0.075),sg=B.stagT>0?1:clamp((B.stag||0)/th,0,1);
+  ctx.fillStyle=B.stagT>0?'rgba(255,224,112,'+(0.6+0.4*Math.sin(G.time*14))+')':'rgba(255,224,112,.75)';ctx.fillRect(bx,yb+bh+1.5,bw*sg,2);
+  ctx.fillStyle='#f6e8d8';ctx.font='700 '+(narrow?10:11.5)+'px '+HUDF;ctx.textAlign='left';
+  ctx.fillText(boss.def.name.toUpperCase(),bx,by+8);
+  ctx.textAlign='right';ctx.fillStyle=B.weak>0?'#ffd060':'#d8c8b8';ctx.fillText(B.stagT>0?'ОГЛУШЁН':B.weak>0?'ОТКРЫТ':'фаза '+B.phase+'/'+n,bx+bw,by+8);
   ctx.restore();
 }
 /* ---------- титры катсцены, вспышки, итоги боя ---------- */
@@ -178,7 +180,6 @@ function hbCheat(a){
   if(a.startsWith('hbTp_')){const b=hbById(a.slice(5));if(!b)return true;if(G.dim!==1){UI.toast('Только в Аду');return true;}
     if(G.scene!=='mine'){enterMine();}
     hbAbort();mobs=mobs.filter(m=>m.def.boss);const p=hbPedPx(b);player.x=p.x-3*TILE;player.y=p.y-2;player.vx=player.vy=0;player.peakY=player.y;
-    if(b===HB_FINAL){player.x=(HB_LADDER_X+3)*TILE;player.y=(b.y0+b.FY-2)*TILE-2;}
     G.cam.x=player.x;G.cam.y=player.y;G.hbAsk=null;UI.clear();return true;}
   switch(a){
     case 'hbSeals':for(const r of HB_RECIPES)addMat(r.id,1);UI.toast('🔱 Выданы все печати');saveGame();break;

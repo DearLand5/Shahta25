@@ -5,6 +5,7 @@
 function update(dt){
   if(G.bossDeath)updateBossDeath(dt);
   if(G.slowT>0){G.slowT-=dt;dt*=0.3;}
+  if(G.hbStop>0){G.hbStop-=dt;dt*=0.1;}           /* короткая пауза при сильном ударе по Владыке */
   if(G.bossCut&&G.scene==='mine')updateBossCut(dt);else if(G.bossCut&&G.scene!=='mine')G.bossCut=null;
   G.time+=dt;
   Music.update();
@@ -242,7 +243,7 @@ function update(dt){
   updateBeams(dt);
   updateClouds(dt);
   updateArena(dt);
-  hbUpdate(dt);
+  hbUpdate(dt);hbCombatTick(dt);
   checkHeartPickup();
   updateHell(dt);
   updateHellBlocks(dt);

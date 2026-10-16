@@ -216,8 +216,8 @@ function playerSplash(p){
   const r=p.kind==='acid'?84:58;
   for(let i=0;i<(p.kind==='acid'?22:14);i++){const a=Math.random()*TAU,sp=rnd(60,240);spawnPart(p.x,p.y,Math.cos(a)*sp,Math.sin(a)*sp,rnd(0.3,0.7),p.kind==='acid'?(i%2?'#9aff40':'#d8ff90'):(i%2?'#ff8a30':'#ffd060'),rnd(2,4.5),200);}
   shockRings.push({x:p.x,y:p.y,r:6,max:r,t:0,col:p.kind==='acid'?'#9aff40':'#ffb030'});
-  for(const m of mobs){if(!m.alive)continue;const d=Math.hypot(m.x-p.x,m.y-m.h*0.5-p.y);
-    if(d<r+m.w*0.4){hitMobGun(m,p.dmg*(d<r*0.5?1:0.6),Math.sign(m.x-p.x),{x:p.x,kind:p.kind});if(p.kind==='acid'){m.poison=Math.max(m.poison||0,5);m.poisonDps=Math.max(m.poisonDps||0,p.dmg*0.15);}}}
+  for(const m of mobs){if(!m.alive)continue;const d=m.def.hb?hbDistToMob(m,p.x,p.y):Math.hypot(m.x-p.x,m.y-m.h*0.5-p.y);
+    if(d<r+(m.def.hb?0:m.w*0.4)){hitMobGun(m,p.dmg*(d<r*0.5?1:0.6),Math.sign(m.x-p.x),{x:p.x,kind:p.kind});if(p.kind==='acid'){m.poison=Math.max(m.poison||0,5);m.poisonDps=Math.max(m.poisonDps||0,p.dmg*0.15);}}}
   SFX.boom();shake(3);
 }
 function thrownBoom(p){

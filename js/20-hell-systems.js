@@ -801,7 +801,7 @@ function minimapBuild(r){
   MM.x0=x0;MM.y0=y0;MM.n=n;
 }
 function drawMinimap(){
-  if(!settings.minimap||G.scene!=='mine')return;
+  if(!settings.minimap||G.scene!=='mine'||hbFight())return;   /* в бою с Владыкой арена закрыта — карта не нужна */
   const r=minimapRect();
   MM.t-=1/60;
   if(MM.t<=0||MM.n!==r.n||Math.abs(Math.floor(player.x/TILE)-(MM.x0+(r.n>>1)))>3||Math.abs(Math.floor(player.y/TILE)-(MM.y0+(r.n>>1)))>3){MM.t=0.45;minimapBuild(r);}

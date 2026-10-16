@@ -275,6 +275,7 @@ function lineClear(x0,y0,x1,y1){
 }
 /* автоприцел: ближайшая видимая цель (опасные мобы в приоритете) */
 function findAutoTarget(range){
+  {const h=hbAutoTarget(range);if(h)return h;}
   const px=player.x,py=player.y-player.h*0.5;
   let best=null,bd=1e9;
   for(let pass=0;pass<2&&!best;pass++){
@@ -291,7 +292,7 @@ function findAutoTarget(range){
   return best;
 }
 function fireGun(g,holdRepeat){
-  if(G.scene!=='mine')return;
+  if(G.scene!=='mine'||G.bossCut)return;
   if(!g)return;
   if((player.gunCd||0)>0)return;
   if(player.gunAmmo<=0){
@@ -306,7 +307,7 @@ function fireGun(g,holdRepeat){
   player.gunAmmo--;
   player.gunCd=g.rate;
   const sx=player.x+player.facing*14,sy=player.y-player.h*0.62;
-  const tx=tgt.x,ty=tgt.y-tgt.h*0.5;
+  const ap=hbAimPoint(tgt),tx=ap.x,ty=ap.y;
   const base=Math.atan2(ty-sy,tx-sx);
   if(tx>player.x+2)player.facing=1;else if(tx<player.x-2)player.facing=-1;
   const dm=gunDmgMult();
@@ -318,7 +319,7 @@ function fireGun(g,holdRepeat){
     const hit=[];
     for(const m of mobs){if(!m.alive||m.untargetable&&!m.hidden)continue;
       const vx=ex-sx,vy=ey-sy,l2=vx*vx+vy*vy||1;let u=((m.x-sx)*vx+((m.y-m.h*0.5)-sy)*vy)/l2;u=clamp(u,0,1);
-      if(Math.hypot(m.x-(sx+vx*u),(m.y-m.h*0.5)-(sy+vy*u))<m.w*0.5+8){hit.push(m);}}
+      if(m.def.hb?hbDistToMob(m,sx+vx*u,sy+vy*u)<10:Math.hypot(m.x-(sx+vx*u),(m.y-m.h*0.5)-(sy+vy*u))<m.w*0.5+8){hit.push(m);}}
     for(const m of hit)hitMobGun(m,g.dmg*dm,Math.sign(Math.cos(base)),g);
     let from=hit.length?hit[hit.length-1]:tgt,chained=new Set(hit);
     for(let k=0;k<3&&from;k++){

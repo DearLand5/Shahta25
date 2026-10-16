@@ -357,3 +357,5 @@ input[type=range],.sliderRow input[type=range]{accent-color:var(--brass);}
 .lilacGate.keyed{background:conic-gradient(from 0deg,#3a1a6a,#b07aff,#6a3ad0,#e0c8ff,#3a1a6a);box-shadow:0 0 50px rgba(190,140,255,.7),inset 0 0 30px rgba(20,0,40,.8);animation:lilacSpin 9s linear infinite}
 .lilacGate.open{box-shadow:0 0 70px rgba(220,180,255,.9),inset 0 0 20px rgba(255,255,255,.3)}
 @keyframes lilacSpin{to{transform:rotate(360deg)}}
+/* катсцены боссов: всплывающие сообщения не показываются */
+body.cutscene .toast{display:none!important}

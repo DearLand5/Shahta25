@@ -19,6 +19,7 @@ function ccMarkDirty(tx,ty){
 function drawStaticRange(g,tx0,tx1,ty0,ty1){
   drawCaveWalls(g,tx0,tx1,ty0,ty1);
   drawStructWalls(g,tx0,tx1,ty0,ty1);
+  hbDrawBackWalls(g,tx0,tx1,ty0,ty1);
   for(let ty=ty0;ty<=ty1;ty++){
     if(ty<0)continue;
     let runStart=null,runType=-1;

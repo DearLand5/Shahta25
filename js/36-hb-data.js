@@ -25,6 +25,8 @@ const HB_FINAL={id:'archdemon',name:'Архидемон Инферналис',ti
 const HB_ALL=HB_MINIS.concat([HB_FINAL]);
 /* геометрия: мини-святилище 56×24 блока в центре мира, арена — во всю ширину */
 HB_MINIS.forEach(b=>{b.x0=20;b.W=56;b.H=24;b.FY=b.H-3;});
+/* с каким снаряжением идти: меч и броня rec.g, огнестрел rec.gun */
+const HB_REC={herald:{g:7,gun:7},mother:{g:8,gun:8},toadking:{g:9,gun:9},emperor:{g:10,gun:10},warden:{g:10,gun:11},archdemon:{g:10,gun:11}};
 HB_FINAL.x0=0;HB_FINAL.W=MW;HB_FINAL.H=52;HB_FINAL.FY=HB_FINAL.H-4;
 /* окончания по роду: «пробудился / пробудилась» */
 function hbG(b,m,f){return b&&b.fem?f:m;}
@@ -33,12 +35,12 @@ function hbById(id){return HB_ALL.find(b=>b.id===id)||null;}
 /* ---------- боссы как мобы (бой ведёт свой ИИ, mech:'hboss') ---------- */
 /* hp и урон потом умножаются правкой баланса (×1.15 и ×1.3, как у всех боссов) */
 const HB_DEFS={
-  herald:  {name:'Пепельный Вестник',  hp:48000,  dmg:110, spd:150,w:64, h:88, fly:true, light:4,c1:'#7a6a64',c2:'#2a1e1c',phases:3},
-  mother:  {name:'Мать Плоти',         hp:96000,  dmg:120,spd:60, w:120,h:120,fly:true, light:3,c1:'#a8283a',c2:'#4a0a14',phases:3},
-  toadking:{name:'Король Топей',       hp:148000, dmg:160,spd:90, w:132,h:96, fly:true, light:3,c1:'#7a8a2a',c2:'#3a4210',phases:3},
-  emperor: {name:'Костяной Император', hp:243000, dmg:170,spd:120,w:72, h:112,fly:true, light:4,c1:'#e8e0cc',c2:'#3a3048',phases:3},
-  warden:  {name:'Владыка Магмы',      hp:390000, dmg:170,spd:70, w:150,h:170,fly:true, light:6,c1:'#3a2620',c2:'#ff7a1a',phases:3},
-  archdemon:{name:'Архидемон Инферналис',hp:900000,dmg:200,spd:140,w:220,h:220,fly:true,light:8,c1:'#3a1418',c2:'#ff5a1a',phases:4}
+  herald:  {name:'Пепельный Вестник',  hp:27000,  dmg:110, spd:150,w:64, h:88, fly:true, light:4,c1:'#7a6a64',c2:'#2a1e1c',phases:3},
+  mother:  {name:'Мать Плоти',         hp:43000,  dmg:140,spd:60, w:120,h:120,fly:true, light:3,c1:'#a8283a',c2:'#4a0a14',phases:3},
+  toadking:{name:'Король Топей',       hp:58000,  dmg:160,spd:90, w:132,h:96, fly:true, light:3,c1:'#7a8a2a',c2:'#3a4210',phases:3},
+  emperor: {name:'Костяной Император', hp:87000,  dmg:170,spd:120,w:72, h:112,fly:true, light:4,c1:'#e8e0cc',c2:'#3a3048',phases:3},
+  warden:  {name:'Владыка Магмы',      hp:380000, dmg:180,spd:70, w:150,h:170,fly:true, light:6,c1:'#3a2620',c2:'#ff7a1a',phases:3},
+  archdemon:{name:'Архидемон Инферналис',hp:520000,dmg:240,spd:140,w:220,h:220,fly:true,light:8,c1:'#3a1418',c2:'#ff5a1a',phases:4}
 };
 for(const id in HB_DEFS){const D=HB_DEFS[id];
   MOBDEFS.push({id:'hb_'+id,dim:1,name:D.name,shape:'hb_'+id,boss:true,hb:id,d0:99999,d1:1e9,hp:D.hp,dmg:D.dmg,spd:D.spd,aggro:3000,
@@ -88,7 +90,7 @@ function hbRectHit(x0,y0,x1,y1){
 }
 /* постамент призыва: блок, на котором он стоит */
 function hbPedestal(b){
-  if(b.id==='archdemon')return {tx:b.x0+48,ty:b.y0+b.FY-2};
+  if(b.id==='archdemon')return {tx:b.x0+34,ty:b.y0+b.FY};   /* у подножия трона, чтобы свет призыва не закрывал статую */
   if(b.id==='emperor')return {tx:b.x0+28,ty:b.y0+b.FY-2};
   if(b.id==='warden')return {tx:b.x0+5,ty:b.y0+b.FY};
   return {tx:b.x0+28,ty:b.y0+b.FY};
@@ -96,14 +98,15 @@ function hbPedestal(b){
 /* ворота: клетки, которые закрываются на время боя */
 function hbGateCells(b){
   const out=[];
-  if(b.id==='archdemon'){for(let y=b.y0;y<=b.y0+1;y++)for(let x=46;x<=49;x++)out.push([x,y]);return out;}
+  if(b.id==='archdemon'){for(let y=b.y0;y<=b.y0+1;y++)for(let x=HB_GATE_X0;x<=HB_GATE_X0+3;x++)out.push([x,y]);return out;}
   for(let y=b.y0+b.FY-3;y<=b.y0+b.FY-1;y++){out.push([b.x0+1,y]);out.push([b.x0+b.W-2,y]);}
   return out;
 }
 
 /* ---------- блоки святилищ ---------- */
 const T_HBWALL=T_ARENA;     /* непробиваемая кладка (в Аду — своя текстура) */
-const HB_LADDER_X=47;       /* лестница в центральной шахте Трона Преисподней */
+const HB_GATE_X0=29;        /* вход в Трон Преисподней сверху: ворота 29..32, левее трона */
+const HB_LADDER_X=30;       /* лестница от входа до пола */
 function hbFeat(id,lx,ly,FY){
   const P=(y,a,b)=>ly===y&&lx>=a&&lx<=b;
   switch(id){
@@ -131,7 +134,6 @@ function hbFeat(id,lx,ly,FY){
       if(P(FY-1,37,39)||P(FY-1,56,58))return T_HBWALL;                 /* ступени */
       for(const [y,a,b2] of [[FY-2,6,13],[FY-4,14,20],[FY-6,6,12],[FY-8,13,19],[FY-11,4,10],[FY-14,12,18]]){
         if(P(y,a,b2)||P(y,MW-1-b2,MW-1-a))return T_HBWALL;}
-      if(P(FY-10,40,55))return T_HBWALL;                              /* балкон над троном */
       return T_AIR;}
   }
   return T_AIR;
@@ -152,13 +154,13 @@ function hbTile(wx,wy){
     if(b===HB_FINAL){
       if(ly<0){                                     /* воронка к воротам в потолке */
         const k=-ly;
-        if(k<=10&&wx>=45-Math.floor(k/3)&&wx<=50+Math.floor(k/3))return {t:wx===HB_LADDER_X?T_LADDER:T_AIR,o:0};
+        if(k<=10&&wx>=HB_GATE_X0-1-Math.floor(k/3)&&wx<=HB_GATE_X0+4+Math.floor(k/3))return {t:wx===HB_LADDER_X?T_LADDER:T_AIR,o:0};
         continue;
       }
-      if(ly<=1)return {t:(lx>=46&&lx<=49)?(wx===HB_LADDER_X?T_LADDER:T_AIR):T_HBWALL,o:0};
+      if(ly<=1)return {t:(lx>=HB_GATE_X0&&lx<=HB_GATE_X0+3)?(wx===HB_LADDER_X?T_LADDER:T_AIR):T_HBWALL,o:0};
       if(lx<2||lx>=W-2||ly>=FY)return {t:T_HBWALL,o:0};
       const f=hbFeat(b.id,lx,ly,FY);
-      if(wx===HB_LADDER_X&&ly<=FY-3&&(f===T_AIR||ly===FY-10))return {t:T_LADDER,o:0};
+      if(wx===HB_LADDER_X&&ly<=FY-1&&f===T_AIR)return {t:T_LADDER,o:0};
       return {t:f,o:0};
     }
     if(ly<0)continue;

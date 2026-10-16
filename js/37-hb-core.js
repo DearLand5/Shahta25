@@ -63,6 +63,7 @@ UI.hbSummon=function(b){
             :`<p class="muted">Нужна <b>${M.n}</b>. Её можно создать в Алтаре душ во вкладке «Призыв».</p>`}
       <div class="chk ${have?'':'no'}">${M.ic} ${M.n}<b>${have} шт.</b></div>
       <div class="chk">${trophy?trophy.ic+' Трофей: '+trophy.n:'🗝 Ключ Лиловых небес'}<b>${k?'побед: '+k:'ещё не побеждён'}</b></div>
+      ${hbRecHtml(b)}
       <p class="tiny" style="margin:8px 0 2px">${k?'Повторная победа даёт меньше душ и монет, но трофей выпадает всегда.':'Если погибнешь или уйдёшь из шахты, печать вернётся.'}</p>
     </div>
     ${have?'<button class="btn" id="hbGo">Пробудить</button>':''}
@@ -71,6 +72,13 @@ UI.hbSummon=function(b){
   d.querySelector('#hbNo').onclick=()=>{SFX.uiBack();UI.close();};
 };
 
+/* рекомендуемое снаряжение и предупреждение, если оно слабее */
+function hbRecHtml(b){
+  const r=HB_REC[b.id],P=player,gl=Math.min(P.swordLvl,P.armorLvl),ok=gl>=r.g&&P.gunLvl>=r.gun;
+  const fin=b===HB_FINAL;
+  return `<div class="chk ${ok?'ok':'no'}">${ok?'✔':'⚠'} Снаряжение: меч и броня ${fin?'максимум':'ур. '+r.g}, огнестрел ${r.gun}<b>у тебя ${gl} / ${P.gunLvl}</b></div>`+
+    (ok?'':`<p class="tiny" style="color:#ff9a8a;margin:4px 0 0">${fin?'Архидемона почти невозможно победить без полностью прокачанного снаряжения.':'Со слабым снаряжением бой будет очень тяжёлым.'}</p>`);
+}
 function hbPedPx(b){const p=hbPedestal(b);return {x:(p.tx+0.5)*TILE,y:p.ty*TILE};}
 function hbCheckPedestal(){
   if(G.dim!==1||G.scene!=='mine'||G.hb||G.bossCut||G.bossDeath||UI.modal)return;
@@ -97,7 +105,7 @@ function hbSpawnPos(b){
     case 'toadking':return {x:cx,y:fy};
     case 'emperor':return {x:cx,y:fy-2*TILE-10};
     case 'warden':return {x:cx,y:fy+1*TILE};
-    case 'archdemon':return {x:cx,y:fy-2*TILE};
+    case 'archdemon':return {x:(b.x0+48)*TILE,y:fy-2*TILE-60};   /* там, где стоит статуя на троне */
   }
   return {x:cx,y:fy-D.h};
 }
@@ -118,7 +126,8 @@ function hbStart(b){
   hbFx.length=0;
   const seen=P.seen||(P.seen={});const short=!!seen[b.id];seen[b.id]=1;
   const fin=b===HB_FINAL;
-  G.bossCut={hb:b.id,t:short?(fin?3.2:1.8):0,dur:fin?10.5:7.6,roarT:fin?6.6:4.6,bx:sp.x,by:sp.y-D.h*0.5,m,roared:false};
+  G.bossCut={hb:b.id,t:short?(fin?2.8:1.8):0,dur:fin?10.8:7.6,roarT:fin?7.0:4.6,shatterT:fin?4.8:0,bx:sp.x,by:sp.y-D.h*0.5,m,roared:false,debris:[]};
+  player.vx=0;player.facing=sp.x>player.x?1:-1;
   SFX.portal();shake(5);vib(80);
   saveGame();
 }
@@ -249,6 +258,12 @@ function updateHbFx(dt){
         if(Math.random()<0.6)spawnPart(f.x,f.y-rnd(0,f.h),rnd(-30,30),rnd(-200,-60),0.4,f.col,rnd(2,3.5),500);
         break;}
       case 'line':if(f.t>f.life)hbFx.splice(i,1);break;
+      case 'flood':{   /* поднимающаяся кровь: стоять на полу нельзя */
+        const tot=f.rise+f.hold+f.fall,k=f.t<f.rise?eOut(f.t/f.rise):f.t<f.rise+f.hold?1:Math.max(0,1-(f.t-f.rise-f.hold)/f.fall);
+        f.lvl=f.y-f.h*k;
+        if(k>0.3&&player.y>f.lvl+6&&player.x>f.x0&&player.x<f.x1){player.fx.slow=Math.max(player.fx.slow||0,0.4);f.tick=(f.tick||0)-dt;if(f.tick<=0){f.tick=0.4;hbHit(f.dps*0.4,f.src,{bleed:1});}}
+        if(f.t>tot)hbFx.splice(i,1);
+        break;}
       case 'chain':{    /* цепь из стены: прицел, затем хлёсткий удар-луч */
         if(f.t>=f.warn&&!f.fired){f.fired=true;
           const a=Math.atan2(f.ty-f.y,f.tx-f.x);let L=0;while(L<f.len){L+=12;if(L>60&&solidAtPx(f.x+Math.cos(a)*L,f.y+Math.sin(a)*L))break;}

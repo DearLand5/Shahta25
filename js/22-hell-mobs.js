@@ -1079,7 +1079,7 @@ function updateProjectiles(dt){
       continue;
     }
     if(p.homeMob){
-      let best=null,bd=420;for(const m of mobs){if(!m.alive||m.untargetable)continue;const d=Math.hypot(m.x-p.x,m.y-m.h*0.5-p.y);if(d<bd){bd=d;best=m;}}
+      let best=null,bd=420;for(const m of mobs){if(!m.alive||m.untargetable)continue;const d=m.def.hb?hbDistToMob(m,p.x,p.y)*0.5:Math.hypot(m.x-p.x,m.y-m.h*0.5-p.y);if(d<bd){bd=d;best=m;}}
       if(best){const sp=Math.hypot(p.vx,p.vy),cur=Math.atan2(p.vy,p.vx);let da=Math.atan2(best.y-best.h*0.5-p.y,best.x-p.x)-cur;
         while(da>Math.PI)da-=TAU;while(da<-Math.PI)da+=TAU;const na=cur+clamp(da,-p.homeMob*dt,p.homeMob*dt);p.vx=Math.cos(na)*sp;p.vy=Math.sin(na)*sp;}
       if(Math.random()<0.7)spawnPart(p.x,p.y,rnd(-20,20),rnd(-20,20),0.35,Math.random()<0.5?'#ff8a30':'#ffd060',3,0);
@@ -1140,7 +1140,7 @@ function updateProjectiles(dt){
         if(!m.alive||m.untargetable&&!m.hidden)continue;
         if(p.hit&&p.hit.has(m))continue;
         const d=Math.hypot(p.x-m.x,p.y-(m.y-m.h*0.5));
-        if(d<m.w*0.6+6+(p.kind==='flame'?p.size:0)){
+        if(m.def.hb?hbDistToMob(m,p.x,p.y)<6+(p.kind==='flame'?p.size:0):d<m.w*0.6+6+(p.kind==='flame'?p.size:0)){
           if(p.kind==='acid'||p.kind==='homing'){playerSplash(p);projectiles.splice(i,1);break;}
           hitMobGun(m,p.dmg,Math.sign(p.vx)*(p.kb||1),p);
           burst(p.x,p.y,6,p.color,110,3);

@@ -2279,6 +2279,24 @@ function hudPillR(rx,y,kind,text,col){
   hudPlate(rx-w,y,w,20);hudIcon(kind,rx-w+13,y+10,13);
   ctx.fillStyle=col;ctx.textAlign='left';ctx.fillText(text,rx-w+24,y+14.5);return w;
 }
+/* катсцена: весь интерфейс скрыт, видны только полосы кино, титры и вспышки */
+function hudHidden(){return G.scene==='mine'&&!!G.bossCut;}
+function drawCutOverlay(){
+  const W=view.W,H=view.H;ctx.save();
+  if(G.bossCut&&G.bossCut.hb&&G.scene==='mine')hbDrawCutHud(ctx,W,H);
+  else if(G.bossCut&&G.scene==='mine'){
+    const c=G.bossCut,t=c.t,lb=Math.min(1,t/0.6,(c.dur-t)/0.6),bh=H*0.11*lb;
+    ctx.fillStyle='#000';ctx.fillRect(0,0,W,bh);ctx.fillRect(0,H-bh,W,bh);
+    if(t>3.5&&t<6.2){const a=Math.min(1,(t-3.5)/0.5,(6.2-t)/0.5);ctx.globalAlpha=a;ctx.textAlign='center';
+      const sp=Math.max(0,1-(t-3.5)/0.8);ctx.fillStyle='#e8c8ff';ctx.font='900 '+Math.min(36,W*0.08)+'px system-ui,sans-serif';
+      const title='ПОЖИРАТЕЛЬ БЕЗДНЫ';if(ctx.letterSpacing!==undefined)ctx.letterSpacing=(2+sp*14)+'px';
+      ctx.shadowColor='#7a3aff';ctx.shadowBlur=18;ctx.fillText(title,W/2,H*0.74);ctx.shadowBlur=0;if(ctx.letterSpacing!==undefined)ctx.letterSpacing='0px';
+      ctx.font='700 13px system-ui,sans-serif';ctx.fillStyle='#b8a0e0';ctx.fillText('Страж Ключа Бездны · Древнее Око Пустоты',W/2,H*0.74+22);ctx.globalAlpha=1;}
+  }
+  hbDrawHudFx(ctx,W,H);
+  if(G.bossFlash>0){ctx.fillStyle='rgba(255,245,255,'+Math.min(0.85,G.bossFlash*0.7)+')';ctx.fillRect(0,0,W,H);}
+  ctx.restore();
+}
 function drawHUD(){
   const W=view.W,H=view.H;
   ctx.save();
@@ -2372,16 +2390,6 @@ function drawHUD(){
     if(boss.invuln>0){ctx.fillStyle='rgba(255,255,255,'+(0.2+0.2*Math.sin(G.time*20))+')';ctx.fillRect(bx2,by2+14,bw2*f,8);}
     ctx.fillStyle='#f0e0ff';ctx.font='800 12px system-ui,sans-serif';ctx.textAlign='center';
     ctx.fillText('ПОЖИРАТЕЛЬ БЕЗДНЫ · фаза '+ph,W/2,by2+11);
-  }
-  if(G.bossCut&&G.bossCut.hb&&G.scene==='mine')hbDrawCutHud(ctx,W,H);
-  else if(G.bossCut&&G.scene==='mine'){
-    const c=G.bossCut,t=c.t,lb=Math.min(1,t/0.6,(c.dur-t)/0.6),bh=H*0.11*lb;
-    ctx.fillStyle='#000';ctx.fillRect(0,0,W,bh);ctx.fillRect(0,H-bh,W,bh);
-    if(t>3.5&&t<6.2){const a=Math.min(1,(t-3.5)/0.5,(6.2-t)/0.5);ctx.globalAlpha=a;ctx.textAlign='center';
-      const sp=Math.max(0,1-(t-3.5)/0.8);ctx.fillStyle='#e8c8ff';ctx.font='900 '+Math.min(36,W*0.08)+'px system-ui,sans-serif';
-      const title='ПОЖИРАТЕЛЬ БЕЗДНЫ';if(ctx.letterSpacing!==undefined)ctx.letterSpacing=(2+sp*14)+'px';
-      ctx.shadowColor='#7a3aff';ctx.shadowBlur=18;ctx.fillText(title,W/2,H*0.74);ctx.shadowBlur=0;if(ctx.letterSpacing!==undefined)ctx.letterSpacing='0px';
-      ctx.font='700 13px system-ui,sans-serif';ctx.fillStyle='#b8a0e0';ctx.fillText('Страж Ключа Бездны · Древнее Око Пустоты',W/2,H*0.74+22);ctx.globalAlpha=1;}
   }
   hbDrawHudFx(ctx,W,H);
   if(G.bossFlash>0&&G.scene==='mine'){ctx.fillStyle='rgba(255,245,255,'+Math.min(0.85,G.bossFlash*0.7)+')';ctx.fillRect(0,0,W,H);}
@@ -2639,7 +2647,7 @@ function drawTouchControls(){
       ctx.fillStyle='rgba(255,217,138,.85)';
       ctx.font='800 13px system-ui,sans-serif';
       ctx.fillText('▸ тапни здесь, чтобы выйти ◂',W/2,H-40);
-    }else if(((player.stats&&player.stats.blocks)||0)<40){
+    }else if(((player.stats&&player.stats.blocks)||0)<40&&!hbFight()){
       /* подсказка только для новичка, потом исчезает и не перекрывает кнопки */
       ctx.textAlign='center';const a=0.55*clamp(1-((player.stats&&player.stats.blocks)||0)/40,0,1);
       ctx.font='600 11px '+HUDF;const L1='тапни — копать и прицелиться',L2='«Ставить» / «Стрелять» — использовать предмет';

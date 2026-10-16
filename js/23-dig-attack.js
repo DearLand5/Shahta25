@@ -91,12 +91,12 @@ function digUpdate(dt){
 function autoAttackUpdate(dt){
   if(player.atkCd>0)player.atkCd-=dt;
   if(player.atkAnim>0)player.atkAnim-=dt*3.2;
-  if(G.scene!=='mine')return;
+  if(G.scene!=='mine'||G.bossCut)return;
   let best=null,bestD=1e9;
   for(const m of mobs){
     if(!m.alive||m.untargetable||m.hidden)continue;     /* под землёй / спрятан — меч не машет впустую и не мешает копать */
-    const d=Math.hypot(m.x-player.x,(m.y-m.h*0.5)-(player.y-player.h*0.5));
-    if(d<62+(m.def.boss?m.w*0.4:0)&&d<bestD){bestD=d;best=m;}
+    const d=m.def.hb?hbDistToMob(m,player.x,player.y-player.h*0.5):Math.hypot(m.x-player.x,(m.y-m.h*0.5)-(player.y-player.h*0.5));
+    if(d<(m.def.hb?54:62+(m.def.boss?m.w*0.4:0))&&d<bestD){bestD=d;best=m;}
   }
   if(!best||player.atkCd>0)return;
   player.atkCd=0.5;player.atkAnim=1;player.animState='attack';
@@ -108,8 +108,8 @@ function autoAttackUpdate(dt){
   for(const m of mobs){
     if(!m.alive||m.untargetable||m.hidden)continue;
     const dx=m.x-cx,dy=(m.y-m.h*0.5)-cy;
-    const d=Math.hypot(dx,dy);
-    if(d<62+(m.def.boss?m.w*0.4:0)){
+    const d=m.def.hb?hbDistToMob(m,cx,cy):Math.hypot(dx,dy);
+    if(d<(m.def.hb?54:62+(m.def.boss?m.w*0.4:0))){
       const kb=dx>0?1:-1;
       let dmg=swordDmg()*(ritOn('blood')?1.4:1);let crit=false;
       if(relicOn('fang')&&Math.random()<0.15){dmg*=2;crit=true;}
@@ -168,7 +168,7 @@ function damageMob(m,dmg,kb,src){
   if(!def.boss){m.vx+=kb*180;m.vy=Math.min(m.vy,-140);}
   if(m.def.mech==='mole'&&m.state==='up')m.vy=-100;
   shake(1.8);
-  floatText(m.x,m.y-m.h-6,''+dmg,'#ffe066');
+  if(def.hb)hbOnHit(m,dmg,src);else floatText(m.x,m.y-m.h-6,''+dmg,'#ffe066');
   burst(m.x,m.y-m.h*0.5,6,'#ff6b6b',130,3);
   if(m.hp<=0)killMob(m,false);
 }
