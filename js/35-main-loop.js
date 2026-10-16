@@ -238,6 +238,15 @@ function applyBalance16(){
   for(const p of PERKS)p.base=Math.round(p.base*0.7);
   for(const r of RITUALS)r.s=Math.round(r.s*0.75);
 }
+/* цены алтаря душ v24: за полное прохождение Ада набирается ~7–8 тыс. душ (из них ~2,8 тыс. уходит на призыв Владык),
+   а благословения, ритуалы и реликвии стоили копейки. Теперь: благословения и реликвии ×2, ритуалы ×2.5.
+   Печати призыва (HB_RECIPES) и снаряжение кузниц не меняются. */
+function applyBalance24(){
+  if(applyBalance24.done)return;applyBalance24.done=true;
+  for(const p of PERKS)p.base=Math.round(p.base*2);
+  for(const r of RITUALS)r.s=Math.round(r.s*2.5/5)*5;
+  for(const r of RELICS)if(r.cost&&r.cost.s)r.cost.s=Math.round(r.cost.s*2/5)*5;
+}
 /* цены v19: кузницы чуть дешевле (−12%), буры и аптечки — заметно дешевле */
 function applyBalance19(){
   if(applyBalance19.done)return;applyBalance19.done=true;
@@ -253,7 +262,7 @@ function applyBalance19(){
   for(const it of HCONS)it.cost=sc(it.cost);
 }
 function init(){
-  applyBalance15();applyBalance16();applyBalance19();
+  applyBalance15();applyBalance16();applyBalance19();applyBalance24();
   {const bd=MOBDEFS.find(d=>d.boss);if(bd&&!bd._b23){bd._b23=1;bd.dmg=Math.round(bd.dmg*1.12);}}
   try{
     resize();

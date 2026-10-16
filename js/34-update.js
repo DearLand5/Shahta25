@@ -5,7 +5,7 @@
 function update(dt){
   if(G.bossDeath)updateBossDeath(dt);
   if(G.slowT>0){G.slowT-=dt;dt*=0.3;}
-  qsTick(dt);if(G.wheel)dt*=0.3;                 /* пока открыто колесо предметов — замедление */
+  qsTick(dt);if(G.wheel)dt*=0.05;                /* пока открыто колесо предметов — время почти стоит */
   if(G.hbStop>0){G.hbStop-=dt;dt*=0.1;}           /* короткая пауза при сильном ударе по Владыке */
   if(G.bossCut&&G.scene==='mine')updateBossCut(dt);else if(G.bossCut&&G.scene!=='mine')G.bossCut=null;
   G.time+=dt;
