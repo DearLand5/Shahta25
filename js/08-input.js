@@ -45,6 +45,7 @@ function resetAllInputs(){
   Input.digPtr=null;
   Input.digTX=-1; Input.digTY=-1;
   Input.ptrs.clear();
+  try{G.wheel=null;}catch(_){}
 }
 
 let inputSanityT=0;
@@ -174,14 +175,8 @@ function pointerDown(e){
     if(G.scene==='menu')return;
     if(minimapHit(x,y))return;
 
-    if(G.scene==='lobby'&&!lobbyPlacing()){
-      {const w=screenToWorldLobby(x,y);if(botTap(w.x,w.y)||crateTap(w.x,w.y)){Input.ptrs.set(e.pointerId,{type:'building'});return;}}
-      if(tryOpenBuilding(x,y)){
-        Input.ptrs.set(e.pointerId,{type:'building'});
-        return;
-      }
-    }
 
+    if(G.scene==='mine'){const qi=qsHit(x,y);if(qi>=0){Input.ptrs.set(e.pointerId,{type:'none'});qsUse(qi);vib(10);return;}}
     if(inBtn(getJumpBtn(),x,y)){
       Input.jumpPressed=true;
       Input.jumpPtr=e.pointerId;
@@ -191,9 +186,10 @@ function pointerDown(e){
       return;
     }
     if(inBtn(getItemsBtn(),x,y)){
+      /* короткий тап — меню (по отпусканию), удержание или протяжка — колесо выбора */
       Input.itemsPtr=e.pointerId;
-      Input.ptrs.set(e.pointerId,{type:'items'});
-      UI.items();
+      try{canvas.setPointerCapture(e.pointerId);}catch(_){}
+      Input.ptrs.set(e.pointerId,{type:'items',t:performance.now(),x,y});
       vib(10);
       return;
     }
@@ -212,6 +208,14 @@ function pointerDown(e){
       usePlace();
       vib(12);
       return;
+    }
+    /* здания и ящики лобби — после экранных кнопок, чтобы кнопка поверх здания нажималась */
+    if(G.scene==='lobby'&&!lobbyPlacing()){
+      {const w=screenToWorldLobby(x,y);if(botTap(w.x,w.y)||crateTap(w.x,w.y)){Input.ptrs.set(e.pointerId,{type:'building'});return;}}
+      if(tryOpenBuilding(x,y)){
+        Input.ptrs.set(e.pointerId,{type:'building'});
+        return;
+      }
     }
     if(joyZoneContains(x,y)){
       if(Input.joy.active && Input.joy.id!==e.pointerId){
@@ -261,6 +265,7 @@ function pointerMove(e){
       joyUpdate(x,y);
     }
     {const rec=Input.ptrs.get(e.pointerId);
+      if(rec&&rec.type==='items')wheelMove(rec,x,y);
       if(rec&&rec.type==='laim'&&G.scene==='lobby'){
         if(!rec.aim&&(Math.hypot(x-rec.sx,y-rec.sy)>10||performance.now()-rec.t>260))rec.aim=true;
         if(rec.aim)setLobbyAim(screenToWorldLobby(x,y).x);}}
@@ -288,7 +293,7 @@ function pointerUp(e){
       if(rec.type==='jump'&&Input.jumpPtr===e.pointerId)Input.jumpPtr=null;
       if(rec.type==='place'&&Input.placePtr===e.pointerId)Input.placePtr=null;
       if(rec.type==='shoot'&&Input.shootPtr===e.pointerId)Input.shootPtr=null;
-      if(rec.type==='items'&&Input.itemsPtr===e.pointerId)Input.itemsPtr=null;
+      if(rec.type==='items'&&Input.itemsPtr===e.pointerId){Input.itemsPtr=null;wheelRelease(rec,e.type==='pointercancel');}
       if(rec.type==='laim'&&G.scene==='lobby'){
         if(!rec.aim&&performance.now()-rec.t>260)setLobbyAim(screenToWorldLobby(rec.sx,rec.sy).x);
         else if(!rec.aim){const w=screenToWorldLobby(rec.sx,rec.sy);if(!(botTap(w.x,w.y)||crateTap(w.x,w.y)))tryOpenBuilding(rec.sx,rec.sy);}}
@@ -324,7 +329,7 @@ canvas.addEventListener('lostpointercapture',e=>{
       if(rec.type==='jump'&&Input.jumpPtr===e.pointerId)Input.jumpPtr=null;
       if(rec.type==='place'&&Input.placePtr===e.pointerId)Input.placePtr=null;
       if(rec.type==='shoot'&&Input.shootPtr===e.pointerId)Input.shootPtr=null;
-      if(rec.type==='items'&&Input.itemsPtr===e.pointerId)Input.itemsPtr=null;
+      if(rec.type==='items'&&Input.itemsPtr===e.pointerId){Input.itemsPtr=null;wheelClose();}
       if(rec.type==='dig'&&Input.digPtr===e.pointerId){
         Input.digActive=false;Input.digPtr=null;Input.digTX=-1;Input.digTY=-1;
       }
@@ -345,6 +350,7 @@ window.addEventListener('keydown',e=>{
   if(e.code==='Space'){Input.jumpPressed=true;e.preventDefault();}
   if(e.code==='KeyF'&&G.scene==='mine'){usePlace();}
   if(e.code==='KeyG'&&G.scene==='mine'){useShoot(false);}
+  if(/^Digit[1-4]$/.test(e.code)&&G.scene==='mine'&&!UI.modal&&!G.paused){qsUse(+e.code.slice(5)-1);}
   if(false){fireGrapple();}
   if(e.code==='Escape'){if(G.scene!=='menu'&&!UI.modal)togglePause();}
   if(e.code==='Backquote'&&settings.cheatsUnlocked){UI.cheats();}

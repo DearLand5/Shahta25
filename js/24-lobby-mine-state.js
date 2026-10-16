@@ -152,6 +152,7 @@ function playerInExitRoom(){
 const G={
   scene:'menu',
   placeItem:'ladder',
+  qslots:null,
   shootItem:'grapple',
   seed:Math.floor(Math.random()*100000),
   oreEpoch:0,

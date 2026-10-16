@@ -58,7 +58,7 @@ function frame(ts){
       if(G.scene==='lobby'||G.scene==='mine'){
         {const hh=hudHidden();if(hh!==G._hh){G._hh=hh;document.body.classList.toggle('cutscene',hh);}}
         if(hudHidden())drawCutOverlay();
-        else{drawTouchControls();drawHUD();drawMinimap();}
+        else{drawTouchControls();drawQuickBar();drawHUD();drawMinimap();drawWheel();}
       }
       adaptRenderScale(performance.now()-_workT0,dt);
       if(G.fadeIn>0&&G.scene!=='cutscene'){ctx.fillStyle='rgba(0,0,0,'+Math.min(1,G.fadeIn)+')';ctx.fillRect(0,0,view.W,view.H);G.fadeIn-=dt*1.3;}
@@ -138,7 +138,7 @@ function resetMemoryState(){
   placedLadders.clear();barricades.clear();tileMods.clear();tileModsByChunk.clear();dugTiles.clear();chunks.clear();
   mobs.length=0;projectiles.length=0;beams.length=0;drills.length=0;grapple=null;aim.active=false;
   G.seed=Math.floor(Math.random()*100000);G.oreEpoch=0;G.descents=0;regenTotal=0;
-  G.scene='menu';G.paused=false;G.mineActive=false;G.shootItem='';G.placeItem='ladder';
+  G.scene='menu';G.paused=false;G.mineActive=false;G.shootItem='';G.placeItem='ladder';G.qslots=qsLoad(null);
   G.hb=null;G.bossCut=null;G.bossDeath=null;G.arenaFight=false;
   lobbyPlayer.x=buildings[0].x+140;lobbyPlayer.y=0;lobbyPlayer.vy=0;
   G.cam.x=lobbyPlayer.x;G.cam.y=0;

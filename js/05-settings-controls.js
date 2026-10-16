@@ -57,12 +57,18 @@ function getDefaultControls(){
   const land=W>H*1.15;
   const itemsY=land?shootY:shootY-mr-sm*sc-gap;
   const itemsX=land?placeX-mr-sm*sc-gap:jcx;
+  /* быстрые слоты: на вертикальном экране — столбик у правого края над рюкзаком,
+     на альбомном — ряд над «Ставить»/«Стрелять»; точка — центр слота 1 */
+  const qr=24*sc,qs=2*qr+10;
+  const qX=land?jcx-3*qs:W-10-qr;
+  const qY=land?shootY-mr-14-qr:itemsY-sm*sc-12-qr-3*qs;
   return {
     joy:    {cx:joyPad/W,  cy:(H-joyPad-30)/H, r:joyR, a:0.55},
     jump:   {cx:jcx/W,     cy:jcy/H,           r:big,  a:1.00},
     place:  {cx:placeX/W,  cy:placeY/H,        r:med,  a:1.00},
     shoot:  {cx:shootX/W,  cy:shootY/H,        r:med,  a:1.00},
     items:  {cx:itemsX/W,  cy:itemsY/H,        r:sm,   a:0.90},
+    qbar:   {cx:qX/W,      cy:qY/H,            r:24,   a:0.92},
     pause:  {cx:(W-30)/W,  cy:30/H,            r:22,   a:0.85}
   };
 }
@@ -104,6 +110,7 @@ const CONTROL_LABELS={
   place:'Ставить',
   shoot:'Стрелять',
   items:'Предметы',
+  qbar:'Слоты',
   pause:'Пауза'
 };
-const CONTROL_ORDER=['joy','jump','place','shoot','items','pause'];
+const CONTROL_ORDER=['joy','jump','place','shoot','items','qbar','pause'];

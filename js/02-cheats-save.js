@@ -248,7 +248,7 @@ function buildSaveData(){
       slots:player.slots,maxDepth:player.maxDepth,inv:player.inv,
       ladders:player.ladders,drills:player.drills,drillLvl:player.drillLvl,drillBought:player.drillBought,gunLvl:player.gunLvl,gunAmmo:player.gunAmmo,
       barricades:player.barricades,barricadeLvl:player.barricadeLvl,barricadeBought:player.barricadeBought,
-      placeItem:G.placeItem,shootItem:G.shootItem,
+      placeItem:G.placeItem,shootItem:G.shootItem,qslots:qsList().slice(),
       grappleUnlocked:player.grappleUnlocked,
       grappleAmmo:player.grappleAmmo,torchLvl:player.torchLvl,
       potions:player.potions,fallProtLvl:player.fallProtLvl,
@@ -356,6 +356,7 @@ function applySaveData(d){
     }
     if(typeof d.placeItem==='string')G.placeItem=d.placeItem;
     if(typeof d.shootItem==='string')G.shootItem=d.shootItem;
+    G.qslots=qsLoad(d.qslots);                 /* старые сейвы без слотов — слоты по умолчанию */
     applyWorldData(d);
 
     if(typeof d.lobbyX==='number')lobbyPlayer.x=clamp(d.lobbyX,60,LOBBY_W-60);

@@ -1709,45 +1709,8 @@ const UI={
       }
     }
   },
-  items(tab){
-    tab=tab||UI._itTab||'items';UI._itTab=tab;
-    if(tab==='res'){UI.resources();return;}
-    validateSelection();
-    const placeItems=getPlaceItems();
-    const shootItems=getShootItems();
-    const row=(it,cur,cat)=>`
-      <div class="item" data-pick="${cat}:${it.id}" style="cursor:pointer;${cur?'border-color:#ffd98a;background:rgba(255,217,138,.1)':''}">
-        <div class="ico" style="background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:16px">${it.icon}</div>
-        <div class="txt"><div class="nm">${it.name}</div><div class="ds">${it.desc}</div></div>
-        <b style="color:#ffd98a">×${it.count}</b>
-        ${cur?'<span class="pill" style="background:rgba(255,217,138,.2);color:#ffd98a">✓</span>':''}
-      </div>`;
-    const d=this.build('items',`
-      <div class="card" style="max-width:480px;width:96vw">
-        <div class="tabs"><button data-ittab="items" class="on">🎒 Предметы</button><button data-ittab="res">⛏ Ресурсы</button></div>
-        <p class="tiny" style="margin-bottom:4px">Здесь только купленное. Остальное — в кузнице.</p>
-        <div class="cheatSection" style="text-align:left;margin-top:4px">Активируются кнопкой «Ставить»</div>
-        ${placeItems.map(it=>row(it,G.placeItem===it.id,'p')).join('')}
-        <div class="cheatSection" style="text-align:left">Активируются кнопкой «Стрелять»</div>
-        ${shootItems.length?shootItems.map(it=>row(it,G.shootItem===it.id,'s')).join(''):'<p class="muted" style="text-align:center;padding:10px">Пока пусто. Пушка-крюк, аптечки и огнестрел продаются в кузнице.</p>'}
-        <p class="tiny" style="margin-top:8px">Тапни по экрану, чтобы задать направление (бур, крюк, бомбы), затем жми кнопку. У огнестрела автоприцел.</p>
-        <div class="cheatSection" style="text-align:left">Рюкзак: ${invCount()}/${player.slots} видов · стопка до ${stackCap()}</div>
-        ${(player.relEq&&player.relEq.length)?'<p class="tiny">Реликвии: '+player.relEq.map(id=>{const r=RELICS.find(q=>q.id===id);return r?r.ic+' '+r.n:'';}).join(' · ')+'</p>':''}
-        ${Object.keys(player.rit||{}).length?'<p class="tiny">Ритуалы: '+Object.keys(player.rit).map(id=>{const r=RITUALS.find(q=>q.id===id);return r?r.ic+' '+r.n+' ('+Math.ceil(player.rit[id]/60)+' мин)':'';}).join(' · ')+'</p>':''}
-        ${(()=>{const it=HITEMS.filter(h=>itemLv(h.id)>0);return it.length?'<p class="tiny">Снаряжение: '+it.map(h=>h.ic+' '+h.n+(h.max>1?' '+itemLv(h.id):'')).join(' · ')+(player.hitems.totems?' · 🗿×'+player.hitems.totems:'')+'</p>':'';})()}
-      </div>
-      <button class="btn" id="itClose">Закрыть</button>
-    `);
-    d.querySelectorAll('[data-pick]').forEach(el=>{
-      el.onclick=()=>{
-        const v=el.getAttribute('data-pick').split(':');
-        if(v[0]==='p')G.placeItem=v[1];else G.shootItem=v[1];
-        SFX.ui();saveGame();UI.items();
-      };
-    });
-    d.querySelectorAll('[data-ittab]').forEach(b=>b.onclick=()=>{SFX.ui();UI.items(b.getAttribute('data-ittab'));});
-    d.querySelector('#itClose').onclick=()=>{SFX.uiBack();UI.clear();};
-  },
+  /* меню предметов — лист снизу с плитками (43-quickbar) */
+  items(tab){itemsMenu(tab);},
   /* вкладка «Ресурсы»: всё, что лежит в рюкзаке */
   resources(){
     const cap=stackCap(),used=invCount(),keys=Object.keys(player.inv).filter(k=>player.inv[k]>0).sort((a,b)=>ORES[b].price-ORES[a].price);
