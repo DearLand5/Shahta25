@@ -141,6 +141,7 @@ function structPlaceRaw(st,cx,cy){
   const px=cx*st.cw+((h>>>8)%Math.max(1,st.cw-tw));
   const py=cy*st.ch+((h>>>16)%Math.max(1,st.ch-th));
   if(py<st.d0||py+th>st.d1||px<1||px+tw>=MW-1)return null;
+  if(st.dim===1&&hbRectHit(px,py,px+tw,py+th))return null;   /* святилища Владык свободны от структур */
   return {px,py,tw,th};
 }
 /* место структуры; если она задевает другую (с меньшим номером) — её нет */

@@ -615,6 +615,7 @@ function renderMine(dt){
   drawStructDecor(ctx,tx0,tx1,ty0,ty1);
   drawBarricades(ctx,tx0,tx1,ty0,ty1);
   drawArenaDecor(ctx,tx0,tx1,ty0,ty1);
+  hbDrawWorld(ctx,tx0,tx1,ty0,ty1);
   drawAnchors(ctx,tx0,tx1,ty0,ty1);
   drawHeartShrine(ctx,tx0,tx1,ty0,ty1);
   for(let ty=ty0;ty<=ty1;ty++){
@@ -755,10 +756,12 @@ function renderMine(dt){
   if(player.pull&&player.pull.mob){const pm=player.pull.mob;ctx.strokeStyle=pm.def.mech==='toad'?'#d06080':pm.def.mech==='wraithgrab'?'rgba(180,170,160,.7)':'#8a8e98';ctx.lineWidth=pm.def.mech==='toad'?4:2.4;ctx.beginPath();ctx.moveTo(pm.x+pm.facing*pm.w*0.3,pm.y-pm.h*0.55);ctx.lineTo(player.x,player.y-player.h*0.5);ctx.stroke();}
   drawClouds(ctx);
   drawBossFx(ctx);
+  drawHbFx(ctx);
   drawHz(ctx);
   drawHellFx(ctx);
   drawFxLists(ctx);
   for(const p of projectiles){
+    if(p.hbk&&hbDrawProj(ctx,p))continue;
     if(p.hook&&p.src){ctx.strokeStyle='#8a8e98';ctx.lineWidth=2;ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(p.src.x,p.src.y-p.src.h*0.6);ctx.lineTo(p.x,p.y);ctx.stroke();ctx.setLineDash([]);
       ctx.strokeStyle='#c8ccd8';ctx.lineWidth=2.4;ctx.beginPath();ctx.arc(p.x,p.y,5,0.3,Math.PI*1.4);ctx.stroke();continue;}
     if(p.ground){

@@ -104,6 +104,7 @@ function enterMine(){
   G.cam.x=player.x;G.cam.y=player.y;
   G.exitGrace=1.0;
   if(G.dim===0&&getTile(ARENA_GX0,ARENA_Y0)===T_ARENA)arenaSetGate(false);
+  hbFixWorld();
   UI.close();saveGame();
   UI.toast(settings.regen?'⛏ Руды обновлены · порода затягивается':'⛏ Рудные жилы обновились');
 }
@@ -115,6 +116,7 @@ function resumeMine(){
   G.scene='mine';G.mineActive=true;G.paused=false;
   if(!R.live){        /* после перезагрузки: мир восстанавливается из сохранения, мобы появятся заново */
     mobs=[];projectiles.length=0;beams.length=0;grapple=null;drills.length=0;aim.active=false;
+    hbFixWorld();
     player.x=clamp(R.x,TILE,(MW-1)*TILE);player.y=Math.max(TILE*2,R.y);
     let tx=Math.floor(player.x/TILE),ty=Math.floor((player.y-4)/TILE),guard=0;
     while(guard++<40&&(isSolid(tx,ty)||isSolid(tx,ty-1))){ty--;}
@@ -127,6 +129,7 @@ function resumeMine(){
   UI.toast('⛏ Продолжаем: '+Math.floor(player.y/TILE)+' м');
 }
 function exitMine(){
+  hbAbort();
   G.resumeMine=null;
   SFX.enter();
   resetAllInputs();

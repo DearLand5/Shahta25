@@ -184,7 +184,7 @@ function updateMobs(dt){
       if(Math.random()<0.15)spawnPart(m.x+rnd(-14,14),m.y-4,rnd(-10,10),rnd(-40,-10),0.6,def.mech==='phoenix'?'#ff8a30':def.c1,2,-10);
       if(m.remT<=0){m.state='idle';m.st=0;m.hp=m.maxHp*0.5;m.alpha=1;burst(m.x,m.y-m.h*0.5,26,def.mech==='phoenix'?'#ffb030':def.c1,200,3.6);floatText(m.x,m.y-m.h-10,'Восстал!','#ff9a5a');SFX.portal();}
     }
-    else if(m.stun>0){m.tele=0;}
+    else if(m.stun>0&&def.mech!=='hboss'){m.tele=0;}
     else switch(def.mech){
       case 'skitter':{                                  /* кролик: зигзаг-прыжки; загнанный — лягается */
         if(dist<190){
@@ -537,6 +537,8 @@ function updateMobs(dt){
         else{mvx=Math.sin(m.anim*1.3)*0.25;mvy=Math.cos(m.anim*1.1)*0.25;}
         break;}
       case 'boss':{noPhys=true;bossUpdate(m,dt,dx,dy,dist);break;}
+      case 'hboss':{noPhys=true;hbBossUpdate(m,dt,dx,dy,dist);break;}
+      case 'hbecho':{noPhys=true;hbEchoUpdate(m,dt,dx,dy,dist);break;}
       /* ======== АД: уникальные механики ======== */
       case 'hound':{                                    /* гончая: стая, вой ускоряет, прыжок оставляет огонь */
         if(!m.howled&&aggro){m.howled=true;floatText(m.x,m.y-m.h-12,'Ау-у-у!','#ff9a5a');SFX.hit();
@@ -1122,12 +1124,13 @@ function updateProjectiles(dt){
       if(p.sulfur){gasCloud(p.x,p.y-10,72,p.dmg*0.25,5);addPatch(p.x,p.y-6,46,4,'fire',p.dmg*0.2);}
       if(p.lava)addPatch(p.x,p.y-6,40,4,'fire',p.dmg*0.25);
       if(p.boulder)mobBlast(p.x,p.y,48,0,'#d8d0bc');
+      if(p.onEnd)p.onEnd(p);
       burst(p.x,p.y,5,p.color,90,2.6);
       projectiles.splice(i,1);continue;
     }
     if(p.owner==='mob'){
       const d=Math.hypot(p.x-player.x,p.y-(player.y-player.h*0.5));
-      if(d<20&&!p.bomb){hurtPlayer(p.dmg,'снаряд',p.fx);burst(p.x,p.y,6,p.color,110,3);
+      if(d<(p.hr||20)&&!p.bomb){hurtPlayer(p.dmg,p.src||'снаряд',p.fx);burst(p.x,p.y,6,p.color,110,3);if(p.onEnd)p.onEnd(p);
         if(p.hook&&p.src&&p.src.alive&&!cheats.god){player.pull={mob:p.src,t:0.7,str:640};SFX.grapple();}
         if(p.web)addPatch(player.x,player.y-4,44,3,'web',0);
         if(p.sulfur)gasCloud(p.x,p.y,72,p.dmg*0.25,5);

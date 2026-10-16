@@ -242,6 +242,7 @@ function update(dt){
   updateBeams(dt);
   updateClouds(dt);
   updateArena(dt);
+  hbUpdate(dt);
   checkHeartPickup();
   updateHell(dt);
   updateHellBlocks(dt);
@@ -251,8 +252,9 @@ function update(dt){
   updateHz(dt);
   ambientParticles(dt);
 
-  const camTX=player.x+player.facing*10;
-  const camTY=player.y-player.h*0.5-10;
+  let camTX=player.x+player.facing*10;
+  let camTY=player.y-player.h*0.5-10;
+  {const f=hbCamBias(camTX,camTY);if(f){camTX=f.x;camTY=f.y;}}
   const dx=camTX-G.cam.x, dy=camTY-G.cam.y;
   const dead=6;
   if(Math.abs(dx)>dead)G.cam.x+=dx*Math.min(1,dt*5.5);

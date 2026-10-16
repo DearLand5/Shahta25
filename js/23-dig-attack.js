@@ -147,7 +147,7 @@ function damageMob(m,dmg,kb,src){
     }
     return;
   }
-  if(m.invuln>0){floatText(m.x,m.y-m.h-6,'неуязвим','#d8c8ff');return;}
+  if(m.invuln>0){if(!G.bossCut)floatText(m.x,m.y-m.h-6,'неуязвим','#d8c8ff');return;}
   if(m.intangible>0){floatText(m.x,m.y-m.h-6,'сквозь','#9ad8ff');return;}
   if(m.state==='shell'||m.def.mech==='necro'&&m.shieldOn){dmg=Math.max(1,Math.round(dmg*(m.state==='shell'?0.15:0.3)));floatText(m.x,m.y-m.h-18,m.state==='shell'?'панцирь':'щит костей',m.state==='shell'?'#ffb070':'#7affb0');}
   mobOnHit(m,src);
@@ -160,6 +160,7 @@ function damageMob(m,dmg,kb,src){
   if(def.thorns&&!src&&!cheats.god){player.fx.burn=Math.max(player.fx.burn||0,3);hurtPlayer(6,'ожог');floatText(m.x,m.y-m.h-18,'ожог!','#ff9a3c');}
   if((def.boss||def.hp>=1500||def.w>=44)&&player.perks&&player.perks.slayer)dmg=Math.round(dmg*(1+0.1*player.perks.slayer));
   if(m.eShield){m.eShieldT=(m.eShieldT||0);if(G.time>m.eShieldT){dmg=Math.round(dmg*0.35);floatText(m.x,m.y-m.h-16,'щит','#9ad8ff');}}
+  if(def.hb)dmg=Math.max(1,Math.round(dmg*hbDmgMul(m)));
   m.hp-=dmg;m.hurt=0.24;SFX.mobHit(def);
   if(settings.quality!=='low'){const hd=Math.sign(m.x-player.x)||1,hx=m.x-hd*m.w*0.3,hy=m.y-m.h*0.55;
     for(let k=0;k<5;k++){const a=(hd>0?0:Math.PI)+rnd(-0.9,0.9);spawnPart(hx,hy,Math.cos(a)*rnd(220,420),Math.sin(a)*rnd(220,420)-60,rnd(0.12,0.25),k%2?'#fff6d0':'#ffc060',rnd(1.6,2.6),600);}

@@ -183,6 +183,7 @@ function trySpawnMob(){
   if(mobRate()<=0||mobs.length>=mobCap())return;
   if(!G.mineActive)return;
   if(player.y<12*TILE)return;
+  if(G.hb||hbAt(player.x,player.y-4))return;          /* в святилищах Владык обычные мобы не появляются */
   if(G.dim===0&&player.y>(ARENA_Y0-3)*TILE)return;
   /* иногда ищем воду — там живёт рыба */
   if(G.dim===0&&Math.random()<0.12){

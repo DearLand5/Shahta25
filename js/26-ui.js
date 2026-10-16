@@ -227,7 +227,7 @@ const UI={
         <button class="btn alt" id="mAbout">${ICONS.book}Об игре</button>
         ${settings.cheatsUnlocked?`<button class="btn alt" id="mCheat" style="border-color:#5ea85e">${ICONS.wrench}Тест-панель</button>`:`<button class="btn alt" id="mHow">${ICONS.help}Как играть</button>`}
       </div>
-      <div class="ver">Обновление «Ад» · v21</div></div></div>
+      <div class="ver">Обновление «Владыки Преисподней» · v22</div></div></div>
     `);
     d.classList.add('menuPanel');
     d.querySelector('#mPlay').onclick=()=>{SFX.ui();AU.init();AU.resume();if(canResumeMine()){resumeMine();return;}G.scene='lobby';lobbyPlayer.x=200;UI.close();};
@@ -679,7 +679,7 @@ const UI={
     let body='';
     if(tab==='stats'){
       const row=(a,b)=>`<div class="row spread"><span class="muted">${a}</span><b>${b}</b></div>`;
-      const totalKinds=MOBDEFS.filter(d=>!d.trap&&d.id!=='spirit').length,known=MOBDEFS.filter(d=>B[d.id]>0).length;
+      const totalKinds=MOBDEFS.filter(d=>!d.trap&&d.id!=='spirit'&&d.mech!=='hbecho').length,known=MOBDEFS.filter(d=>B[d.id]>0).length;
       const trophies=MOBDEFS.filter(d=>(B[d.id]||0)>=TROPHY_N&&!d.boss).length;
       body=`<div class="card" style="max-width:440px">
         ${row('Врагов повержено',fmt(S.kills||0))}${row('Видов в бестиарии',known+' / '+totalKinds)}${row('Охотничьих трофеев 🏆',trophies)}
@@ -687,10 +687,11 @@ const UI={
         ${row('Событий Пустошей пережито',fmt(S.events||0))}${row('Смертей',fmt(S.deaths||0))}
         ${row('Глубочайшая точка Земли',Math.floor(player.maxDepth||0)+' м')}${row('Глубочайшая точка Ада',(player.prog.hellDepth||0)+' м')}
         ${row('Пожиратель Бездны',player.prog.key?'повержен ✅':'жив')}
+        ${row('Владыки Преисподней',HB_MINIS.filter(b=>hbKills(b.id)).length+' / 5')}${row('Архидемон Инферналис',hbKills('archdemon')?'повержен ✅':'жив')}
       </div><p class="tiny muted" style="text-align:center">Убей ${TROPHY_N} врагов одного вида — получишь трофей: +15% урона по ним навсегда.</p>`;
     }else{
       const dim=tab==='hell'?1:0;
-      const list=MOBDEFS.filter(d=>(d.dim||0)===dim&&d.id!=='spirit');
+      const list=MOBDEFS.filter(d=>(d.dim||0)===dim&&d.id!=='spirit'&&d.mech!=='hbecho');
       body='<div class="scroll"><div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
       for(const d of list){const n=B[d.id]||0,k=n>0;
         const tr=n>=TROPHY_N&&!d.boss;
@@ -1319,6 +1320,8 @@ const UI={
         return `<div class="item" style="flex-wrap:wrap;${on?'border-color:#9ad8ff;background:rgba(120,200,255,.08)':''}"><div class="ico" style="background:rgba(120,180,255,.12);display:flex;align-items:center;justify-content:center;font-size:15px">${r.ic}</div>
           <div class="txt"><div class="nm">${r.n}</div><div class="ds">${r.d}</div>${own?'':`<div class="cost">${costChips(r.cost)}</div>`}</div>
           ${own?`<button class="btn small ${on?'':'alt'}" data-eq="${r.id}">${on?'Снять':'Надеть'}</button>`:`<button class="btn small" data-relic="${r.id}" ${canPay(r.cost)?'':'disabled'}>Создать</button>`}</div>`;}).join('');
+    }else if(tab==='summon'){
+      body=hbAltarBody();
     }else{
       const price=Math.round(4000*Math.pow(1.03,player.soulBuy||0));
       body=`<div class="item"><div class="ico" style="background:rgba(255,217,138,.14);display:flex;align-items:center;justify-content:center;font-size:15px">🪙</div>
@@ -1338,11 +1341,12 @@ const UI={
         <div style="height:6px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden;margin-bottom:4px"><div style="height:100%;width:${nextXp?Math.round(100*((player.altarXp||0)-ALTAR_LV[al-1])/(nextXp-ALTAR_LV[al-1])):100}%;background:linear-gradient(90deg,#5ab8ff,#c8a0ff)"></div></div>
         <p class="tiny" style="margin-bottom:8px">${nextXp?'До ур. '+(al+1)+': '+fmt(nextXp-(player.altarXp||0))+' потраченных душ':'Алтарь максимального уровня'}</p>
         <div class="tabs"><button data-tab="perks" class="${tab==='perks'?'on':''}">✨ Благословения</button><button data-tab="rit" class="${tab==='rit'?'on':''}">🕯 Ритуалы</button>
-          <button data-tab="relic" class="${tab==='relic'?'on':''}">💎 Реликвии</button><button data-tab="offer" class="${tab==='offer'?'on':''}">🪙 Подношения</button></div>
+          <button data-tab="relic" class="${tab==='relic'?'on':''}">💎 Реликвии</button><button data-tab="offer" class="${tab==='offer'?'on':''}">🪙 Подношения</button><button data-tab="summon" class="${tab==='summon'?'on':''}">🔱 Призыв</button></div>
         ${body}
       </div>
       <button class="btn alt" id="alBack">Выйти</button>`);
     d.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{SFX.ui();UI.altar(b.getAttribute('data-tab'));});
+    hbAltarBind(d);
     d.querySelectorAll('[data-perk]').forEach(b=>b.onclick=()=>{
       const pk=PERKS.find(q=>q.id===b.getAttribute('data-perk'));const c=perkCost(pk);
       if((player.souls||0)<c||perkLv(pk.id)>=pk.max)return;
@@ -1927,6 +1931,7 @@ const UI={
       const list=MOBDEFS.filter(d=>(d.dim||0)===G.dim&&!d.boss);
       body=`<div class="cheatGrid">${act('killMobs','💀 Убить всех')}${act('spawnMobs','👾 +5 случайных')}
           ${G.dim===0?act('spawnBoss','☠ Вызвать Пожирателя')+act('bossPhase','⏭ Следующая фаза босса'):''}</div>
+        ${G.dim===1?hbCheatHtml(act):''}
         <div class="sect">Создать рядом</div>
         <div class="cheatGrid">${list.map(d=>`<button class="btn small" data-spawn="${d.id}">${d.name}</button>`).join('')}</div>
         <p class="tiny" style="margin-top:6px">Ползунок частоты мобов — в настройках, раздел «Мир».</p>`;
@@ -1982,6 +1987,7 @@ const UI={
       btn.onclick=()=>{
         const a=btn.getAttribute('data-action');
         SFX.ui();
+        if(a.startsWith('hb')&&hbCheat(a))return;
         if(a.startsWith('tpB')){const bi=+a.slice(3);const B=BIOMES[bi];if((B.dim||0)!==G.dim)switchDimension(B.dim);teleportToDepth(B.d0+(bi%5===0?20:12));UI.clear();return;}
         switch(a){
           case 'heal': player.hp=player.maxHp;player.heat=0; UI.toast('❤️ HP восстановлено'); break;
@@ -2353,7 +2359,8 @@ function drawHUD(){
     if(G.dim===0){const ay=by+bh*(ARENA_Y0/maxD);ctx.fillStyle=G.wf.bossDead?'#5ab8ff':'#ff5aff';ctx.fillRect(bx-3,ay-1,bw+6,3);ctx.font='12px system-ui';ctx.fillText(G.wf.bossDead?'✔':'☠',bx+bw+4,ay+4);}
   }
   {const boss=G.scene==='mine'&&!G.bossCut?bossAlive():null;
-  if(boss){
+  if(boss&&boss.def.hb)hbDrawBar(ctx,boss,W,top);
+  else if(boss){
     const bw2=Math.min(W-40,420),bx2=W/2-bw2/2,by2=top+30;
     ctx.fillStyle='rgba(8,4,16,.82)';roundRect(ctx,bx2-4,by2-2,bw2+8,28,8);ctx.fill();
     const f=clamp(boss.hp/boss.maxHp,0,1),ph=boss.b?boss.b.phase:1;
@@ -2366,7 +2373,8 @@ function drawHUD(){
     ctx.fillStyle='#f0e0ff';ctx.font='800 12px system-ui,sans-serif';ctx.textAlign='center';
     ctx.fillText('ПОЖИРАТЕЛЬ БЕЗДНЫ · фаза '+ph,W/2,by2+11);
   }
-  if(G.bossCut&&G.scene==='mine'){
+  if(G.bossCut&&G.bossCut.hb&&G.scene==='mine')hbDrawCutHud(ctx,W,H);
+  else if(G.bossCut&&G.scene==='mine'){
     const c=G.bossCut,t=c.t,lb=Math.min(1,t/0.6,(c.dur-t)/0.6),bh=H*0.11*lb;
     ctx.fillStyle='#000';ctx.fillRect(0,0,W,bh);ctx.fillRect(0,H-bh,W,bh);
     if(t>3.5&&t<6.2){const a=Math.min(1,(t-3.5)/0.5,(6.2-t)/0.5);ctx.globalAlpha=a;ctx.textAlign='center';
@@ -2375,6 +2383,7 @@ function drawHUD(){
       ctx.shadowColor='#7a3aff';ctx.shadowBlur=18;ctx.fillText(title,W/2,H*0.74);ctx.shadowBlur=0;if(ctx.letterSpacing!==undefined)ctx.letterSpacing='0px';
       ctx.font='700 13px system-ui,sans-serif';ctx.fillStyle='#b8a0e0';ctx.fillText('Страж Ключа Бездны · Древнее Око Пустоты',W/2,H*0.74+22);ctx.globalAlpha=1;}
   }
+  hbDrawHudFx(ctx,W,H);
   if(G.bossFlash>0&&G.scene==='mine'){ctx.fillStyle='rgba(255,245,255,'+Math.min(0.85,G.bossFlash*0.7)+')';ctx.fillRect(0,0,W,H);}
   if(G.bossIntro>0&&G.scene==='mine'){
     const a=Math.min(1,G.bossIntro,3.2-G.bossIntro);

@@ -92,12 +92,34 @@ const Music={
       pad:{type:'sawtooth',lp:1100,vol:0.05,att:0.3,rel:0.6,det:10},
       mel:{inst:'epiano',vol:0.08,dens:0.72,oct:1,dur:0.45},
       bass:{vol:0.11,every:1,pulse:true},drone:{note:28,vol:0.045,lp:260},
-      drums:{vol:0.6,kick:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1],hat:[1,0,1,1,1,0,1,0,1,0,1,1,1,0,1,0]}}
+      drums:{vol:0.6,kick:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1],hat:[1,0,1,1,1,0,1,0,1,0,1,1,1,0,1,0]}},
+    /* Владыки Преисподней: тёмные, тягучие, но тихие — низкий гул и мерный пульс */
+    hb1:{root:38,scale:[0,1,3,5,7,8,10],prog:[0,5,1,4],barsPer:1,bpm:84,
+      pad:{type:'sawtooth',lp:620,vol:0.045,att:0.9,rel:1.3,det:11},
+      mel:{inst:'flute',vol:0.06,dens:0.45,oct:1,dur:0.9},
+      bass:{vol:0.1,every:1,pulse:true},drone:{note:26,vol:0.045,lp:200},
+      drums:{vol:0.45,kick:[1,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0],snare:[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0],hat:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0]}},
+    hb2:{root:37,scale:[0,1,3,5,7,8,10],prog:[0,1,5,4],barsPer:1,bpm:94,
+      pad:{type:'sawtooth',lp:780,vol:0.045,att:0.6,rel:1,det:12},
+      mel:{inst:'box',vol:0.055,dens:0.55,oct:1,dur:0.7},
+      bass:{vol:0.1,every:1,pulse:true},drone:{note:25,vol:0.045,lp:220},
+      drums:{vol:0.5,kick:[1,0,0,1,0,0,0,0,1,0,1,0,0,0,0,0],snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],hat:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,1]}},
+    hb3:{root:36,scale:[0,1,4,5,7,8,10],prog:[0,1,6,5],barsPer:1,bpm:104,
+      pad:{type:'sawtooth',lp:940,vol:0.05,att:0.4,rel:0.8,det:12},
+      mel:{inst:'epiano',vol:0.07,dens:0.66,oct:1,dur:0.5},
+      bass:{vol:0.11,every:1,pulse:true},drone:{note:24,vol:0.05,lp:240},
+      drums:{vol:0.56,kick:[1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,0],snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],hat:[1,0,1,0,1,0,1,1,1,0,1,0,1,0,1,1]}},
+    hbf:{root:33,scale:[0,1,3,5,7,8,11],prog:[0,5,1,4],barsPer:1,bpm:88,
+      pad:{type:'sawtooth',lp:560,vol:0.05,att:1.2,rel:1.6,det:13,wide:true},
+      mel:{inst:'glass',vol:0.06,dens:0.4,oct:2,dur:1.1},
+      bass:{vol:0.11,every:1,pulse:true},drone:{note:21,vol:0.055,lp:180},
+      drums:{vol:0.5,kick:[1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0],snare:[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0],hat:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0]}}
   },
   mtof(m){return 440*Math.pow(2,(m-69)/12);},
   setVol(v){AU.setMusicVol(v);},
   desired(){
-    if(G.scene==='mine'&&G.bossCut&&G.bossCut.t<3.4)return null;
+    if(G.scene==='mine'&&G.bossCut&&G.bossCut.t<(G.bossCut.hb?G.bossCut.roarT:3.4))return null;
+    if(G.scene==='mine'&&G.hb&&G.hb.m&&G.hb.m.alive){const ph=(G.hb.m.b&&G.hb.m.b.phase)||1;return G.hb.id==='archdemon'?(ph<=2?'hbf':'hb3'):'hb'+Math.min(3,ph);}
     if(G.scene==='mine'&&G.arenaFight){const b=bossAlive();return 'boss'+((b&&b.b&&b.b.phase)||1);}
     if(G.scene==='mine')return 'b'+biomeAt(Math.max(0,player.y)/TILE);
     return G.dim===1?'hlobby':'lobby';

@@ -222,6 +222,7 @@ function updatePlayerFx(dt){
   }
 }
 function playerDie(){
+  hbAbort();
   statAdd('deaths');
   let lost=0;
   const keys=Object.keys(player.inv);

@@ -132,6 +132,7 @@ function applyLighting(){
   const hbi=G.dim===1?biomeAt(depth):-1;
   if(hbi===7)dark=Math.max(dark,0.95);else if(hbi===8)dark=Math.max(dark,0.978);else if(hbi>=9)dark=Math.max(dark,0.968);
   if(G.dim===0&&depth>ARENA_Y0)dark=Math.min(dark,0.62);
+  {const hl=hbLightDark();if(hl>=0)dark=Math.min(dark,hl);}
   if(settings.quality==='low')dark=Math.max(0,dark-0.05);
   if(player.y<12*TILE)dark=Math.max(0.05,dark-0.12);
   if(cheats.megaLight)dark=Math.max(0,dark-0.7);
@@ -205,6 +206,7 @@ function applyLighting(){
         }
       }
     }
+    hbLightHoles(hole,W,H,sc);
     for(const m of mobs){
       if(m.def.light&&m.alive){hole((m.x-G.cam.x)*sc+W/2,(m.y-m.h*0.5-G.cam.y)*sc+H/2,m.def.light*TILE*sc,0.8);}
     }

@@ -540,6 +540,7 @@ function deathTint(m){
 }
 function drawMobSprite0(g,m,t){
   const def=m.def;
+  if(def.hb||def.mech==='hbecho'){hbDrawMob(g,m,t);return;}
   /* Ад: тёмные силуэты со светящимися акцентами */
   const HK=def.dim===1&&!HK_KEEP.has(def.id);
   const olOn=settings.quality!=='low'&&settings.outline!==false;

@@ -173,6 +173,16 @@ function makeTex(type,v){
       for(let i=0;i<3;i++){g.strokeStyle='rgba(180,240,255,.35)';g.lineWidth=0.8;g.beginPath();const x=R()*32,y=R()*32;g.arc(x,y,2+R()*3,0,Math.PI*1.4);g.stroke();}
       break;}
     case T_ARENA:{
+      if(v>=10){   /* Ад: кладка святилищ Владык — чёрный обсидиан с тлеющими швами и рунами */
+        const vv=v-10;g.fillStyle=['#231a1e','#281d20','#1e1619'][vv%3];g.fillRect(0,0,32,32);
+        for(let i=0;i<40;i++){g.fillStyle=shadeHex('#2a1e22',(R()-0.5)*0.6);g.fillRect(R()*32|0,R()*32|0,1+(R()*2|0),1);}
+        const off=vv%2?8:0;
+        g.fillStyle='rgba(255,90,30,.20)';g.fillRect(0,15,32,2);g.fillRect(off+7,0,2,15);g.fillRect(((off+23)%32),17,2,15);
+        g.fillStyle='rgba(0,0,0,.55)';g.fillRect(0,15.5,32,1);g.fillRect(off+7.5,0,1,15);g.fillRect(((off+23)%32)+0.5,17,1,15);
+        g.fillStyle='rgba(255,255,255,.06)';g.fillRect(0,0,32,1);g.fillRect(0,17,32,1);
+        if(vv===1){g.strokeStyle='rgba(255,120,50,.55)';g.lineWidth=1;g.beginPath();g.moveTo(20,4);g.lineTo(24,8);g.lineTo(20,12);g.moveTo(22,4);g.lineTo(22,12);g.stroke();}
+        if(vv===3){g.strokeStyle='rgba(255,140,60,.35)';g.lineWidth=0.8;g.beginPath();let x=4+R()*6,y=18+R()*4;g.moveTo(x,y);for(let k=0;k<4;k++){x+=3+R()*4;y+=(R()-0.5)*6;g.lineTo(x,y);}g.stroke();}
+        break;}
       g.fillStyle='rgba(0,0,0,.25)';g.fillRect(0,15,32,2);g.fillRect(15+(v%2?0:-8),0,2,15);g.fillRect(8+(v%2?8:0),17,2,15);
       g.strokeStyle='rgba(170,110,255,.25)';g.lineWidth=1;g.strokeRect(3.5,3.5,25,25);
       for(let i=0;i<2;i++){g.fillStyle='rgba(190,140,255,.45)';g.fillRect(R()*30|0,R()*30|0,2,1);}
@@ -216,6 +226,7 @@ function makeTex(type,v){
 }
 const TEXABLE=new Set([60,T_BRICK,T_WOOD,T_DIRT,T_STONE,T_CRYSTAL,T_MAGMA,T_OBS,T_BEDROCK,T_SPRING,T_HOT,T_VENT,T_BONE,T_ASH,T_BASALT,T_FLESH,T_SULFUR,T_BONEROCK,T_HELLSTONE,T_SOULSTONE,T_ARENA,T_SOULSAND,T_ASHVENT,T_FLESHPOD,T_SULFBOMB,T_CRUST,T_BSPIKE]);
 function texFor(type,tx,ty){
+  if(type===T_ARENA&&G.dim===1){let a=TEX.hbw;if(!a)a=TEX.hbw=[10,11,12,13].map(v=>makeTex(type,v));return a[hash2(tx,ty,7)&3];}
   let a=TEX[type];
   if(!a){a=TEX[type]=[0,1,2,3].map(v=>makeTex(type,v));}
   return a[hash2(tx,ty,7)&3];
@@ -227,6 +238,7 @@ function makeAtlasPattern(g,variants,salt){
   return g.createPattern(c,'repeat');
 }
 function texPat(g,type){
+  if(type===T_ARENA&&G.dim===1){if(!TEXPAT.hbw){if(!TEX.hbw)TEX.hbw=[10,11,12,13].map(v=>makeTex(type,v));TEXPAT.hbw=makeAtlasPattern(g,TEX.hbw,977);}return TEXPAT.hbw;}
   let pt=TEXPAT[type];
   if(!pt){if(!TEX[type])TEX[type]=(type===T_BONEROCK?[0,1,2,3,4,5]:[0,1,2,3]).map(v=>makeTex(type,v));pt=TEXPAT[type]=makeAtlasPattern(g,TEX[type],type*31+7);}
   return pt;

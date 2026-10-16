@@ -59,8 +59,9 @@ function anchorList(){
         let bad=false;
         for(const [dx,dy] of [[-4,-5],[4,-5],[-4,1],[4,1],[0,-2],[-4,-2],[4,-2],[0,1],[0,-5]]){if(structAt(x+dx,y+dy)){bad=true;break;}}
         if(G.dim===0){const hs=heartSpot();if(Math.abs(y-hs.y)<12&&Math.abs(x-hs.x)<14)bad=true;}
+        if(G.dim===1&&hbRectHit(x-5,y-6,x+5,y+2))bad=true;
         if(!bad)break;
-        x=8+((x-8+29)%(MW-16));if(tr===3)y=Math.min(y1,y+9);
+        x=8+((x-8+29)%(MW-16));if(tr===3)y=Math.min(y1,y+9);if(tr===4&&G.dim===1)y=Math.max(y0,y-30);
       }
       _anList.push({id:b*3+k,bi:off+b,x:x,y:y});
     }
@@ -84,6 +85,7 @@ function genTileAt(wx,wy){
   if(wy<0)return {t:T_AIR,o:0};
   const sz=getSafeZoneTile(wx,wy);
   if(sz!==-1)return {t:sz,o:0};
+  if(G.dim===1){const hb=hbTile(wx,wy);if(hb)return hb;}
   {const at=anchorTile(wx,wy);if(at!==-1)return {t:at,o:0};}
   if(G.dim===1)return genHellTileAt(wx,wy);
   if(wy>=ARENA_Y0-12){const at=arenaTile(wx,wy);if(at!==-1)return {t:at,o:0};}

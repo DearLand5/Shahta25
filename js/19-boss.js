@@ -27,6 +27,7 @@ function startBossFight(){
   shake(6);SFX.geyser();vib(80);
 }
 function onBossKilled(m){
+  if(m.def.hb){hbOnKilled(m);return;}
   G.arenaFight=false;bossFx.length=0;
   G.wf.bossDead=true;
   const first=!player.prog.key;
@@ -42,6 +43,7 @@ function onBossKilled(m){
 /* ---------- катсцена появления босса и анимация смерти ---------- */
 function updateBossCut(dt){
   const c=G.bossCut;if(!c)return;
+  if(c.hb){hbCutUpdate(dt);return;}
   c.t+=dt;const m=c.m;
   Input.digActive=false;player.vx*=0.8;
   if(m&&m.alive){m.spawnS=clamp((c.t-1.2)/2.2,0,1);m.spawnS=1-Math.pow(1-m.spawnS,3);m.invuln=Math.max(m.invuln,1);m.x=c.bx;m.y=c.by+m.h*0.5;}
@@ -56,12 +58,14 @@ function updateBossCut(dt){
 }
 function bossCutCam(){
   const c=G.bossCut;if(!c)return null;
+  if(c.hb)return hbCutCam();
   const k=c.t<1.2?c.t/1.2:c.t<5.0?1:Math.max(0,1-(c.t-5.0)/1.4);
   const e=k*k*(3-2*k);
   return {x:lerp(player.x,c.bx,e),y:lerp(player.y-player.h*0.5-10,c.by+20,e)};
 }
 function drawBossCutFx(g){
   const c=G.bossCut;if(!c)return;
+  if(c.hb){hbDrawCutFx(g,c);return;}
   const t=c.t,o=clamp((t-0.6)/1.2,0,1)*(t<4.2?1:Math.max(0,1-(t-4.2)/0.8));
   if(o<=0)return;
   g.save();g.translate(c.bx,c.by);
@@ -83,6 +87,7 @@ function onBossDeathStart(m){
 }
 function updateBossDeath(rdt){
   const d=G.bossDeath;if(!d)return;
+  if(d.hb){hbUpdateDeath(d,rdt);return;}
   d.t+=rdt;const m=d.m;m.dieK=clamp(d.t/2.4,0,1);m.hurt=d.t<2.4&&Math.floor(d.t*14)%2?0.05:0;
   if(d.t<2.4){if(Math.random()<rdt*7){const a=Math.random()*TAU,r=rnd(10,60);explodeFx(d.x+Math.cos(a)*r,d.y-m.h*0.5+Math.sin(a)*r);}shake(1.5);}
   if(d.t>=2.4&&!d.flashed){d.flashed=true;G.bossFlash=1;shake(20);SFX.boom();vib(250);
@@ -95,7 +100,8 @@ function updateBossDeath(rdt){
 }
 function explodeFx(x,y){burst(x,y,10,Math.random()<0.5?'#ffffff':'#c8a0ff',220,3);if(Math.random()<0.4)SFX.hit&&SFX.hit();}
 function drawBossDeath(g){
-  const d=G.bossDeath;if(!d)return;const m=d.m;
+  const d=G.bossDeath;if(!d)return;
+  if(d.hb){hbDrawDeath(g,d);return;}const m=d.m;
   if(d.t<2.4){const k=d.t/2.4;const ox=m.x;m.x=d.x+rnd(-1,1)*(2+k*6);m.alpha=1;
     g.save();g.translate(0,-k*6);drawMobSprite(g,m,G.time);g.restore();m.x=ox;
     /* лучи света из трещин */
