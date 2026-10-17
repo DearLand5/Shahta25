@@ -16,7 +16,7 @@ index.html        разметка: <canvas id="c"> и <div id="ui">, подкл
 css/fonts.css     шрифты Rubik и Russo One, встроены как data-URI (работают без интернета)
 css/style.css     все стили интерфейса
 fonts/OFL.txt     лицензия шрифтов
-js/NN-*.js        код игры, 47 файлов
+js/NN-*.js        код игры, 48 файлов
 concepts/         концепт-картинки боссов (по ним нарисованы модели)
 tools/            боты для баланса боссов (в игру не подключаются): boss-bot.js — честный бой, boss-dps.js — замер
 ```
@@ -53,7 +53,8 @@ tools/            боты для баланса боссов (в игру не 
 | 44-bossfight | правила боя с боссами (Владыки и Пожиратель): пояс 8 аптечек `G.bf.pots`, лечение за 2 с, рана `player.wound`, коронные удары `BF_ULTS` (gap/quake/beam/nova), рывок `bfDash`, окна ×2 / ×0.7 `bfDmgMul`, ярость после 150 с |
 | 45-lilac-gen | Лиловые небеса (`G.dim===2`, биомы 10–16): генератор `genLilacTileAt`/`lilacAir` — у каждого биома своя форма пещер (соты `lilHex`, кварталы `lilTownTile`, озёра-чаши `lilLakeSlab`), дно мира `LIL_FLOOR`, особые блоки `lilacSpecialBreak` |
 | 47-lilac-art | рисунки Лиловых небес: текстуры пород 40–53 `lilacTex`, стены `lilacWall`, самородки по `ORES[].sh` `drawLilacOre`, фон `drawLilacBackdrop`, атмосфера, декор пустот `lilacAirDecor`, кромки, частицы |
-| 46-lilac-lobby | лобби «Деревня Вечного Рассвета» `renderLilacLobby`, здания `lilacOpen`, окно врат `UI.lportal`, переход `lilacJump` (пока без катсцены) |
+| 46-lilac-lobby | лобби «Деревня Вечного Рассвета» `renderLilacLobby`: небо дня и ночи, луна-глаз, пряничные домики, деревья с глазами, фонари, качели (`llbScenery`), здания `drawLilacBuilding`, открытие зданий `lilacOpen`, окно врат `UI.lportal`, переход `lilacJump` (пока без катсцены). Цвета дня/ночи смешивай `llbMix` (понимает rgba) |
+| 48-lilac-village | механика деревни: сутки `lilNight()` (6 мин, ночь ~1 мин; в тест-панели «Мир» — переключатель), Перегонный куб `UI.lstill` (очередь `player.lfurn`, слитки i37–i61 и эссенции `LIL_ESS`, вкладки SMELT `lingot`/`less`), Доска пропавших `UI.lboard` (`player.lcontracts`, `lcontractEvent`), Карусель удачи `UI.lcasino` с игрой `cgCarousel`, Кузница Зари `UI.lforge`, облик окон `LIL_SKIN` (подменяет заголовки Ада в `UI.build`) |
 
 Чтобы найти, где что-то определено, ищи по всем файлам (`grep -n "function имя\|const имя" js/*.js`), а не полагайся на таблицу.
 

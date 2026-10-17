@@ -223,7 +223,7 @@ function applyBalance16(){
   for(let k=0;k<ORES.length;k++){const O=ORES[k];if(!O||O.dim!==1)continue;old[k]=O.price;O.price=Math.round(O.price*(PM[O.tier]||2)/50)*50;}
   for(const r of SMELT){
     if(r.tab==='ingot'){const o=+r.out.slice(1);r.c=Math.max(100,Math.round((old[o]||0)*0.3/50)*50);r.time=Math.max(1.5,r.time*0.8);}
-    else r.c=Math.round((r.c||0)*0.4/500)*500;
+    else if(r.tab==='alloy'||r.tab==='comp')r.c=Math.round((r.c||0)*0.4/500)*500;
   }
   const sc=(r)=>{if(!r)return r;const o=JSON.parse(JSON.stringify(r));
     if(o.c)o.c=o.c>=10000?Math.round(o.c*0.42/1000)*1000:o.c;

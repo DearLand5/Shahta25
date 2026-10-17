@@ -53,7 +53,7 @@ function update(dt){
 
   const pd=player.y/TILE;
   if(pd>player.maxDepth)player.maxDepth=Math.floor(pd);
-  if(G.dim===2&&pd>(player.prog.lilacDepth||0))player.prog.lilacDepth=Math.floor(pd);
+  if(G.dim===2&&pd>(player.prog.lilacDepth||0)){player.prog.lilacDepth=Math.floor(pd);lcontractEvent('depth',0,pd);}
   const bodyT=getTile(Math.floor(player.x/TILE),Math.floor((player.y-player.h*0.4)/TILE));
   const headT=getTile(Math.floor(player.x/TILE),Math.floor((player.y-player.h+6)/TILE));
   const inWaterP=isLiq(bodyT);

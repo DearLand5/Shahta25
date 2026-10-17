@@ -261,6 +261,8 @@ function buildSaveData(){
       contracts:JSON.parse(JSON.stringify(player.contracts||null)),
       stackLvl:player.stackLvl||0,mats:JSON.parse(JSON.stringify(player.mats||{})),
       furn:(()=>{const F=JSON.parse(JSON.stringify(furn()));F.ts=Date.now();return F;})(),
+      lfurn:(()=>{const F=JSON.parse(JSON.stringify(lstill()));F.ts=Date.now();return F;})(),
+      lcontracts:JSON.parse(JSON.stringify(player.lcontracts||null)),
       hitems:JSON.parse(JSON.stringify(player.hitems||{})),relics:JSON.parse(JSON.stringify(player.relics||{})),relEq:(player.relEq||[]).slice(),
       rit:JSON.parse(JSON.stringify(player.rit||{})),altarXp:player.altarXp||0,soulBuy:player.soulBuy||0,wingT:player.wingT||0,
       stats:JSON.parse(JSON.stringify(player.stats||{})),bestiary:JSON.parse(JSON.stringify(player.bestiary||{})),
@@ -335,6 +337,10 @@ function applySaveData(d){
       if(p.gasMask&&!player.hitems.resp)player.hitems.resp=1;
       if(p.furn&&Array.isArray(p.furn.q)){player.furn={q:p.furn.q.filter(j=>SMELT_BY[j.r]&&j.n>0),lvl:clamp(p.furn.lvl|0,0,3),ts:p.furn.ts||Date.now()};
         const el=clamp((Date.now()-(p.furn.ts||Date.now()))/1000,0,4*3600);if(el>0)updateFurnace(el,true);}else player.furn={q:[],lvl:0,ts:Date.now()};
+      /* Перегонный куб Лиловых небес (в старых сейвах нет — пустой) */
+      if(p.lfurn&&Array.isArray(p.lfurn.q)){player.lfurn={q:p.lfurn.q.filter(j=>SMELT_BY[j.r]&&j.n>0),lvl:clamp(p.lfurn.lvl|0,0,3),ts:p.lfurn.ts||Date.now()};
+        const el=clamp((Date.now()-(p.lfurn.ts||Date.now()))/1000,0,4*3600);if(el>0)updateStill(el,true);}else player.lfurn={q:[],lvl:0,ts:Date.now()};
+      player.lcontracts=(p.lcontracts&&Array.isArray(p.lcontracts.list))?p.lcontracts:null;
       player.barricadeLvl=clamp(Math.floor(p.barricadeLvl||1),1,7);
       player.barricades=player.barricadeBought?Math.max(0,Math.floor(p.barricades||0)):0;
       player.drills=player.drillBought?Math.max(0,Math.floor(p.drills||0)):0;

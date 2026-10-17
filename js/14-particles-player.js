@@ -67,6 +67,7 @@ function addOre(id,n){
   n=n||1;
   if(player.stats)player.stats.ore=(player.stats.ore||0)+n;
   if(G.dim===1&&ORES[id]&&ORES[id].dim===1&&typeof contractEvent==='function')contractEvent('ore',id,n);
+  if(G.dim===2&&ORES[id]&&ORES[id].dim===2&&typeof lcontractEvent==='function')lcontractEvent('ore',id,n);
   if(cheats.god){player.inv[id]=(player.inv[id]||0)+n;return true;}
   const half=(k,q)=>Math.floor(q*ORES[k].price*0.5);
   if(!player.inv[id]&&invCount()>=player.slots){

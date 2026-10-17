@@ -78,6 +78,11 @@ const Music={
       pad:{type:'triangle',lp:1400,vol:0.045,att:2.4,rel:3,det:5,shimmer:true},
       mel:{inst:'glass',vol:0.075,dens:0.4,oct:2,dur:1.8},
       bell:{prob:0.14,vol:0.03,oct:2},bass:{vol:0.06,every:2}},
+    /* ночь в деревне: та же шкатулка, но в миноре, медленнее и с «расстроенной» нотой */
+    llobbyN:{root:50,scale:[0,1,3,5,7,8,11],prog:[0,5,1,4],barsPer:2,bpm:52,
+      pad:{type:'triangle',lp:800,vol:0.045,att:3,rel:3.6,det:11},
+      mel:{inst:'box',vol:0.06,dens:0.28,oct:2,dur:2},
+      bass:{vol:0.06,every:2},drone:{note:38,vol:0.03,lp:200},amb:{wind:0.018,wlp:320,creak:0.04}},
     b10:{root:52,scale:[0,2,4,7,9],prog:[0,3,5,4],barsPer:2,bpm:60,
       pad:{type:'triangle',lp:1300,vol:0.05,att:2.6,rel:3,det:5},
       mel:{inst:'kalimba',vol:0.085,dens:0.38,oct:1,dur:1.5},
@@ -156,7 +161,7 @@ const Music={
     if(G.scene==='mine'&&G.hb&&G.hb.m&&G.hb.m.alive){const ph=(G.hb.m.b&&G.hb.m.b.phase)||1;return G.hb.id==='archdemon'?(ph<=2?'hbf':'hb3'):'hb'+Math.min(3,ph);}
     if(G.scene==='mine'&&G.arenaFight){const b=bossAlive();return 'boss'+((b&&b.b&&b.b.phase)||1);}
     if(G.scene==='mine')return 'b'+biomeAt(Math.max(0,player.y)/TILE);
-    return G.dim===1?'hlobby':G.dim===2?'llobby':'lobby';
+    return G.dim===1?'hlobby':G.dim===2?(lilNight()>0.5?'llobbyN':'llobby'):'lobby';
   },
   update(){
     if(!AU.ready||!AU.ctx||AU.ctx.state!=='running')return;

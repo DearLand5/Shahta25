@@ -193,6 +193,7 @@ const UI={
     const fresh=!this.el;
     this.clear();
     const d=document.createElement('div');
+    if(G.dim===2&&typeof lilacSkinHtml==='function')html=lilacSkinHtml(name,html);
     d.className='panel';d.innerHTML=html;cleanEmoji(d);
     if(fresh&&name!=='menu'&&name!=='death')SFX.open();
     uiRoot.appendChild(d);
@@ -814,7 +815,7 @@ const UI={
   },
 
   market(){
-    const hell=G.dim===1;
+    const hell=G.dim>=1;
     const preview=(k,n)=>{const base=orePrice(k);if(!ORES[k].dim)return Math.round(base*n);let sv=(G.wf.sat&&G.wf.sat[k])||0,sum=0;for(let i=0;i<n;i++){sum+=base/(1+sv/SAT_ORE);sv++;}return Math.round(sum);};
     const previewM=(id,n)=>{const base=matValue(id);let sv=(G.wf.sat&&G.wf.sat['m:'+id])||0,sum=0;for(let i=0;i<n;i++){sum+=base/(1+sv/60);sv++;}return Math.round(sum);};
     const sellN=(k,n)=>{n=Math.min(n,player.inv[k]||0);if(n<=0)return 0;const g=sellOre(k,n);player.money+=g;player.inv[k]-=n;if(player.inv[k]<=0)delete player.inv[k];return g;};
@@ -1928,7 +1929,7 @@ const UI={
     }else if(tab==='world'){
       const off=dimInfo().b0;
       body=`<div class="sect" style="border:none;margin-top:0;padding-top:0">Измерение: ${DIM_NAMES[G.dim]}</div>
-        <div class="cheatGrid">${dimBtns('')}${act('toLobby','🏠 В лобби')}</div>
+        <div class="cheatGrid">${dimBtns('')}${act('toLobby','🏠 В лобби')}${G.dim===2?act('lilNight',lilNight()>0.5?'☀ День в деревне':'🌙 Ночь в деревне'):''}</div>
         <div class="sect">Телепорт по биомам</div>
         <div class="cheatGrid">${Array.from({length:dimInfo().bn},(_,b)=>act('tpB'+(off+b),'⬇ '+BIOMES[off+b].n+' ('+BIOMES[off+b].d0+' м)')).join('')}</div>
         <div class="row" style="gap:6px;margin-top:8px">
@@ -2049,6 +2050,7 @@ const UI={
           case 'contractsDone': ensureContracts();for(const c of player.contracts.list){c.have=c.need;c.ready=true;} UI.toast('📜 Контракты выполнены — забери на Доске'); break;
           case 'mask': player.gasMask=!player.gasMask; UI.toast('😷 Противогаз: '+(player.gasMask?'есть':'нет')); break;
           case 'dimSwap': switchDimension(G.dim===0?1:0); UI.toast('Измерение: '+DIM_NAMES[G.dim]); UI.clear(); return;
+          case 'lilNight': lilSetNight(!(lilNight()>0.5)); Music.lastPick=0; UI.toast(lilNight()>0.5?'🌙 Ночь':'☀ День'); UI.clear(); return;
           case 'dim0': case 'dim1': case 'dim2': switchDimension(+a.slice(3)); UI.toast('Измерение: '+DIM_NAMES[G.dim]); UI.clear(); return;
           case 'cutscene': startCutscene(G.dim===0?1:0); return;
           case 'toLobby': if(G.scene==='mine')exitMine();UI.clear();return;

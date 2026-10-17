@@ -82,7 +82,7 @@ const SMELT_BY={};for(const r of SMELT)SMELT_BY[r.id]=r;
 /* цена слитков и сплавов у скупщика Ада: сырьё + работа печи с небольшой наценкой */
 function matValue(id){
   if(/^i\d+$/.test(id)){const o=+id.slice(1);if(!ORES[o])return 0;return Math.round(orePrice(o)*3.9);}
-  const r=SMELT.find(q=>q.out===id);if(!r||r.tab!=='alloy')return 0;
+  const r=SMELT.find(q=>q.out===id);if(!r||(r.tab!=='alloy'&&r.tab!=='less'))return 0;
   let v=r.c||0;for(const k in (r.m||{}))v+=matValue(k)*r.m[k];return Math.round(v*1.08);
 }
 function matSatMult(id){const sv=(G.wf&&G.wf.sat&&G.wf.sat['m:'+id])||0;return 1/(1+sv/60);}
@@ -257,6 +257,7 @@ function updateFxLists(dt){
   if(G.wf&&G.wf.sat){for(const k in G.wf.sat){G.wf.sat[k]*=Math.exp(-dt/150);if(G.wf.sat[k]<0.5)delete G.wf.sat[k];}}
   if(player.rit){for(const k in player.rit){player.rit[k]-=dt;if(player.rit[k]<=0){delete player.rit[k];if(k==='blood')recomputeStats();UI.toast('Ритуал окончен');}}}
   updateFurnace(dt);
+  if(typeof updateStill==='function')updateStill(dt);
 }
 function drawFxLists(g){
   for(let i=slashes.length-1;i>=0;i--){const s2=slashes[i];s2.t-=1/60;if(s2.t<=0){slashes.splice(i,1);continue;}
