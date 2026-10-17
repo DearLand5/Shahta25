@@ -67,7 +67,7 @@ function hbDrawHudFx(ctx,W,H){
     ctx.font='600 13px '+HUDF;ctx.fillStyle='#f0dcc8';
     const tr=o.b.trophy?MATS[o.b.trophy].ic+' '+MATS[o.b.trophy].n:'🗝 Ключ Лиловых небес';
     ctx.fillText(tr+' · +'+fmt(o.souls)+' душ · +'+fmt(o.coins)+' монет',W/2,H*0.39+24);
-    if(!o.b.trophy)ctx.fillText('Врата Пустоты в лобби Ада ждут. Лиловые небеса откроются в следующем обновлении.',W/2,H*0.39+44);
+    if(!o.b.trophy)ctx.fillText('Ключ у тебя — Врата Пустоты в лобби Ада ведут в Лиловые небеса.',W/2,H*0.39+44);
     else{const left=HB_MINIS.filter(b=>!hbKills(b.id)).length;ctx.fillText(left?'Осталось Владык: '+left:'Все пять трофеев собраны — создай Печать Преисподней!',W/2,H*0.39+44);}
     ctx.restore();}
 }
