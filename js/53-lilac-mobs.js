@@ -48,6 +48,10 @@ const LIL_MOBS=[
   lmDef(6,{id:'lnightmare',name:'Кошмар',spd:96,aggro:460,w:52,h:44,fly:true,ghost:true,truthOnly:true,k:1.0,kd:1.3,c1:'#1a1028',c2:'#ffc040',dd:30})
 ];
 for(const d of LIL_MOBS)MOBDEFS.push(d);
+/* размер окна обводки (доля от max(w,h)): замерено по самой широкой позе модели в обоих обликах.
+   Обводка стоит пропорционально площади окна, у общей формулы запас был лишним */
+const LM_OR={lbunny:1.32,lbutterfly:1.1,ldaisy:1.1,lglassbird:1.12,lstatue:1.05,lchime:1.1,lbee:1.32,lslime:1.1,lwaxknight:1.05,ldoll:1.15,lsoldier:1.1,ljack:1.3,
+  lrosehound:1.0,lgardener:1.1,lfairy:1.15,lmirror:1.1,lswan:1.05,lfrog:1.16,lsheep:1.16,lsandman:1.1,lnightmare:0.95,lmimic:1.1};
 /* описания для бестиария */
 Object.assign(MOB_LORE,{
   lbunny:'Прыгает к тебе, перед броском приседает. В Истине — без шкуры, с длинными руками.',

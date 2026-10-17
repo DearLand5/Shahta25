@@ -644,7 +644,7 @@ function drawMobSprite0(g,m,t){
   const bob=Math.sin(t*4+m.phase)*(def.fly?3:1.4);
   const ty=-m.h*0.5+bob;
   const s=Math.max(m.w,m.h)/34;
-  const OR=Math.max(m.w,m.h)*1.3+16,dark=def.dim===1||(def.boss&&false);
+  const OR=(def.lm||def.id==='lmimic')?Math.max(m.w,m.h)*(LM_OR[def.id]||1.2)+8:Math.max(m.w,m.h)*1.3+16,dark=def.dim===1||(def.boss&&false);
   const olTh=-1.2;
   OL.shade={h:m.h,top:dark?0.1:0.16,bot:def.fly?0.26:0.36};
   withOutline(g,0,-m.h*0.5,OR,OR,dark?'rgba(5,2,4,.96)':'rgba(24,15,10,.92)',olTh,(g)=>{

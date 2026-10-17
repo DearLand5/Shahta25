@@ -230,7 +230,7 @@ const UI={
         <button class="btn alt" id="mAbout">${ICONS.book}Об игре</button>
         ${settings.cheatsUnlocked?`<button class="btn alt" id="mCheat" style="border-color:#5ea85e">${ICONS.wrench}Тест-панель</button>`:`<button class="btn alt" id="mHow">${ICONS.help}Как играть</button>`}
       </div>
-      <div class="ver">Обновление «Владыки Преисподней» · v22</div></div></div>
+      <div class="ver">Обновление «Лиловые небеса» · v23</div></div></div>
     `);
     d.classList.add('menuPanel');
     d.querySelector('#mPlay').onclick=()=>{SFX.ui();AU.init();AU.resume();if(canResumeMine()){resumeMine();return;}G.scene='lobby';lobbyPlayer.x=200;UI.close();};
@@ -1179,11 +1179,13 @@ const UI={
         ${reqs.map(r=>`<div class="chk ${r.ok?'ok':r.opt?'':'no'}" ${!r.ok&&r.opt?'style="opacity:.7"':''}>${r.ok?'✔':r.opt?'○':'✘'} ${r.t}${r.opt?' <span class="tiny">(необязательно)</span>':''}<b>${r.v}</b></div>`).join('')}
         <p class="tiny" style="margin-top:8px">Сердце, Ключ и 2 000 000 монет уйдут на открытие портала.</p>`}
       </div>
+      ${open&&player.prog.lilacOpen?`<button class="btn" id="poLil">🌸 В Лиловые небеса</button>`:''}
       ${open?`<button class="btn" id="poGo">🔥 Отправиться в Ад</button>`:`<button class="btn" id="poOpen" ${all?'':'disabled'}>🔥 Открыть портал</button>`}
       <button class="btn alt" id="poBack">Закрыть</button>
     `);
     SFX.portal();
     if(dd.querySelector('#poGo'))dd.querySelector('#poGo').onclick=()=>startCutscene(1);
+    if(dd.querySelector('#poLil'))dd.querySelector('#poLil').onclick=()=>startCutscene(2);
     if(dd.querySelector('#poOpen'))dd.querySelector('#poOpen').onclick=()=>{
       if(!portalReqs().every(r=>r.ok||r.opt)){UI.toast('Не все условия выполнены');return;}
       if(!cheats.infMoney)player.money-=PORTAL_COST;

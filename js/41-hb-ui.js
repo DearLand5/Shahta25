@@ -117,6 +117,22 @@ function lilacReqs(){
   ];
 }
 UI.portal3=function(){
+  if(player.prog.lilacOpen){   /* врата уже открыты — путь свободный */
+    const d=this.build('portal3',`
+      <div class="card hell" style="max-width:440px;width:96vw;text-align:center">
+        <h3 style="text-align:center">🕳 Врата Пустоты</h3>
+        <div class="lilacGate keyed open"></div>
+        <p class="muted">Врата открыты навсегда. За ними — <b style="color:#d8b8ff">Лиловые небеса</b> и Деревня Вечного Рассвета.</p>
+      </div>
+      <button class="btn" id="p3Go">🌸 В Лиловые небеса</button>
+      <button class="btn alt" id="p3Home">🌄 Вернуться на Землю надежды</button>
+      <button class="btn alt" id="p3Back">Закрыть</button>`);
+    SFX.portal();
+    d.querySelector('#p3Go').onclick=()=>startCutscene(2);
+    d.querySelector('#p3Home').onclick=()=>startCutscene(0);
+    d.querySelector('#p3Back').onclick=()=>{SFX.uiBack();UI.close();};
+    return;
+  }
   const reqs=lilacReqs(),all=reqs.every(r=>r.ok);
   const d=this.build('portal3',`
     <div class="card hell" style="max-width:480px;width:96vw;text-align:center">
@@ -124,7 +140,7 @@ UI.portal3=function(){
       <div class="lilacGate${player.prog.lilacKey?' keyed':''}"></div>
       <p class="muted">За вратами — <b style="color:#d8b8ff">Лиловые небеса</b>, третье измерение. Врата откроются лишь тому, кто покорил Ад целиком.</p>
       ${reqs.map(r=>`<div class="chk ${r.ok?'ok':'no'}">${r.ok?'✔':'✘'} ${r.t}<b>${r.v}</b></div>`).join('')}
-      <p class="tiny" style="margin-top:8px">Ключ, 40 000 000 монет и 6 666 душ уйдут на открытие врат.</p>
+      <p class="tiny" style="margin-top:8px">40 000 000 монет и 6 666 душ уйдут на открытие врат, Ключ останется у тебя. Врата откроются навсегда.</p>
     </div>
     <button class="btn" id="p3Open" ${all?'':'disabled'}>🌌 Открыть врата</button>
     <button class="btn alt" id="p3Home">🌄 Вернуться на Землю надежды</button>
@@ -132,14 +148,12 @@ UI.portal3=function(){
   SFX.portal();
   d.querySelector('#p3Open').onclick=()=>{
     if(!lilacReqs().every(r=>r.ok)){UI.toast('Не все условия выполнены');return;}
-    /* измерения ещё нет: ничего не списываем */
-    SFX.portal();vib(80);
-    UI.build('portal3',`<div class="card hell" style="max-width:440px;width:96vw;text-align:center">
-      <h3 style="text-align:center">🌌 Лиловые небеса</h3><div class="lilacGate keyed open"></div>
-      <p class="muted">Врата отзываются на Ключ, но за ними пока лишь тишина и лиловый свет.</p>
-      <div class="chk no">🔒 Лиловые небеса пока закрыты<b>скоро</b></div>
-      <p class="tiny" style="margin-top:8px">Ничего не потрачено. Измерение появится в следующем обновлении.</p></div>
-      <button class="btn alt" id="p3B2">Понятно</button>`).querySelector('#p3B2').onclick=()=>{SFX.uiBack();UI.close();};
+    /* ключ остаётся у шахтёра (он нужен и дальше), монеты и души уходят на открытие */
+    if(!cheats.infMoney)player.money-=LILAC_COST.c;
+    player.souls=(player.souls||0)-LILAC_COST.s;
+    player.prog.lilacOpen=true;
+    SFX.portal();vib(80);saveGame();
+    startCutscene(2);
   };
   d.querySelector('#p3Home').onclick=()=>startCutscene(0);
   d.querySelector('#p3Back').onclick=()=>{SFX.uiBack();UI.close();};

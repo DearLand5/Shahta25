@@ -39,7 +39,8 @@ const LG_ING={
   armor:[{i37:8,i38:6},{i40:6,i42:6},{i45:8,i47:4},{i48:8,i50:5},{i54:4,i57:6}],
   gun:  [{i38:5,i37:5},{i42:6,i41:4},{i47:5,i44:4},{i51:3,i49:6},{i54:4,i56:6}]
 };
-const LG_MONEY=[14000000,26000000,46000000,80000000,130000000],LG_KMUL={pick:1,sword:0.9,armor:1.15,gun:1.25},LG_DREAM=[2,4,6,9,12];
+/* цены по замеру дохода (lecon.js): комплект уровня ≈ 40 минут копания в биоме, где на него зарабатывают */
+const LG_MONEY=[6000000,12000000,23000000,42000000,60000000],LG_KMUL={pick:1,sword:0.9,armor:1.15,gun:1.25},LG_DREAM=[2,4,6,9,12];
 function lgCost(kind,i){
   const m=Object.assign({},LG_ING[kind][i]);m[LG_ESS[i]]=(m[LG_ESS[i]]||0)+3+(i>2?1:0);if(i===4)m.eMirror=2;
   return {c:Math.round(LG_MONEY[i]*LG_KMUL[kind]/100000)*100000,m,d:LG_DREAM[i]};
