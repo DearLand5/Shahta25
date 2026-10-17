@@ -422,7 +422,7 @@ function llbUnderground(g,x0w,x1w,t,N,glowList,mx){
   /* светящиеся кристаллы и косточки (ночью кристаллы краснеют) */
   for(let x=Math.floor(x0w/150)*150;x<x1w;x+=150){const i=x/150|0,r=llbRand(i*7+13);
     const cx=x+llbRand(i+21)*110,cy=60+llbRand(i+22)*160;
-    if(r<0.5){const col=N>0.5?'#ff5a70':['#d8a8ff','#a8e8ff','#ffb0e0'][i%3],L=shadeHex(col,0.35),D=shadeHex(col,-0.4),tw=0.7+0.3*Math.sin(t*1.4+i);
+    if(r<0.5){const col=N>0.5?'#ff5a70':['#d8a8ff','#a8e8ff','#ffb0e0'][((i%3)+3)%3],L=shadeHex(col,0.35),D=shadeHex(col,-0.4),tw=0.7+0.3*Math.sin(t*1.4+i);
       for(let k=0;k<3;k++){const h=8+k*4-(k===2?6:0),a=(k-1)*0.45;g.save();g.translate(cx+(k-1)*4,cy);g.rotate(a);
         g.fillStyle=D;g.beginPath();g.moveTo(0,-h);g.lineTo(3,-h*0.6);g.lineTo(3,0);g.lineTo(-3,0);g.lineTo(-3,-h*0.6);g.closePath();g.fill();
         g.fillStyle=col;g.beginPath();g.moveTo(0,-h);g.lineTo(0,0);g.lineTo(-3,0);g.lineTo(-3,-h*0.6);g.closePath();g.fill();
