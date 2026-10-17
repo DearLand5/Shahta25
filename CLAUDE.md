@@ -16,7 +16,7 @@ index.html        разметка: <canvas id="c"> и <div id="ui">, подкл
 css/fonts.css     шрифты Rubik и Russo One, встроены как data-URI (работают без интернета)
 css/style.css     все стили интерфейса
 fonts/OFL.txt     лицензия шрифтов
-js/NN-*.js        код игры, 48 файлов
+js/NN-*.js        код игры, 49 файлов
 concepts/         концепт-картинки боссов (по ним нарисованы модели)
 tools/            боты для баланса боссов (в игру не подключаются): boss-bot.js — честный бой, boss-dps.js — замер
 ```
@@ -55,6 +55,7 @@ tools/            боты для баланса боссов (в игру не 
 | 47-lilac-art | рисунки Лиловых небес: текстуры пород 40–53 `lilacTex`, стены `lilacWall`, самородки по `ORES[].sh` `drawLilacOre`, фон `drawLilacBackdrop`, атмосфера, декор пустот `lilacAirDecor`, кромки, частицы |
 | 46-lilac-lobby | лобби «Деревня Вечного Рассвета» `renderLilacLobby`: небо дня и ночи, луна-глаз, пряничные домики, деревья с глазами, фонари, качели (`llbScenery`), здания `drawLilacBuilding`, открытие зданий `lilacOpen`, окно врат `UI.lportal`, переход `lilacJump` (пока без катсцены). Цвета дня/ночи смешивай `llbMix` (понимает rgba) |
 | 48-lilac-village | механика деревни: сутки `lilNight()` (6 мин, ночь ~1 мин; в тест-панели «Мир» — переключатель), Перегонный куб `UI.lstill` (очередь `player.lfurn`, слитки i37–i61 и эссенции `LIL_ESS`, вкладки SMELT `lingot`/`less`), Доска пропавших `UI.lboard` (`player.lcontracts`, `lcontractEvent`), Карусель удачи `UI.lcasino` с игрой `cgCarousel`, Кузница Зари `UI.lforge`, облик окон `LIL_SKIN` (подменяет заголовки Ада в `UI.build`) |
+| 49-lilac-veil | Пелена и Рассудок: `player.sanity` (0–100, тает в шахте по `SAN_RATE`, держат свет, якоря, Настой ясности `ltea`), доля Истины `veilT` (0–1) — по ней рисуется облик Истины: декор `lilacAirDecorT`, жилы и глаза `lilacDecorT`/`lilacEdgeT`, фон `drawLilacTruthBackdrop`, экранный оттенок `drawLilacTruthGrade`. Руда: иллюзорная `lilIllusory` (рассыпается), истинная `lilTrueOre` (видна и копается только в Истине). Кошмар на нуле, шёпот `SFX.whisper`, фальшь музыки `Music.sour` |
 
 Чтобы найти, где что-то определено, ищи по всем файлам (`grep -n "function имя\|const имя" js/*.js`), а не полагайся на таблицу.
 

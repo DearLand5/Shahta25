@@ -285,6 +285,10 @@ const SFX={
     if(m==='crystal')AU.bell(rr(1800,2400),0.6,0.1,0.02,{ratio:1.41,index:1.2});
     if(m==='wood')AU.osc('triangle',220,0.12,0.1,0,{to:120});
   },
+  /* шёпот Пелены: тихий шелест с «гласными» и далёкая расстроенная нота шкатулки (k — 0..1, чем ниже Рассудок, тем ближе) */
+  whisper(k){if(!sfxGate('whisp',1500))return;k=clamp(k||0.5,0,1);const pan=rr(-0.9,0.9);
+    for(let i=0;i<3;i++)AU.noise(rr(0.18,0.32),rr(900,1700),0.02+0.025*k,i*rr(0.14,0.22),{type:'bandpass',q:6,to:rr(600,1100),pan,rev:0.5});
+    if(Math.random()<0.5)AU.bell(rr(700,1100)*(1+rr(-0.03,0.03)),1.2,0.012+0.012*k,0.5,{ratio:2.01,index:0.5,rev:0.7,pan:-pan});},
   ore(){if(!sfxGate('ore',70))return;
     const f=PENTA[Math.floor(Math.random()*PENTA.length)];
     AU.bell(f,0.7,0.16,0,{ratio:3,index:1.1});AU.bell(f*1.5,0.6,0.08,0.06,{ratio:3,index:0.8});

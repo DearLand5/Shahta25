@@ -96,6 +96,7 @@ function openBuilding(b){
    ============================================================ */
 function enterMine(){
   G.resumeMine=null;
+  player.sanity=100;player.teaT=0;if(typeof veilT!=='undefined')veilT=0;
   G.oreEpoch=(G.oreEpoch||0)+1;
   chunks.clear();
   SFX.enter();

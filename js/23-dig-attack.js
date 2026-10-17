@@ -66,13 +66,15 @@ function digUpdate(dt){
   if(player.digProg>=1){
     const isOre=!!oreId;
     setTile(tx,ty,T_AIR);
-    if(isOre){
+    if(isOre&&lilOreDug(tx,ty,oreId,mx,my)){}
+    else if(isOre){
       const dbl=(ritOn('harvest')?2:1)*((perkLv('miner')>0&&Math.random()<0.05*perkLv('miner'))?2:1);
       addOre(oreId,dbl);if(dbl>1)floatText(mx,my-30,'×'+dbl,'#ffd060');
       SFX.ore();
       burst(mx,my,10,ORES[oreId].glow,150,3.2);
       floatText(mx,my-14,'+1 '+ORES[oreId].name,RARITY[ORES[oreId].rar].c);
     }else{
+      if(G.dim===2)lilRockDug(tx,ty,t,mx,my);
       SFX.breakBlock(t);
       burst(mx,my,8,TILECOL[t]?TILECOL[t][0]:'#888',120,3);
     }

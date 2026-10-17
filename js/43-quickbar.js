@@ -5,11 +5,11 @@
    ============================================================ */
 const QS_N=4;
 /* чем заполнить слоты старого сейва: первые 4 предмета из этого списка, что есть у игрока */
-const QS_AUTO=['s:medkit','p:barricade','p:hbomb','p:icegren','s:ice','s:scroll','p:drill','s:beacon'];
+const QS_AUTO=['s:medkit','p:barricade','p:hbomb','p:icegren','s:ice','s:ltea','s:scroll','p:drill','s:beacon'];
 /* разделы меню */
 const IT_CATS=[['all','Все'],['build','Стройка'],['fight','Бой'],['use','Расходники']];
 const IT_CAT_OF={ladder:'build',barricade:'build',crate:'build',drill:'build',sorter:'build',grapple:'build',
-  hbomb:'fight',icegren:'fight',gun:'fight',medkit:'use',ice:'use',beacon:'use',scroll:'use'};
+  hbomb:'fight',icegren:'fight',gun:'fight',medkit:'use',ice:'use',ltea:'use',beacon:'use',scroll:'use'};
 
 function qsLoad(a){
   if(!Array.isArray(a))return null;                 /* null — заполнить при первом обращении */
@@ -44,6 +44,7 @@ function qsMeta(code){
     case 'beacon':n=h.beacons||0;icon='📡';name='Рудный маяк';break;
     case 'scroll':n=h.scrolls||0;icon='📜';name='Свиток возврата';break;
     case 'ice':n=player.icePotions||0;icon='🧊';name='Ледяное зелье';break;
+    case 'ltea':n=matN('ltea');icon='🍵';name='Настой ясности';break;
     case 'gun':{const g=curGun();n=g?player.gunAmmo:0;icon=g?g.icon:'🔫';name=g?g.name:'Огнестрел';break;}
     default:return null;
   }

@@ -154,7 +154,9 @@ const Music={
       bass:{vol:0.11,every:1,pulse:true},drone:{note:21,vol:0.055,lp:180},
       drums:{vol:0.5,kick:[1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0],snare:[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0],hat:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0]}}
   },
-  mtof(m){return 440*Math.pow(2,(m-69)/12);},
+  /* sour — «фальшь» в центах (Лиловые небеса, Истина): ноты чуть расстроены */
+  sour:0,
+  mtof(m){const f=440*Math.pow(2,(m-69)/12);return Music.sour>0?f*Math.pow(2,(Math.random()-0.5)*Music.sour/600):f;},
   setVol(v){AU.setMusicVol(v);},
   desired(){
     if(G.scene==='mine'&&G.bossCut&&G.bossCut.t<(G.bossCut.hb?G.bossCut.roarT:3.4))return null;

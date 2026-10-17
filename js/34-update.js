@@ -249,6 +249,7 @@ function update(dt){
   hbUpdate(dt);hbCombatTick(dt);bfTick(dt);
   checkHeartPickup();
   updateHell(dt);
+  updateVeil(dt);
   updateHellBlocks(dt);
   updateAnchors();
   updateTraps(dt);

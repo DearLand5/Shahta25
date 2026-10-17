@@ -146,7 +146,7 @@ function applyLighting(){
   const kx=lw/W,ky=lh/H;
   lctx.setTransform(1,0,0,1,0,0);
   lctx.clearRect(0,0,lw,lh);
-  lctx.fillStyle=(G.dim===2?'rgba(16,4,26,':'rgba(0,0,0,')+dark.toFixed(3)+')';
+  lctx.fillStyle=(G.dim===2?'rgba('+Math.round(16+4*veilT)+','+Math.round(4-2*veilT)+','+Math.round(26-20*veilT)+',':'rgba(0,0,0,')+dark.toFixed(3)+')';
   lctx.fillRect(0,0,lw,lh);
 
   const px=(player.x-G.cam.x)*sc+W/2;
@@ -198,6 +198,8 @@ function applyLighting(){
           }
         }
       }
+      /* фонари-якоря Лиловых небес: островки ясного света */
+      if(G.dim===2)for(const a of anchorList()){if(a.x>=tx0-4&&a.x<=tx1+4&&a.y>=ty0-4&&a.y<=ty1+6)L.push(a.x*TILE+16,(a.y-2)*TILE,5,0.75);}
       /* фонари душ в галереях Катакомб рассеивают тьму */
       if(G.dim===1&&ty1>=850&&ty0<1200){
         for(let ty=Math.max(ty0,850);ty<=Math.min(ty1,1199);ty++){const c=catBand(ty);if(c.row!==1)continue;

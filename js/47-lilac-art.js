@@ -256,6 +256,10 @@ function lilOreShape(g,sh,C,L,D,GL,hk){
 
 /* ---------- фон биомов (экранные слои за пещерой) ---------- */
 function drawLilacBackdrop(g,W,H,cam,bi,T,shift){
+  drawLilacBackdropI(g,W,H,cam,bi,T,shift);
+  drawLilacTruthBackdrop(g,W,H,cam,veilT,T);
+}
+function drawLilacBackdropI(g,W,H,cam,bi,T,shift){
   const b=bi-10;
   if(b===0){
     /* Цветущие луга: косые лучи света, гигантские цветы вдали, летящие семена */
@@ -395,7 +399,7 @@ function lilFlower(g,cx,by,h,time,tx){
   for(let p=0;p<5;p++){const a=p/5*TAU+h;g.fillStyle=p<3?c:shadeHex(c,-0.18);g.beginPath();g.ellipse(fx+Math.cos(a)*2.4,fy+Math.sin(a)*2.2,2.2,1.4,a,0,TAU);g.fill();}
   g.fillStyle='#ffe070';g.beginPath();g.arc(fx,fy,1.2,0,TAU);g.fill();g.fillStyle='rgba(255,255,255,.7)';g.fillRect(fx-2.6,fy-2.4,1,1);
 }
-function lilacAirDecor(g,x,y,tx,ty,bi,h,up,dn,time,gl,solid){
+function lilacAirDecorI(g,x,y,tx,ty,bi,h,up,dn,time,gl,solid){
   const b=bi-10,B=x+TILE,Y=y+TILE;
   if(b===0){
     if(dn){
@@ -528,6 +532,7 @@ function lilacEdge(g,x,y,bi,h){
 /* живые блики на особых блоках (каждый кадр) */
 function lilacDecor(g,tx,ty,t,h){
   const x=tx*TILE,y=ty*TILE,time=G.time;
+  if(veilT>0.03)lilacDecorT(g,tx,ty,t,h);
   if(t===T_LQUARTZ){const ph=((time*0.35+(h%17)*0.07+ty*0.05)%1.6);if(ph<1){g.fillStyle='rgba(255,255,255,'+(0.35*Math.sin(ph*Math.PI))+')';g.fillRect(x+3,y+ph*TILE-3,26,3);}}
   else if(t===T_LCOMB){if(h%3===0){const p=0.5+0.5*Math.sin(time*2+h);g.fillStyle='rgba(255,250,200,'+(0.2+0.4*p)+')';g.beginPath();g.ellipse(x+8+(h%14),y+8+((h>>4)%14),1.6,0.8,-0.6,0,TAU);g.fill();}}
   else if(t===T_LSILVER){const ph=((time*0.25+tx*0.11+ty*0.03)%2);if(ph<1){g.fillStyle='rgba(255,255,255,'+(0.25*Math.sin(ph*Math.PI))+')';g.beginPath();g.moveTo(x+ph*40-8,y);g.lineTo(x+ph*40,y);g.lineTo(x+ph*40-12,y+TILE);g.lineTo(x+ph*40-20,y+TILE);g.closePath();g.fill();}}

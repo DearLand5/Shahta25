@@ -262,6 +262,8 @@ function getShootItems(){
     desc:'Каждое нажатие «Стрелять» восстанавливает 30% здоровья.'});
   if((player.hitems&&player.hitems.beacons)>0)a.push({id:'beacon',icon:'📡',name:'Рудный маяк',count:player.hitems.beacons,desc:'Продаёт весь рюкзак прямо из шахты по 75% рыночной цены.'});
   if((player.hitems&&player.hitems.scrolls)>0)a.push({id:'scroll',icon:'📜',name:'Свиток возврата',count:player.hitems.scrolls,desc:'Мгновенный возврат в лобби, рюкзак сохраняется.'});
+  if(matN('ltea')>0)a.push({id:'ltea',icon:'🍵',name:'Настой ясности',count:matN('ltea'),
+    desc:'+50 Рассудка, и 30 секунд Пелена не сгущается. Перегоняется в Перегонном кубе.'});
   if(player.icePotions>0)a.push({id:'ice',icon:'🧊',name:'Ледяное зелье',count:player.icePotions,
     desc:'Сбрасывает Жар на 70 и 25 секунд не даёт ему расти. Делается в Печи.'});
   {const g=curGun();if(g)a.push({id:'gun',icon:g.icon,name:g.name,count:player.gunAmmo,desc:g.desc+' · урон '+g.dmg+(g.pellets>1?'×'+g.pellets:'')+' · автоприцел'});}
@@ -370,6 +372,7 @@ function useShoot(holdRepeat){
   }
   if(it==='medkit'){if(!holdRepeat)useMedkit();return;}
   if(it==='ice'){if(!holdRepeat)useIcePotion();return;}
+  if(it==='ltea'){if(!holdRepeat)useLTea();return;}
   if(it==='beacon'){if(!holdRepeat)useBeacon();return;}
   if(it==='scroll'){if(!holdRepeat){player.hitems.scrolls--;validateSelection();for(let i=0;i<30;i++)spawnPart(player.x,player.y-24,rnd(-120,120),rnd(-200,40),0.8,'#c8a0ff',3,-60);SFX.portal();UI.toast('📜 Возврат в лобби');exitMine();}return;}
   if(it==='gun'){fireGun(curGun(),holdRepeat);return;}

@@ -1929,7 +1929,7 @@ const UI={
     }else if(tab==='world'){
       const off=dimInfo().b0;
       body=`<div class="sect" style="border:none;margin-top:0;padding-top:0">Измерение: ${DIM_NAMES[G.dim]}</div>
-        <div class="cheatGrid">${dimBtns('')}${act('toLobby','🏠 В лобби')}${G.dim===2?act('lilNight',lilNight()>0.5?'☀ День в деревне':'🌙 Ночь в деревне'):''}</div>
+        <div class="cheatGrid">${dimBtns('')}${act('toLobby','🏠 В лобби')}${G.dim===2?act('lilNight',lilNight()>0.5?'☀ День в деревне':'🌙 Ночь в деревне')+act('san100','👁 Рассудок 100')+act('san30','👁 Рассудок 30')+act('san0','👁 Рассудок 0')+act('ltea','🍵 +10 настоев'):''}</div>
         <div class="sect">Телепорт по биомам</div>
         <div class="cheatGrid">${Array.from({length:dimInfo().bn},(_,b)=>act('tpB'+(off+b),'⬇ '+BIOMES[off+b].n+' ('+BIOMES[off+b].d0+' м)')).join('')}</div>
         <div class="row" style="gap:6px;margin-top:8px">
@@ -2050,6 +2050,8 @@ const UI={
           case 'contractsDone': ensureContracts();for(const c of player.contracts.list){c.have=c.need;c.ready=true;} UI.toast('📜 Контракты выполнены — забери на Доске'); break;
           case 'mask': player.gasMask=!player.gasMask; UI.toast('😷 Противогаз: '+(player.gasMask?'есть':'нет')); break;
           case 'dimSwap': switchDimension(G.dim===0?1:0); UI.toast('Измерение: '+DIM_NAMES[G.dim]); UI.clear(); return;
+          case 'san100': case 'san30': case 'san0': player.sanity=+a.slice(3);veilT=veilTarget();UI.toast('Рассудок: '+player.sanity);UI.clear();return;
+          case 'ltea': addMat('ltea',10);validateSelection();UI.toast('🍵 +10 настоев');break;
           case 'lilNight': lilSetNight(!(lilNight()>0.5)); Music.lastPick=0; UI.toast(lilNight()>0.5?'🌙 Ночь':'☀ День'); UI.clear(); return;
           case 'dim0': case 'dim1': case 'dim2': switchDimension(+a.slice(3)); UI.toast('Измерение: '+DIM_NAMES[G.dim]); UI.clear(); return;
           case 'cutscene': startCutscene(G.dim===0?1:0); return;
@@ -2291,6 +2293,11 @@ function hudIcon(kind,cx,cy,s){
       c.fillStyle='#7dffb0';c.beginPath();c.ellipse(-s*0.2,-s*0.12,s*0.22,s*0.1,0.6,0,TAU);c.ellipse(s*0.2,-s*0.24,s*0.22,s*0.1,-0.6,0,TAU);c.fill();break;}
     case 'flame':{c.fillStyle='#ffb030';c.beginPath();c.moveTo(0,-s*0.48);c.quadraticCurveTo(s*0.46,0,s*0.2,s*0.42);c.quadraticCurveTo(0,s*0.5,-s*0.2,s*0.42);c.quadraticCurveTo(-s*0.46,0,0,-s*0.48);c.fill();
       c.fillStyle='#fff0a0';c.beginPath();c.ellipse(0,s*0.18,s*0.12,s*0.18,0,0,TAU);c.fill();break;}
+    case 'eye':{const T=veilT;c.fillStyle=T>0.5?'#f0d0c8':'#f4ecff';c.beginPath();c.ellipse(0,0,s*0.5,s*0.3,0,0,TAU);c.fill();
+      c.fillStyle=T>0.5?'#b01030':'#9a6ad8';c.beginPath();c.arc(0,0,s*0.2,0,TAU);c.fill();c.fillStyle='#120818';c.beginPath();c.ellipse(0,0,s*0.07,s*0.16,0,0,TAU);c.fill();
+      c.strokeStyle='rgba(60,20,70,.8)';c.lineWidth=1;c.beginPath();c.ellipse(0,0,s*0.5,s*0.3,0,0,TAU);c.stroke();break;}
+    case 'tea':{c.fillStyle='#e8f8ee';c.beginPath();c.moveTo(-s*0.38,-s*0.15);c.lineTo(s*0.32,-s*0.15);c.quadraticCurveTo(s*0.3,s*0.42,0,s*0.42);c.quadraticCurveTo(-s*0.36,s*0.42,-s*0.38,-s*0.15);c.fill();
+      c.fillStyle='#7ad8a0';c.fillRect(-s*0.3,-s*0.12,s*0.56,s*0.12);c.strokeStyle='#e8f8ee';c.lineWidth=1.4;c.beginPath();c.arc(s*0.38,s*0.08,s*0.12,-1.4,1.4);c.stroke();break;}
     case 'ice':{c.strokeStyle='#9fe8ff';c.lineWidth=Math.max(1.4,s*0.12);for(let k=0;k<3;k++){c.rotate(Math.PI/3);c.beginPath();c.moveTo(0,-s*0.44);c.lineTo(0,s*0.44);c.stroke();}break;}
   }
   c.restore();
@@ -2345,6 +2352,14 @@ function drawHUD(){
     if(hf>=1){ctx.fillStyle='rgba(255,255,255,'+(0.3+0.3*Math.sin(G.time*14))+')';roundRect(ctx,bx0,top+29,bw0,7,3.5);ctx.fill();}
     ctx.fillStyle='#ffe0c0';ctx.font='700 9px '+HUDF;ctx.textAlign='right';ctx.fillText(Math.round(player.heat||0)+'%',10+hpW-6,top+36);
   }
+  if(G.dim===2&&G.scene==='mine'){   /* Рассудок: полная полоса — Иллюзия, пустая — Истина */
+    const sf=clamp((player.sanity==null?100:player.sanity)/100,0,1),lowS=sf<0.25;
+    hudPlate(10,top+25,hpW,15,lowS&&Math.sin(G.time*6)>0);hudIcon(player.teaT>0?'tea':'eye',22,top+32.5,12);
+    ctx.fillStyle='rgba(0,0,0,.45)';roundRect(ctx,bx0,top+29,bw0,7,3.5);ctx.fill();
+    const sg=ctx.createLinearGradient(bx0,0,bx0+bw0,0);sg.addColorStop(0,'#a01a4a');sg.addColorStop(0.45,'#b07ae0');sg.addColorStop(1,'#f0d0ff');
+    if(sf>0){ctx.fillStyle=player.teaT>0?'#bff0d0':sg;roundRect(ctx,bx0,top+29,Math.max(7,bw0*sf),7,3.5);ctx.fill();ctx.fillStyle='rgba(255,255,255,.25)';ctx.fillRect(bx0+4,top+30,Math.max(2,bw0*sf-8),1.4);}
+    ctx.fillStyle=lowS?'#ffb0c8':'#ecdcff';ctx.font='700 9px '+HUDF;ctx.textAlign='right';ctx.fillText(Math.round((player.sanity==null?100:player.sanity))+'%',10+hpW-6,top+36);
+  }
 
   /* правая колонка: левее кнопки паузы, подложки по ширине текста */
   const pb=getBtnRect('pause'),pw=pb.r*1.9,ph=pb.r*1.7;
@@ -2379,7 +2394,7 @@ function drawHUD(){
   if(G.scene==='mine'){
     /* шкала глубины: между верхней панелью и джойстиком, не залезает на него */
     const jbr=getBtnRect('joy'),jTop=(jbr.x<W*0.4)?jbr.y-jbr.r-18:H*0.7;
-    const bx=12,bw=8,by=Math.max(H*0.2,G.dim===1?84:62),bh=Math.max(50,Math.min(H*0.42,jTop-by-6));
+    const bx=12,bw=8,by=Math.max(H*0.2,G.dim>=1?84:62),bh=Math.max(50,Math.min(H*0.42,jTop-by-6));
     hudPlate(bx-3,by-3,bw+6,bh+6);
     const DI=dimInfo(),maxD=DI.maxD;
     const cols=['#7a5a34','#6a7180','#5a4aa0','#a0442a','#3a2a6a','#6a5a52','#8a2030','#a09a2a','#b8b8c8','#e04a10',

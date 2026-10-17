@@ -42,7 +42,7 @@ function drawEarthAtmos(W,H){
 /* парящие частицы атмосферы: одинаковый параллакс по обеим осям, плавный перенос по краям */
 function atmWrap(v,span){return ((v%span)+span)%span;}
 function drawHellAtmos(W,H,dt){
-  if(G.dim===2){drawLilacAtmos(W,H);return;}
+  if(G.dim===2){drawLilacAtmos(W,H);drawLilacTruthGrade(W,H);return;}
   if(G.dim!==1||settings.quality==='low'){drawEarthAtmos(W,H);return;}
   const depth=Math.max(0,player.y)/TILE,bi=biomeAt(depth),T=G.time,cam=G.cam;
   if(!_atm){_atm=[];for(let i=0;i<70;i++)_atm.push({x:Math.random(),y:Math.random(),s:Math.random(),p:Math.random()*TAU});}
@@ -165,6 +165,7 @@ function drawBackdrop(g,W,H,cam,depth,bi,B){
   let c1=B.bg,c2=B.bg2,fog=B.fog;
   const nb=(BIOMES[bi+1]&&BIOMES[bi+1].dim===B.dim)?BIOMES[bi+1]:null;
   if(nb){const left=B.d1-depth;if(left<25){const t=1-left/25;c1=mixHex(B.bg,nb.bg,t);c2=mixHex(B.bg2,nb.bg2,t);fog=mixHex(B.fog,nb.fog,t);}}
+  if(B.dim===2&&veilT>0.01){const k=veilT*0.75;c1=mixHex(c1,'#2a0812',k);c2=mixHex(c2,'#0a0204',k);fog=mixHex(fog,'#1a0408',k);}   /* Истина */
   const bg=g.createLinearGradient(0,0,0,H);
   bg.addColorStop(0,c1);bg.addColorStop(1,c2);
   g.fillStyle=bg;g.fillRect(0,0,W,H);
@@ -574,7 +575,7 @@ function drawBiomeDecor(g,tx0,tx1,ty0,ty1){
       }else if(t!==T_BEDROCK){
         /* стенки: мох, трещины, грани, окаменелости */
         if(!solid(tx,ty-1)){
-          if(bi>=10)lilacEdge(g,x,y,bi,h);
+          if(bi>=10){lilacEdge(g,x,y,bi,h);lilacEdgeT(g,x,y,h,time);}
           else if(bi===0){g.fillStyle='rgba(95,110,52,.9)';g.fillRect(x,y,TILE,3);if(h%3===0){g.fillRect(x+4+(h>>>4)%20,y-2,2,2);}}
           else if(bi===1){g.fillStyle='rgba(150,160,180,.3)';g.fillRect(x,y,TILE,2);}
           else if(bi===2){g.fillStyle='rgba(185,168,255,.38)';g.fillRect(x,y,TILE,2);}
