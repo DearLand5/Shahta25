@@ -47,7 +47,7 @@ function qsMeta(code){
     case 'ltea':n=matN('ltea');icon='🍵';name='Настой ясности';break;
     case 'gun':{const g=curGun();n=g?player.gunAmmo:0;icon=g?g.icon:'🔫';name=g?g.name:'Огнестрел';break;}
     case 'llan':n=G.dim===2&&player.prog&&player.prog.bk?lanFree():0;icon='🏮';name='Фонарь-якорь';break;
-    default:{const b=LB_BY[id];if(!b)return null;n=matN(id);icon=b.ic;name=b.n;break;}
+    default:{const q=lgQsMeta(id);if(!q)return null;n=q.n;icon=q.icon;name=q.name;break;}
   }
   return {c,id,n:Math.max(0,n|0),icon,name};
 }

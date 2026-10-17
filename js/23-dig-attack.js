@@ -50,7 +50,7 @@ function digUpdate(dt){
   const base=ROCK_HP[t]||20;
   const oreHp=oreId?ORES[oreId].hp:0;
   const total=base+oreHp;
-  const power=cheats.instantDig?total*100:14*pickSpeed()*(player.digSpeed||1)*(G.dim===2?lbDigMul():1);
+  const power=cheats.instantDig?total*100:14*pickSpeed()*(player.digSpeed||1)*(G.dim===2?lbDigMul()*lgDigMul(t):1);
   let prog=sameTile?player.digProg:getDmg(tx,ty)/255;
   prog+=power*dt/total;
   player.digProg=clamp(prog,0,1);

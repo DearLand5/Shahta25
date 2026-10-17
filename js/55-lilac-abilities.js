@@ -57,13 +57,13 @@ function lilAbHurt(dmg,src){
   if(LAB.sh&&!abBoss())return 0;
   if(LAB.dome&&LAB.dome.hp>0){const a=Math.min(LAB.dome.hp,dmg);LAB.dome.hp-=a;LAB.dome.hit=0.25;dmg-=a;
     if(LAB.dome.hp<=0){LAB.dome.t=Math.min(LAB.dome.t,0.25);floatText(player.x,player.y-70,'Купол лопнул','#d8b0ff');AU.bell(660,0.6,0.08,0,{ratio:1.41,index:1});}}
-  return dmg*lbMod('hurt');
+  return lgHurt(dmg*lbMod('hurt'));
 }
 /* урон по мобам: Око с мутацией «Уязвимые места», глубокий сон */
 function lilAbMobDmg(m,dmg){
   if(LAB.eyeT>0&&abMut('eye')==='b')dmg*=1.5;
   if(m.sleepT>0){if(abMut('lullaby')==='a'&&!m.sleepHit){dmg*=2;floatText(m.x,m.y-m.h-20,'×2 во сне','#c8b0ff');}m.sleepHit=1;m.sleepT=0;m.stun=0;}
-  return dmg*lbDmgMul();
+  return dmg*lbDmgMul()*lgDmgVs(m);
 }
 
 /* ---------- нажатия ---------- */

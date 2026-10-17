@@ -269,6 +269,7 @@ function getShootItems(){
   if((player.hitems&&player.hitems.scrolls)>0)a.push({id:'scroll',icon:'📜',name:'Свиток возврата',count:player.hitems.scrolls,desc:'Мгновенный возврат в лобби, рюкзак сохраняется.'});
   if(matN('ltea')>0)a.push({id:'ltea',icon:'🍵',name:'Настой ясности',count:matN('ltea'),
     desc:'+50 Рассудка, и 30 секунд Пелена не сгущается. Перегоняется в Перегонном кубе.'});
+  lgShootItems(a);
   for(const b of LB_BREWS)if(matN(b.id)>0)a.push({id:b.id,icon:b.ic,name:b.n,count:matN(b.id),desc:b.txt+' Варится в Оранжерее.'});
   if(player.icePotions>0)a.push({id:'ice',icon:'🧊',name:'Ледяное зелье',count:player.icePotions,
     desc:'Сбрасывает Жар на 70 и 25 секунд не даёт ему расти. Делается в Печи.'});
@@ -323,7 +324,8 @@ function fireGun(g,holdRepeat){
   const base=Math.atan2(ty-sy,tx-sx);
   if(tx>player.x+2)player.facing=1;else if(tx<player.x-2)player.facing=-1;
   const dm=gunDmgMult();
-  if(g.kind==='chain'){
+  if(g.kind&&g.kind.charCodeAt(0)===108&&lgFire(g,sx,sy,base,tgt,dm)){}
+  else if(g.kind==='chain'){
     /* мгновенный луч + цепная молния */
     let L=0;while(L<g.range){if(solidAtPx(sx+Math.cos(base)*L,sy+Math.sin(base)*L))break;L+=10;}
     const ex=sx+Math.cos(base)*L,ey=sy+Math.sin(base)*L;
@@ -348,6 +350,7 @@ function fireGun(g,holdRepeat){
     if(g.kind==='acid'){const d=Math.hypot(tx-sx,ty-sy),T=clamp(d/520,0.3,1.1);pr.vx=(tx-sx)/T;pr.vy=(ty-sy)/T-0.5*600*T;pr.grav=600;pr.life=3;}
     if(g.kind==='homing'){pr.homeMob=3.2;pr.life=2.6;}
     if(g.kind==='flame'){pr.life=g.range/g.speed*rnd(0.7,1.1);pr.grow=1;}
+    lgShotSetup(pr,g);
     projectiles.push(pr);
   }
   player.gunAnim=1;player.gunId=g.id;
@@ -380,6 +383,7 @@ function useShoot(holdRepeat){
   if(it==='ice'){if(!holdRepeat)useIcePotion();return;}
   if(it==='ltea'){if(!holdRepeat)useLTea();return;}
   if(LB_BY[it]){if(!holdRepeat)lbDrink(it);return;}
+  if(lgUse(it,holdRepeat))return;
   if(it==='beacon'){if(!holdRepeat)useBeacon();return;}
   if(it==='scroll'){if(!holdRepeat){player.hitems.scrolls--;validateSelection();for(let i=0;i<30;i++)spawnPart(player.x,player.y-24,rnd(-120,120),rnd(-200,40),0.8,'#c8a0ff',3,-60);SFX.portal();UI.toast('📜 Возврат в лобби');exitMine();}return;}
   if(it==='gun'){fireGun(curGun(),holdRepeat);return;}

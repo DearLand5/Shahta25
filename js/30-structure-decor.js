@@ -620,7 +620,7 @@ function renderMine(dt){
   drawArenaDecor(ctx,tx0,tx1,ty0,ty1);
   hbDrawWorld(ctx,tx0,tx1,ty0,ty1);
   drawAnchors(ctx,tx0,tx1,ty0,ty1);
-  if(G.dim===2)lbDrawLanterns(ctx,tx0,tx1,ty0,ty1);
+  if(G.dim===2){lbDrawLanterns(ctx,tx0,tx1,ty0,ty1);lgWorldBack(ctx,tx0,tx1,ty0,ty1);}
   drawHeartShrine(ctx,tx0,tx1,ty0,ty1);
   for(let ty=ty0;ty<=ty1;ty++){
     if(ty<0)continue;
@@ -833,7 +833,7 @@ function renderMine(dt){
        gun:gunNow,gunAnim:gunNow?clamp(player.gunAnim*1.3,0,1):0,digging:typeof digging!=='undefined'&&digging,sq:player.landSq||0,lamp:player.y>4*TILE,groundY:playerGroundY()});
     if(flipG)ctx.restore();
   }
-  if(G.dim===2)lilAbWorld(ctx);
+  if(G.dim===2){lilAbWorld(ctx);lgWorldFront(ctx);}
   drawCrateLabels(ctx);
 
   drawWater(ctx,tx0,tx1,ty0,ty1);

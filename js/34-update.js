@@ -147,6 +147,7 @@ function update(dt){
   if(player.onGround&&itemLv('jet')>0)player.jetF=Math.min([0,0.9,1.5,2.3][itemLv('jet')],(player.jetF||0)+dt*1.5);
   if(player.jetOn>0)player.jetOn-=dt;
 
+  lgMoveTick(dt,ax,wantJump,stunned,onLadder,grappling,inWaterP||inLavaP);
   if(wantJump){
     if(grappling){
       player.vy = -430;grapple = null;SFX.jump();
@@ -257,6 +258,7 @@ function update(dt){
   lilMobHzTick(dt);
   lilAbTick(dt);
   lbTick(dt);
+  lgTick(dt);
   updateHellBlocks(dt);
   updateAnchors();
   updateTraps(dt);

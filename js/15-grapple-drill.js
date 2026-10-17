@@ -22,7 +22,7 @@ function hellSupUnit(id){
   if(id==='lad')return 3500/20;
   if(id==='med')return 1200/3;
   if(id==='gra')return 4400/20;
-  if(id==='amm'){const g=curGun();return g?Math.round(g.packCost*(g.hell?1:3)*0.88)/g.pack:0;}
+  if(id==='amm'){const g=curGun();return g?Math.round(g.packCost*(g.hell||g.lil?1:3)*0.88)/g.pack:0;}
   if(id==='dri')return Math.round((drillPackCost()*1.5+(player.drillLvl>6?(player.drillLvl-6)*15000:0))*0.88/100)*100/5;
   if(id==='bar')return Math.round((BARR_PACK_COST[Math.min(3,Math.max(0,player.barricadeLvl-1))]*4+(player.barricadeLvl>4?(player.barricadeLvl-4)*150000:0))*0.88/100)*100/BARR_PACK;
   return 0;

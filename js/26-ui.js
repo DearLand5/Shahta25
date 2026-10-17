@@ -873,21 +873,21 @@ const UI={
   },
   forge(){
     const buyPick=()=>{
-      const nxt=PICKS.find(p=>p.lv===player.pickLvl+1&&!p.hell);
+      const nxt=PICKS.find(p=>p.lv===player.pickLvl+1&&!p.hell&&!p.lil);
       if(!nxt){UI.toast('Максимум');return;}
       if(player.money<nxt.cost){UI.toast('Мало монет');SFX.uiBack();return;}
       player.money-=nxt.cost;player.pickLvl=nxt.lv;
       SFX.buy();vib(25);UI.toast('Куплено: '+nxt.name);saveGame();UI.forge();
     };
     const buySword=()=>{
-      const nxt=SWORDS.find(p=>p.lv===player.swordLvl+1&&!p.hell);
+      const nxt=SWORDS.find(p=>p.lv===player.swordLvl+1&&!p.hell&&!p.lil);
       if(!nxt){UI.toast('Максимум');return;}
       if(player.money<nxt.cost){UI.toast('Мало монет');SFX.uiBack();return;}
       player.money-=nxt.cost;player.swordLvl=nxt.lv;
       SFX.buy();vib(25);UI.toast('Куплено: '+nxt.name);saveGame();UI.forge();
     };
     const buyArmor=()=>{
-      const nxt=ARMORS.find(p=>p.lv===player.armorLvl+1&&!p.hell);
+      const nxt=ARMORS.find(p=>p.lv===player.armorLvl+1&&!p.hell&&!p.lil);
       if(!nxt){UI.toast('Максимум');return;}
       if(player.money<nxt.cost){UI.toast('Мало монет');SFX.uiBack();return;}
       player.money-=nxt.cost;player.armorLvl=nxt.lv;
@@ -944,7 +944,7 @@ const UI={
     };
     const buyGunUp=()=>{
       const next=GUNS[player.gunLvl];
-      if(!next||next.hell){UI.toast('Максимум');return;}
+      if(!next||next.hell||next.lil){UI.toast('Максимум');return;}
       if(player.money<next.cost){UI.toast('Мало монет');SFX.uiBack();return;}
       player.money-=next.cost;
       const first=player.gunLvl===0;
@@ -1009,9 +1009,9 @@ const UI={
       SFX.buy();vib(25);UI.toast('Амортизаторы ур. '+player.fallProtLvl);saveGame();UI.forge();
     };
 
-    const nextPick=PICKS.find(p=>p.lv===player.pickLvl+1&&!p.hell);
-    const nextSword=SWORDS.find(p=>p.lv===player.swordLvl+1&&!p.hell);
-    const nextArmor=ARMORS.find(p=>p.lv===player.armorLvl+1&&!p.hell);
+    const nextPick=PICKS.find(p=>p.lv===player.pickLvl+1&&!p.hell&&!p.lil);
+    const nextSword=SWORDS.find(p=>p.lv===player.swordLvl+1&&!p.hell&&!p.lil);
+    const nextArmor=ARMORS.find(p=>p.lv===player.armorLvl+1&&!p.hell&&!p.lil);
     const slotCost=Math.floor(600*Math.pow(2.1,player.slots-8));
     const spCost=(player.digSpeedLvl||0)>=DIG_SPEED_MAX?0:DIG_SPEED_COSTS[player.digSpeedLvl||0];
     const torchCost=player.torchLvl>=5?0:TORCH_COSTS[player.torchLvl];
@@ -1077,7 +1077,7 @@ const UI={
 
         <div style="margin:14px 0 6px;color:#e0b86a;font-size:12px;letter-spacing:1px;text-transform:uppercase;border-top:1px solid rgba(255,255,255,.1);padding-top:10px">Огнестрельное (кнопка «Стрелять», автоприцел)</div>
         ${(()=>{
-          const cg=curGun(),ng=(GUNS[player.gunLvl]&&!GUNS[player.gunLvl].hell)?GUNS[player.gunLvl]:null;
+          const cg=curGun(),ng=(GUNS[player.gunLvl]&&!GUNS[player.gunLvl].hell&&!GUNS[player.gunLvl].lil)?GUNS[player.gunLvl]:null;
           const dmgTxt=g=>'Урон '+g.dmg+(g.pellets>1?'×'+g.pellets:'');
           return `
         <div class="item"><div class="ico" style="background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:16px">${(ng||cg).icon}</div>
@@ -1929,7 +1929,7 @@ const UI={
     }else if(tab==='world'){
       const off=dimInfo().b0;
       body=`<div class="sect" style="border:none;margin-top:0;padding-top:0">Измерение: ${DIM_NAMES[G.dim]}</div>
-        <div class="cheatGrid">${dimBtns('')}${act('toLobby','🏠 В лобби')}${G.dim===2?act('lilNight',lilNight()>0.5?'☀ День в деревне':'🌙 Ночь в деревне')+act('san100','👁 Рассудок 100')+act('san30','👁 Рассудок 30')+act('san0','👁 Рассудок 0')+act('ltea','🍵 +10 настоев')+act('abMax','🪞 Все способности')+act('lbSny','🌙 +30 Снов')+act('lbHerbs','🌿 Травы и отвары')+act('lbGrow','🌱 Вырастить грядки')+act('lbBk5','🗼 Маяк 5'):''}</div>
+        <div class="cheatGrid">${dimBtns('')}${act('toLobby','🏠 В лобби')}${G.dim===2?act('lilNight',lilNight()>0.5?'☀ День в деревне':'🌙 Ночь в деревне')+act('san100','👁 Рассудок 100')+act('san30','👁 Рассудок 30')+act('san0','👁 Рассудок 0')+act('ltea','🍵 +10 настоев')+act('abMax','🪞 Все способности')+act('lbSny','🌙 +30 Снов')+act('lbHerbs','🌿 Травы и отвары')+act('lbGrow','🌱 Вырастить грядки')+act('lbBk5','🗼 Маяк 5')+act('lgMax','☀ Снаряжение Зари')+act('lgMats','▰ Слитки Зари'):''}</div>
         <div class="sect">Телепорт по биомам</div>
         <div class="cheatGrid">${Array.from({length:dimInfo().bn},(_,b)=>act('tpB'+(off+b),'⬇ '+BIOMES[off+b].n+' ('+BIOMES[off+b].d0+' м)')).join('')}</div>
         ${G.dim===2?`<div class="sect">Постройки Лиловых небес</div><div class="cheatGrid">${LS_DEFS.map(d=>act('lst_'+d.id,'🏠 '+LS_NAMES[d.id])).join('')}</div>`:''}
@@ -1983,7 +1983,7 @@ const UI={
     });
     d.querySelectorAll('[data-step]').forEach(btn=>btn.onclick=()=>{
       const [k,dv]=btn.getAttribute('data-step').split(':');const v=+dv;const P=player;
-      const lim={pickLvl:[1,10],swordLvl:[1,10],armorLvl:[1,10],gunLvl:[0,GUNS.length],digSpeedLvl:[0,DIG_SPEED_HMAX],torchLvl:[0,8],drillLvl:[0,10],barricadeLvl:[0,7],fallProtLvl:[0,3],slots:[8,40],stackLvl:[0,16]}[k];
+      const lim={pickLvl:[1,15],swordLvl:[1,15],armorLvl:[1,15],gunLvl:[0,GUNS.length],digSpeedLvl:[0,DIG_SPEED_HMAX],torchLvl:[0,8],drillLvl:[0,10],barricadeLvl:[0,7],fallProtLvl:[0,3],slots:[8,40],stackLvl:[0,16]}[k];
       if(k.startsWith('it_')){const id=k.slice(3),h=HITEMS.find(q=>q.id===id);if(!P.hitems)P.hitems={};P.hitems[id]=clamp(itemLv(id)+v,0,h.max);}
       else if(k==='drillLvl'){const cur=P.drillBought?P.drillLvl:0,n=clamp(cur+v,0,10);P.drillBought=n>0;P.drillLvl=Math.max(1,n);}
       else if(k==='barricadeLvl'){const cur=P.barricadeBought?P.barricadeLvl:0,n=clamp(cur+v,0,7);P.barricadeBought=n>0;P.barricadeLvl=Math.max(1,n);}
@@ -2038,7 +2038,7 @@ const UI={
           case 'allMats': for(const k in MATS)addMat(k,50); UI.toast('📦 Материалы ×50'); break;
           case 'allCons': if(!player.hitems)player.hitems={};for(const c of HCONS)player.hitems[c.id]=(player.hitems[c.id]||0)+5;validateSelection(); UI.toast('💣 Расходники ×5'); break;
           case 'furnDone': updateFurnace(36000,true); UI.toast('🔥 Печь закончила'); break;
-          case 'presetHellMax': setMax();player.pickLvl=10;player.swordLvl=10;player.armorLvl=10;player.gunLvl=GUNS.length;player.gunAmmo+=500;player.gasMask=true;player.icePotions+=20;
+          case 'presetHellMax': setMax();player.pickLvl=10;player.swordLvl=10;player.armorLvl=10;player.gunLvl=GUNS.filter(g=>!g.lil).length;player.gunAmmo+=500;player.gasMask=true;player.icePotions+=20;
             player.digSpeedLvl=DIG_SPEED_HMAX;player.digSpeed=digSpeedMult(DIG_SPEED_HMAX);player.drillLvl=10;player.barricadeLvl=7;player.torchLvl=8;player.slots=34;player.stackLvl=16;furn().lvl=3;
             if(!player.hitems)player.hitems={};for(const h of HITEMS)player.hitems[h.id]=h.max;player.relics={};for(const r of RELICS)player.relics[r.id]=true;player.altarXp=Math.max(player.altarXp||0,16000);player.relEq=['fang','heart','coin','ember'];
             player.prog.heart=player.prog.key=player.prog.hellUnlocked=true;for(const pk of PERKS)player.perks[pk.id]=pk.max;recomputeStats();player.hp=player.maxHp;validateSelection(); UI.toast('👑 Всё на максимум Ада'); break;
@@ -2055,6 +2055,8 @@ const UI={
           case 'san100': case 'san30': case 'san0': player.sanity=+a.slice(3);veilT=veilTarget();UI.toast('Рассудок: '+player.sanity);UI.clear();return;
           case 'abMax':{const P=abP();for(const d of AB_DEFS)P.lv[d.id]=5;P.slot=['shadow','blink'];LAB.eth=AB_ETHER;UI.toast('🪞 Все способности на 5 уровне — мутации выбираются в Зале');break;}
           case 'lbSny': lbCheat('sny');break;
+          case 'lgMax': lgCheat('max');break;
+          case 'lgMats': lgCheat('mats');break;
           case 'lbHerbs': lbCheat('herbs');break;
           case 'lbGrow': lbCheat('grow');break;
           case 'lbBk5': lbCheat('bk5');break;

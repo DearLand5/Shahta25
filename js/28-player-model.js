@@ -34,6 +34,7 @@ function plGlove(g,x,y,c,lv){
 }
 function plPauldron(g,x,y,lv,A,t){
   if(lv<2)return;
+  if(lv>=11){lgPauldron(g,x,y,lv,t);return;}
   if(lv===2){plVol(g,x,y,5,3.6,'#6a4426');g.strokeStyle='#3a2410';g.lineWidth=0.8;g.beginPath();g.arc(x,y,3,Math.PI*1.1,Math.PI*1.9);g.stroke();return;}
   if(lv===3){plVol(g,x,y,5.4,4,'#7a828c');g.fillStyle='rgba(40,46,56,.5)';for(let k=0;k<4;k++){g.beginPath();g.arc(x-3+k*2,y+1,0.9,0,TAU);g.fill();}return;}
   const col=lv===4?'#c4ccd8':A.body;
@@ -47,6 +48,7 @@ function plPauldron(g,x,y,lv,A,t){
   else if(lv===10){olLight(g,(g)=>{for(let k=0;k<3;k++){const fx=x-3+k*3,fh=5+Math.sin(t*12+k*2)*2;g.fillStyle=k===1?'rgba(255,230,140,.9)':'rgba(255,100,20,.85)';g.beginPath();g.moveTo(fx-1.6,y-3);g.quadraticCurveTo(fx,y-3-fh*1.6,fx+1.6,y-3);g.fill();}});}
 }
 function drawArmorBody(g,lv,bob,t){
+  if(lv>=11){lgArmorBody(g,lv,bob,t);return;}
   const A=ARMOR_LOOK[lv],y0=-36+bob*0.4;
   /* торс-бочонок */
   const shirt=lv===1?'#c86a3a':lv===2?'#9a5a3a':shadeHex(A.body,-0.25);
@@ -184,6 +186,7 @@ function drawPlayerHead(g,lv,bob,t,torch,face,opts){
     g.fillStyle='#79dcf5';g.beginPath();g.moveTo(hx-11.4,hy+7);g.lineTo(hx-11.6,hy-4);g.quadraticCurveTo(hx-11,hy-14.6,hx,hy-14.6);g.quadraticCurveTo(hx+11.6,hy-14.6,hx+12,hy-3);g.lineTo(hx+12.4,hy+3);g.lineTo(hx+6,hy+7);g.closePath();g.fill();
     g.fillStyle='#e8fbff';g.fillRect(hx+2,hy-3,10.6,3);g.fillStyle='#0a2a3a';g.fillRect(hx+3.4,hy-2.2,8.6,1.4);mobGlow(g,hx+8,hy-1.5,7,'#8ff0ff',0.6);
     g.fillStyle='#bff6ff';for(const [x1,y1,x2,y2,x3,y3] of [[-8,-6,-20,-14,-9,-1],[-2,-13,-6,-25,2,-14],[5,-12,10,-23,9,-11]]){g.beginPath();g.moveTo(hx+x1,hy+y1);g.lineTo(hx+x2,hy+y2);g.lineTo(hx+x3,hy+y3);g.closePath();g.fill();}
+  }else if(lv>=11){lgHelmet(g,lv,hx,hy,t);
   }else{
     const A2=ARMOR_LOOK[lv],gl=A2.glow||'190,130,255';
     if(lv===9){/* шлем-череп */
@@ -247,7 +250,7 @@ function drawPlayerSprite(g,x,y,st,anim,facing,opts){
         g.fillStyle='rgba(0,0,0,'+(0.34*k*k+0.05)+')';g.beginPath();g.ellipse(x,y+dh,rx,3.8*(0.6+0.4*k),0,0,TAU);g.fill();}}
     const o2=Object.assign({},opts,{_ol:1});
     withOutline(g,x,y-28,48,42,'rgba(20,12,8,.92)',-1.25,(gg)=>drawPlayerSprite(gg,x,y,st,anim,facing,o2));return;}
-  const lvA=clamp(Math.floor(opts.armor||1),1,10),lvP=clamp(Math.floor(opts.pickLvl||1),1,10);
+  const lvA=clamp(Math.floor(opts.armor||1),1,15),lvP=clamp(Math.floor(opts.pickLvl||1),1,15);
   const A=ARMOR_LOOK[lvA];
   const t=anim;
   g.save();
@@ -332,7 +335,8 @@ function drawPlayerSprite(g,x,y,st,anim,facing,opts){
     const arm=plArm(g,shX,shY,aF,kF,armC,handC,lvA,true);
     if(swing>0.3&&swing<0.9){olLight(g,(g)=>{g.strokeStyle='rgba(255,255,255,'+(0.35*Math.sin((swing-0.3)/0.6*Math.PI))+')';g.lineWidth=6;g.lineCap='round';g.beginPath();g.arc(shX,shY,22,-Math.PI*0.9,-Math.PI*0.9+swing*2.4);g.stroke();});}
     g.save();g.translate(arm[2],arm[3]);g.rotate(Math.PI-arm[4]+Math.PI/2-0.25);
-    {const sl=opts.sword||2,SC=['#e8eef7','#e8eef7','#e8eef7','#e8eef7','#9ff0ff','#b48aff','#c8b8a8','#e0303a','#f0e8d0','#ffb030'][sl-1]||'#e8eef7';
+    if((opts.sword||2)>=11){g.rotate(-Math.PI/2);lgSwordModel(g,opts.sword,30+Math.min(6,(opts.sword-11)*1.5),t);}
+    else{const sl=opts.sword||2,SC=['#e8eef7','#e8eef7','#e8eef7','#e8eef7','#9ff0ff','#b48aff','#c8b8a8','#e0303a','#f0e8d0','#ffb030'][sl-1]||'#e8eef7';
     const L=22+Math.min(8,Math.max(0,sl-4)*1.4);
     g.rotate(-Math.PI/2);
     g.fillStyle='#5a3a1a';g.fillRect(-1.6,-1,3.2,7);g.fillStyle='#caa24a';g.beginPath();g.arc(0,6.6,1.8,0,TAU);g.fill();
@@ -347,7 +351,7 @@ function drawPlayerSprite(g,x,y,st,anim,facing,opts){
     const arm=plArm(g,shX,shY,aF,kF,armC,handC,lvA,true);
     if(showTool&&tool==='pick'){
       const hx2=arm[2],hy2=arm[3],rot=toolRot;
-      if(lvP>=4&&dig&&swing>0.45){const gc=['','','','','#b890ff','#8ff0ff','#8a5aff','#ff7a2a','#ff3a4a','#7ad8ff','#ffb030'][lvP];
+      if(lvP>=4&&dig&&swing>0.45){const gc=['','','','','#b890ff','#8ff0ff','#8a5aff','#ff7a2a','#ff3a4a','#7ad8ff','#ffb030','#bfe6ff','#ffc040','#8aa0ff','#ff6a9a','#ffd8a0'][lvP];
         olLight(g,(g)=>{g.translate(hx2,hy2);g.strokeStyle=hexA(gc,0.4);g.lineWidth=5;g.lineCap='round';g.beginPath();g.arc(0,0,15*(1+(lvP-1)*0.06),-Math.PI/2+rot-1.0,-Math.PI/2+rot,false);g.stroke();});}
       g.save();g.translate(hx2,hy2);g.rotate(rot);g.translate(0,-7);drawPickModel(g,lvP,t);g.restore();
       plHand(g,hx2,hy2,arm[4],handC,lvA,true);

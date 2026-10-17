@@ -106,7 +106,7 @@ function lbExitMine(){if(player.prog)player.prog.mact=[];G.lbuf={};G.lbCalm=0;}
 function lbSanRate(rate,tx,ty){
   if(rate<0){
     if(G.lbCalm>0)return 0;
-    rate*=(1-0.08*bkLv())*(lbBuf('san')>0?0.5:1)*lbMod('san');
+    rate*=(1-0.08*bkLv())*(lbBuf('san')>0?0.5:1)*lbMod('san')*lgSanMul();
   }
   return rate;
 }
@@ -171,7 +171,8 @@ function lbDug(tx,ty,t,oreId,mx,my){
   if(G.dim!==2)return;
   const g=gdP();g.dig=(g.dig|0)+1;
   if(ty<12||ty>=LIL_FLOOR)return;
-  if(Math.random()<(oreId?0.035:0.009)){const s=lbSeedFor(biomeAt(ty));addMat(s,1);floatText(mx,my-34,'+1 🌰 '+GD_BY[s].n,GD_BY[s].c);}
+  lgDugBonus(oreId,mx,my);
+  if(Math.random()<(oreId?0.035:0.009)*lgSeedMul()){const s=lbSeedFor(biomeAt(ty));addMat(s,1);floatText(mx,my-34,'+1 🌰 '+GD_BY[s].n,GD_BY[s].c);}
 }
 function lbMobKill(m){
   if(G.dim!==2||!m.def.lm)return;
@@ -275,7 +276,7 @@ function gdHarvest(i){
   const g=gdP(),b=g.beds[i];if(!b||gdGrowth(b)<1)return '';
   const q=GD_BY[b.s];let txt='';
   if(q.moon){addMat('lhmoon',2);txt='2× Лунный цветок';}
-  else{let n=3+(Math.random()<0.5?1:0);if(b.m===1)n*=2;addMat(q.h,n);txt=n+'× '+q.n;
+  else{let n=3+(Math.random()<0.5?1:0)+(lgi('shears')?1:0);if(b.m===1)n*=2;addMat(q.h,n);txt=n+'× '+q.n;
     if(b.m===1){addMat('lhmoon',1);txt+=' · 1× Лунный цветок';}}
   if(Math.random()<0.35){addMat(b.s,1);txt+=' · семечко';}
   g.beds[i]=null;SFX.buy();AU.bell(1047,0.8,0.07,0,{ratio:2.01,index:0.8,rev:0.6});saveGame();
@@ -322,6 +323,7 @@ UI.lgarden=function(tab){
       return `<div class="lbRow"><div class="lbIco" style="background:${hexA(b.c,0.18)};border-color:${hexA(b.c,0.5)}">${b.ic}</div><div style="flex:1;min-width:0"><b>${b.n}</b> <span class="tiny">(есть: ${matN(b.id)})</span>
         <div class="tiny">${b.txt}</div><div class="tiny">${rec}${b.out>1?' → '+b.out+' шт.':''}</div></div><button class="btn small" data-br="${b.id}" ${ok?'':'disabled'}>Сварить</button></div>`;}).join('')+`</div>
       <p class="tiny muted" style="margin-top:6px">Отвары берутся в шахту как предметы: кнопка «Стрелять» или быстрый слот. Действуют в Лиловых небесах (лечебные — везде, кроме боя с боссом).</p>`;
+  }else if(tab==='pets'){body=gdPetsHtml();
   }else if(tab.indexOf('weed:')===0){
     const i=+tab.slice(5);
     body=`<p class="tiny" style="text-align:center">Тапай по сорняку — бей мечом. Когда пасть раскрыта и горит красным — <b>не трогай</b>, укусит!</p>
@@ -332,7 +334,7 @@ UI.lgarden=function(tab){
   const d=this.build('lgarden',`
     <div class="card lilac" style="max-width:560px;width:96vw">
       <h3>🌱 Оранжерея</h3>
-      <div class="tabs"><button data-t="beds" class="${tab==='beds'||tab.indexOf('weed')===0?'on':''}">Грядки</button><button data-t="brew" class="${tab==='brew'?'on':''}">Отвары</button></div>
+      <div class="tabs"><button data-t="beds" class="${tab==='beds'||tab.indexOf('weed')===0?'on':''}">Грядки</button><button data-t="brew" class="${tab==='brew'?'on':''}">Отвары</button><button data-t="pets" class="${tab==='pets'?'on':''}">Питомцы</button></div>
       <div class="scroll" style="max-height:62vh">${body}</div>
     </div>
     <button class="btn alt" id="gdBack">Выйти</button>`);
@@ -346,13 +348,14 @@ UI.lgarden=function(tab){
   {const bb=d.querySelector('#gdBuy');if(bb)bb.onclick=()=>{const pr=GD_BEDS[g.n];if(player.money<pr.m||snyN()<pr.s)return;player.money-=pr.m;snySpend(pr.s);g.n++;g.beds.push(null);SFX.buy();UI.toast('🌱 Новая грядка вскопана');saveGame();UI.lgarden('beds');};}
   {const f=d.querySelector('#gdFlee');if(f)f.onclick=()=>{SFX.uiBack();UI.lgarden('beds');};}
   d.querySelector('#gdBack').onclick=()=>{SFX.uiBack();UI.close();};
+  if(tab==='pets')gdPetsBind(d);
   d.querySelectorAll('canvas[data-bed]').forEach(cv=>{const i=+cv.getAttribute('data-bed');lbAnim(cv,(c,t)=>gdDrawBed(c,150,104,g.beds[i],t));});
 };
 /* мини-игра «прополка»: сорняк раскачивается, раскрывает пасть (красный — не трогай) и щёлкает */
 function gdWeedGame(i){
   const cv=document.getElementById('gdWeed');if(!cv)return;
   const g=gdP(),b=g.beds[i];if(!gdWeedy(b)){UI.lgarden('beds');return;}
-  const hits=clamp(Math.ceil(3600/Math.max(1,swordDmg())),3,10);
+  const hits=clamp(Math.ceil(3600/Math.max(1,swordDmg())/(lgi('shears')?2:1)),2,10);
   const W={hp:hits,max:hits,ph:'idle',t:0,next:rnd(1.2,2),hit:0,bite:0,parts:[],x:0,dead:0,swing:0};
   let last=performance.now();
   const step=()=>{const now=performance.now(),dt=Math.min(0.05,(now-last)/1000);last=now;W.t+=dt;
@@ -504,7 +507,8 @@ const TH_SHOP=[
   {id:'heal',  n:'Медовый отвар ×2',   ic:'🍯',s:2,txt:'Лечит 40% здоровья.'},
   {id:'eth',   n:'Сонный эликсир',     ic:'💤',s:3,txt:'Полный Эфир и двойное накопление.'},
   {id:'ess',   n:'Флакон эссенции',    ic:'💧',s:4,txt:'Случайная эссенция одного из открытых биомов.'},
-  {id:'lan',   n:'Фонарь-якорь',       ic:'🏮',s:5,txt:'Ещё один фонарь, если маяк позволяет (до предела маяка).'}
+  {id:'lan',   n:'Фонарь-якорь',       ic:'🏮',s:5,txt:'Ещё один фонарь, если маяк позволяет (до предела маяка).'},
+  {id:'firefly',n:'Светлячок-питомец', ic:'✨',s:8,txt:'Летит рядом в шахте и светит. Живёт в Оранжерее.'}
 ];
 const TH_TALES=[
   'Когда-то в деревне жили люди. Потом они уснули, а сны остались. Я завариваю их в чай — так они не плачут.',
@@ -527,6 +531,7 @@ UI.lteah=function(tab,say){
   let body='';
   if(tab==='shop'){
     body=`<div class="lbList">`+TH_SHOP.map(q=>{
+      if(q.id==='firefly'&&petLv('firefly'))return '';
       const lanBlock=q.id==='lan'&&(!bkLv()||(bkP().own|0)>=bkCap());
       const can=snyN()>=q.s&&!lanBlock;
       return `<div class="lbRow"><div class="lbIco">${q.ic}</div><div style="flex:1;min-width:0"><b>${q.n}</b><div class="tiny">${q.txt}${lanBlock?' <span style="color:#ff9a9a">'+(bkLv()?'Предел маяка.':'Сначала зажги маяк.')+'</span>':''}</div></div>
@@ -566,6 +571,7 @@ UI.lteah=function(tab,say){
     else if(q.id==='eth')addMat('lbeth',1);
     else if(q.id==='ess'){const top=clamp(biomeAt(player.prog.lmaxd|0)-10,0,6),e=LIL_ESS[Math.floor(Math.random()*(top+1))];addMat(e[0],1);got=e[1];}
     else if(q.id==='lan')bkP().own=(bkP().own|0)+1;
+    else if(q.id==='firefly'){if(!petGive('firefly'))return;}
     SFX.buy();validateSelection();saveGame();UI.lteah('shop','Держи: '+got.toLowerCase()+'. Приходи ещё.');});
   {const b=d.querySelector('#thTale');if(b)b.onclick=()=>{const told=P.tales|0;let i,txt;
     if(told<TH_TALES.length){i=told;P.tales=told+1;snyAdd(1);txt=TH_TALES[i];saveGame();SFX.coin();}

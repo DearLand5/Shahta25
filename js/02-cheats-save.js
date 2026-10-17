@@ -300,7 +300,7 @@ function applySaveData(d){
     if(d.player){
       const p=d.player;
       player.money=p.money||0;
-      player.pickLvl=clamp(p.pickLvl||1,1,10);
+      player.pickLvl=clamp(p.pickLvl||1,1,15);
       {
         /* старые сохранения: уровней могло быть сколько угодно — лишнее возвращаем монетами */
         const oldLvl=Math.max(0,Math.floor(p.digSpeedLvl||0));
@@ -309,8 +309,8 @@ function applySaveData(d){
         player.digSpeed=digSpeedMult(player.digSpeedLvl);
       }
       player.digRadius=clamp(p.digRadius||0,0,3);
-      player.swordLvl=clamp(p.swordLvl||1,1,10);
-      player.armorLvl=clamp(p.armorLvl||1,1,10);
+      player.swordLvl=clamp(p.swordLvl||1,1,15);
+      player.armorLvl=clamp(p.armorLvl||1,1,15);
       player.slots=clamp(p.slots||8,8,40);
       player.stackLvl=clamp(Math.floor(p.stackLvl||0),0,16);
       player.maxDepth=p.maxDepth||0;

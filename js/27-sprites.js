@@ -27,6 +27,7 @@ const ARMOR_LOOK=[
   {body:'#2a0a04',trim:'#ffb030',leg:'#1a0602',boot:'#100402',arm:'#3a0e06',glow:'255,170,40'}
 ];
 function drawPickModel(g,lv,t){
+  if(lv>=11){lgPickModel(g,lv,t);return;}
   /* ручка */
   g.fillStyle='#8a5a2a';g.fillRect(-1.6,-2,3.2,21);
   g.fillStyle='#6a4018';g.fillRect(-1.6,10,3.2,2);
@@ -97,6 +98,7 @@ function drawGunModel(g,id,recoil){
   const glowDot=(x,y,r,c,a)=>{olLight(g,(g)=>{const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,hexA(c,a));gr.addColorStop(1,hexA(c,0));g.fillStyle=gr;g.beginPath();g.arc(x,y,r,0,TAU);g.fill();});};
   const grip=(x,c)=>{g.fillStyle=c||'#2a2420';g.beginPath();g.moveTo(x,1.6);g.lineTo(x+4,1.6);g.lineTo(x+2.6,8.4);g.lineTo(x-1.2,8.4);g.closePath();g.fill();g.fillStyle='rgba(0,0,0,.25)';g.fillRect(x-0.6,4,4,0.8);g.fillRect(x-0.8,6,4,0.8);};
   let muzzle=L.len,flash='#ffe08a';
+  if(LG_GUNLEN[id]){lgGunModel(g,id,T);return;}
   switch(id){
     case 'pistol':
       box(0,-2.4,12,4,'#3a3f48');hl(0,-2.4,12);box(1,-3.2,9,1,'#5a606a');grip(1.2,'#4a3a2a');box(4,1.6,3,2,'#2a2d34');box(11,-1.4,2.4,2,'#1a1c20');muzzle=13.4;break;

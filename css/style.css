@@ -497,3 +497,10 @@ body.cutscene .toast{display:none!important}
 .thTop canvas{flex:0 0 auto;margin:0!important;border-radius:12px;border:2px solid rgba(255,200,230,.35)}
 .thSay{flex:1;position:relative;padding:9px 11px;border-radius:12px;background:#fff4fa;color:#4a2a3a;font-size:13px;line-height:1.35;min-height:60px;box-shadow:0 2px 6px rgba(0,0,0,.35)}
 .thSay::before{content:'';position:absolute;left:-8px;top:24px;border:8px solid transparent;border-right-color:#fff4fa;border-left:0}
+/* ===== Лиловые небеса: Кузница Зари и питомцы (58-lilac-gear) ===== */
+.lgRow{display:flex;gap:10px;align-items:center;padding:8px;border-radius:10px;background:rgba(30,16,46,.55);border:1px solid rgba(200,170,255,.18);margin-bottom:6px}
+.lgRow canvas{flex:0 0 56px;margin:0!important;border-radius:10px;border:1px solid rgba(220,190,255,.25)}
+.lgRow .txt{flex:1;min-width:0}
+.lgRow .cost{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.lgRow .btn{flex:0 0 auto}
+.lgRow.locked{opacity:.8;filter:saturate(.7)}

@@ -209,6 +209,7 @@ function hitMobGun(m,dmg,kb,src){
   damageMob(m,dmg,kb,src&&src.x!==undefined?src:{x:player.x,gun:true});
   if(crit)floatText(m.x,m.y-m.h-22,'КРИТ!','#ffd040');
   const k=src&&src.kind;
+  if(k&&k.charCodeAt(0)===108)lgOnHit(m,dmg,k);
   if(k==='flame'){m.burn=Math.max(m.burn||0,4);m.burnDps=Math.max(m.burnDps||0,dmg*0.5);}
   if(k==='vamp'&&player.hp>0){player.hp=Math.min(player.maxHp,player.hp+dmg*(bfOn()?0.0125:0.05));}   /* в бою с боссом лечит в 4 раза слабее — иначе бой без напряжения */
 }
