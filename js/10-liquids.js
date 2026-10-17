@@ -142,6 +142,7 @@ function ventWarning(x,y){const p=ventPhase(x,y);return p>=3.6&&p<4.4;}
 let ventT=0,hotT=0;
 function openChest(wx,wy,rich){
   openedChests.add(wx+','+wy);
+  if(G.dim===2){lilOpenChest(wx,wy,rich);return;}
   const d=wy,bi=biomeAt(d);
   const money=(rich?3:1)*(G.dim===1?Math.round((3000+d*45)*rnd(0.7,1.3)):1)*(G.dim===1?1:0)+(G.dim===1?0:Math.round((120+d*1.6)*rnd(0.8,1.4)*(1+bi*0.8)));
   player.money+=money;
@@ -189,7 +190,7 @@ function checkChests(){
         const fy=glyphFloorRow(wx,wy);
         if(fy<0)continue;
         if(Math.abs(player.x-(wx*TILE+16))<30&&player.y>fy*TILE-6&&player.y-player.h<(fy+1)*TILE){
-          if(row[c]==='k'){if(!lockedChestOpen(q)){if(G.time-(G.lockMsgT||0)>2.5){G.lockMsgT=G.time;floatText(player.x,player.y-70,'🔒 Заперто: уничтожь стражей структуры','#ff9a8a');}continue;}openChest(wx,wy,true);}
+          if(row[c]==='k'){if(!lockedChestOpen(q)){if(G.time-(G.lockMsgT||0)>2.5){G.lockMsgT=G.time;floatText(player.x,player.y-70,'🔒 '+(q.st.lock||'Заперто: уничтожь стражей структуры'),'#ff9a8a');}continue;}openChest(wx,wy,true);}
           else openChest(wx,wy);
         }
       }

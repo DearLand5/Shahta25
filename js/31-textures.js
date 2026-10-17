@@ -285,6 +285,7 @@ function drawCaveWalls(g,tx0,tx1,ty0,ty1){
   const inside=structInterior(tx0,tx1,ty0,ty1);
   g.save();
   for(let ty=Math.max(ty0,5);ty<=ty1;ty++){
+    if(G.dim===2&&ty>=LIL_FLOOR)continue;   /* сонный карман: за островами видно небо сна */
     g.globalAlpha=ty<9?(ty-4)*0.16:0.8;
     g.fillStyle=wallPat(g,biomeAt(ty));
     let run=-1;

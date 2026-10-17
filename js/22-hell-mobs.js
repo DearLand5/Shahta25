@@ -844,6 +844,7 @@ function updateMobs(dt){
           if(dist<30&&m.atkCd<=0){m.atkCd=1.1;mobMelee(m,def.dmg,{slow:1.2},120,-80);if((player.souls||0)>0){player.souls=Math.max(0,player.souls-1);floatText(player.x,player.y-70,'−1 👻','#9ad8ff');}}}
         else{mvx=Math.sin(G.time*0.7+m.phase)*0.4;mvy=Math.cos(G.time*0.6+m.phase)*0.3;}
         break;}
+      case 'lmimic':noPhys=true;lilMimicAI(m,dt,dist,dx,dy);break;
       case 'turret':{                                   /* череп-турель: заряжается и бьёт очередью из 3 огнешаров */
         noPhys=true;m.facing=dx>=0?1:-1;
         if(dist<def.aggro&&seen){
@@ -977,7 +978,7 @@ function updateMobs(dt){
       }
     }
     /* контактный урон */
-    if(def.dmg>0&&hostile&&!['mole','spitter','bomber','laser','gazer','web','blinker','charger','slammer','colossus','diver','swooper','bomb','thief','phantom','provoke','skitter','shielder','leech','gasbag','archer','boss','turret','pod','rift','berserk','hound','lavaworm','toad','priest','necro','soulwraith','blademaster','scorpion','infernal','magmael','acidmother','ashgolem','bonecolossus','hookgolem'].includes(def.mech)){
+    if(def.dmg>0&&hostile&&!['mole','spitter','bomber','laser','gazer','web','blinker','charger','slammer','colossus','diver','swooper','bomb','thief','phantom','provoke','skitter','shielder','leech','gasbag','archer','boss','turret','pod','rift','lmimic','berserk','hound','lavaworm','toad','priest','necro','soulwraith','blademaster','scorpion','infernal','magmael','acidmother','ashgolem','bonecolossus','hookgolem'].includes(def.mech)){
       const hitDist=Math.hypot(player.x-m.x,(player.y-player.h*0.5)-(m.y-m.h*0.5));
       if(hitDist<(m.w+player.w)/2+8&&m.atkCd<=0){m.atkCd=0.95;mobMelee(m,def.dmg,def.fx);}
     }

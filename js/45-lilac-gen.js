@@ -144,16 +144,12 @@ function lilacLiquidAt(wx,wy,band){
 }
 function genLilacTileAt(wx,wy){
   const s=G.seed+90000,d=wy;
-  if(d>=LIL_FLOOR)return {t:T_BEDROCK,o:0};
+  if(d>=LIL_FLOOR)return (d>=DREAM_Y0-1&&d<=DREAM_Y1)?lilDreamTile(wx,wy):{t:T_BEDROCK,o:0};
   const band=lilBand(wx,wy);
   let rock=LIL_ROCK[band];
   {
-    const sc=wy>=8?structCharAt(wx,wy):null;
-    if(sc!==null){
-      if(sc==='#')return {t:rock,o:0};
-      if(sc==='i'||sc==='g')return {t:rock,o:structOre(wx,wy,d,sc)};
-      return {t:T_AIR,o:0};
-    }
+    const sr=wy>=8?structAt(wx,wy):null;
+    if(sr)return lilStructTile(sr,rock,d,wx,wy);
   }
   /* городок: кирпич домов и мостовых */
   if(band===3){const tt=lilTownTile(wx,wy);if(tt===T_LTOY||tt===T_WOOD)return {t:tt,o:0};}

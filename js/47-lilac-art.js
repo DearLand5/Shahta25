@@ -256,6 +256,7 @@ function lilOreShape(g,sh,C,L,D,GL,hk){
 
 /* ---------- фон биомов (экранные слои за пещерой) ---------- */
 function drawLilacBackdrop(g,W,H,cam,bi,T,shift){
+  if(G.dream){lilDreamBackdrop(g,W,H,cam,T);return;}
   drawLilacBackdropI(g,W,H,cam,bi,T,shift);
   drawLilacTruthBackdrop(g,W,H,cam,veilT,T);
 }

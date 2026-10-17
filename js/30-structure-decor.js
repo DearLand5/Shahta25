@@ -260,6 +260,7 @@ function crusherState(wx,wy,ceilY){
 }
 function drawStructDecor(g,tx0,tx1,ty0,ty1){
   const lst=structList(tx0,tx1,ty0,ty1);
+  if(G.dim===2){lilStructDecor(g,lst,tx0,tx1,ty0,ty1);return;}
   if(!lst.length)return;
   const time=G.time,low=settings.quality==='low';
   const glows=[];

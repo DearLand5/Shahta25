@@ -460,3 +460,7 @@ body.cutscene .toast{display:none!important}
 .poster .pin{position:absolute;top:-4px;left:50%;width:10px;height:10px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffb0c8,#b0306a);box-shadow:0 1px 2px rgba(0,0,0,.5);}
 .poster.night{background:linear-gradient(180deg,#bfb09a,#9a8a70);}
 .poster.night .ttl{color:#4a0a14;}
+/* записки жителей Лиловых небес */
+.lnote{background:linear-gradient(#f6ecd8,#eadcc0);color:#3a2a20;border-radius:6px;padding:14px 16px 10px;box-shadow:0 3px 10px rgba(0,0,0,.4),inset 0 0 18px rgba(140,100,60,.25);transform:rotate(-0.6deg);font-family:Rubik,system-ui,sans-serif}
+.lnote .lnt{font-size:14px;line-height:1.5;font-style:italic}
+.lnote .lns{margin-top:8px;text-align:right;font-size:12px;color:#6a4a3a}

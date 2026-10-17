@@ -298,6 +298,7 @@ function makeElite(m){
 const trapSpawned=new Set();let trapT=0,trapHzT=0;
 function trapKeys(q){const out=[];for(let r=0;r<q.th;r++)for(let c=0;c<q.tw;c++){const ch=q.st.tpl[r][c];if(ch==='q'||ch==='h'||ch==='z')out.push((q.px+c)+','+(q.py+r));}return out;}
 function lockedChestOpen(q){
+  if(q.st.dim===2)return lilLockedOpen(q);
   const trd=G.wf.trd||[],key=q.px+','+q.py;
   for(const k of trapKeys(q))if(trd.indexOf(k)<0)return false;
   if(q.st.tpl.some(r=>r.indexOf('s')>=0)&&!(G.wf.done&&G.wf.done.indexOf(key)>=0))return false;

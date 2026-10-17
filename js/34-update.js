@@ -253,6 +253,7 @@ function update(dt){
   updateHell(dt);
   updateVeil(dt);
   lilLivingTick(dt);
+  lilStructTick(dt);
   updateHellBlocks(dt);
   updateAnchors();
   updateTraps(dt);

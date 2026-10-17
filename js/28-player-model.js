@@ -1580,6 +1580,7 @@ function drawMobSprite0(g,m,t){
       g.strokeStyle=mobLine(c1);g.lineWidth=0.8;g.beginPath();g.moveTo(15,0.6);g.lineTo(18.4,0);g.stroke();
       if(prov)mobGlow(g,18,0,6,'#ffb040',0.5+0.3*Math.sin(t*20));
       break;}
+    case 'lmimic':lilMimicModel(g,m,FY,t);break;
     case 'turret':{
       /* череп-турель: рогатый череп на кованом кронштейне, прибитом к стене цепями; глазницы разгораются при зарядке, челюсть отбрасывает при выстреле */
       const ch=m.ch||0,jaw=Math.max(0,m.jaw||0),bone='#e2d6bc',boneD='#b8aa8c';

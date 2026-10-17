@@ -1932,6 +1932,7 @@ const UI={
         <div class="cheatGrid">${dimBtns('')}${act('toLobby','🏠 В лобби')}${G.dim===2?act('lilNight',lilNight()>0.5?'☀ День в деревне':'🌙 Ночь в деревне')+act('san100','👁 Рассудок 100')+act('san30','👁 Рассудок 30')+act('san0','👁 Рассудок 0')+act('ltea','🍵 +10 настоев'):''}</div>
         <div class="sect">Телепорт по биомам</div>
         <div class="cheatGrid">${Array.from({length:dimInfo().bn},(_,b)=>act('tpB'+(off+b),'⬇ '+BIOMES[off+b].n+' ('+BIOMES[off+b].d0+' м)')).join('')}</div>
+        ${G.dim===2?`<div class="sect">Постройки Лиловых небес</div><div class="cheatGrid">${LS_DEFS.map(d=>act('lst_'+d.id,'🏠 '+LS_NAMES[d.id])).join('')}</div>`:''}
         <div class="row" style="gap:6px;margin-top:8px">
           <input type="number" id="tpDepth" class="cheatInput" placeholder="Глубина, м" style="flex:1;min-width:0">
           <button class="btn small" id="tpBtn">ТП</button>
@@ -2006,6 +2007,7 @@ const UI={
       btn.onclick=()=>{
         const a=btn.getAttribute('data-action');
         SFX.ui();
+        if(a.indexOf('lst_')===0){if(G.scene!=='mine')teleportToDepth(LS_DEFS.find(d=>d.id===a.slice(4)).d0+2);lilTpStruct(a.slice(4));return;}
         if(a.startsWith('hb')&&hbCheat(a))return;
         if(a.startsWith('tpB')){const bi=+a.slice(3);const B=BIOMES[bi];if((B.dim||0)!==G.dim)switchDimension(B.dim||0);teleportToDepth(B.d0+(bi===dimInfo().b0?20:12));UI.clear();return;}
         switch(a){

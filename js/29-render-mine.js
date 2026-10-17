@@ -42,7 +42,7 @@ function drawEarthAtmos(W,H){
 /* парящие частицы атмосферы: одинаковый параллакс по обеим осям, плавный перенос по краям */
 function atmWrap(v,span){return ((v%span)+span)%span;}
 function drawHellAtmos(W,H,dt){
-  if(G.dim===2){drawLilacAtmos(W,H);drawLilacTruthGrade(W,H);lilDrawSleep(W,H);return;}
+  if(G.dim===2){if(!G.dream)drawLilacAtmos(W,H);drawLilacTruthGrade(W,H);lilDrawSleep(W,H);lilStructScreen(W,H);return;}
   if(G.dim!==1||settings.quality==='low'){drawEarthAtmos(W,H);return;}
   const depth=Math.max(0,player.y)/TILE,bi=biomeAt(depth),T=G.time,cam=G.cam;
   if(!_atm){_atm=[];for(let i=0;i<70;i++)_atm.push({x:Math.random(),y:Math.random(),s:Math.random(),p:Math.random()*TAU});}
@@ -740,6 +740,7 @@ function drawStructWall(g,style,x,y,wx,wy,ceil){
       g.fillStyle='#24170c';g.beginPath();g.arc(x+8+(h%14),y+10+((h>>>4)%12),5,0,TAU);g.fill();
       g.fillStyle='#3a2816';g.fillRect(x+4+((h>>>6)%20),y+20,3,2);g.fillRect(x+16+((h>>>9)%10),y+6,2,2);
       break;}
+    default:if(style.charCodeAt(0)===108){lilStructWall(g,style,x,y,wx,wy,ceil);return;}break;
     case 'moss':{
       g.fillStyle='rgba(28,40,24,.75)';g.fillRect(x,y,TILE,TILE);
       g.fillStyle='rgba(70,110,50,.35)';g.beginPath();g.arc(x+10+(h%12),y+12+((h>>>3)%10),6,0,TAU);g.fill();
@@ -778,7 +779,7 @@ function drawStructWalls(g,tx0,tx1,ty0,ty1){
         drawStructWall(g,style,wx*TILE,wy*TILE,wx,wy,ceil);
         structWallDepth(g,style,wx*TILE,wy*TILE,floor,isSolid(wx-1,wy),isSolid(wx+1,wy));
         /* колонны и арки на задней стене — глубина интерьера */
-        if(q.tw>=9&&(c-3)%6===0&&c>1&&c<q.tw-2)drawStructColumn(g,style,wx*TILE,wy*TILE,isSolid(wx,wy-1),isSolid(wx,wy+1));
+        if(q.st.dim!==2&&q.tw>=9&&(c-3)%6===0&&c>1&&c<q.tw-2)drawStructColumn(g,style,wx*TILE,wy*TILE,isSolid(wx,wy-1),isSolid(wx,wy+1));
       }
     }
   }

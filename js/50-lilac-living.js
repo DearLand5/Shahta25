@@ -100,7 +100,7 @@ function lilLivingTick(dt){
       burst(g.tx*TILE+16,g.ty*TILE+16,10,'#9aff9a',90,2.4);}
   }
   /* зеркальная вода переворачивает мир */
-  if(player.grav===-1){
+  if(player.grav===-1&&!LIV.house){
     player.gravT-=dt;
     if(!isLiq(bodyT))LIV.outW=true;
     if(player.gravT<=0||band!==5||(isLiq(bodyT)&&LIV.outW))lilFlip(false);

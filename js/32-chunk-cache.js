@@ -133,7 +133,7 @@ function applyLighting(){
   const depth=Math.max(0,player.y)/TILE;
   /* Чем глубже, тем темнее, а собственный свет игрока без факелов сужается:
      на дне без прокачанных факелов почти ничего не видно. */
-  let dark=G.dim===1?clamp(0.2+depth/900,0.2,0.94):G.dim===2?clamp(0.14+depth/2900,0.14,0.8):clamp(0.16+depth/650,0.16,0.975);
+  let dark=G.dim===1?clamp(0.2+depth/900,0.2,0.94):G.dim===2?(G.dream?0.12:clamp(0.14+depth/2900,0.14,0.8)):clamp(0.16+depth/650,0.16,0.975);
   /* глубокие биомы Ада темнее: Топи, Катакомбы, Ядро (в Ядре немного светлее из-за лавы) */
   const hbi=G.dim===1?biomeAt(depth):-1;
   if(hbi===7)dark=Math.max(dark,0.95);else if(hbi===8)dark=Math.max(dark,0.978);else if(hbi>=9)dark=Math.max(dark,0.968);
@@ -215,7 +215,7 @@ function applyLighting(){
             for(let c=0;c<q.tw;c++){
               const wx=q.px+c;if(wx<tx0||wx>tx1)continue;
               const ch=q.st.tpl[r][c];
-              const rad=ch==='L'?3.8:ch==='F'?4.2:ch==='E'?3.6:ch==='V'?4.5:ch==='P'||ch==='M'?3.4:ch==='U'||ch==='J'?2.6:ch==='c'||ch==='m'||ch==='C'?2.2:0;
+              const rad=G.dim===2?(LS_LIGHT[ch]||0):ch==='L'?3.8:ch==='F'?4.2:ch==='E'?3.6:ch==='V'?4.5:ch==='P'||ch==='M'?3.4:ch==='U'||ch==='J'?2.6:ch==='c'||ch==='m'||ch==='C'?2.2:0;
               if(rad)L.push(wx*TILE+16,wy*TILE+16,rad,0.85);
             }
           }
