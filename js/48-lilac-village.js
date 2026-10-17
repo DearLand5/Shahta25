@@ -185,6 +185,7 @@ UI.lboard=function(){
         ${c.ready?`<button class="btn small" data-claim="${i}">Отдать</button>`:`<button class="btn small alt" data-swap="${i}" ${(player.souls||0)>=5?'':'disabled'}>↻ 5 👻</button>`}</div>
       </div>`).join('')}
     </div>
+    <button class="btn" id="lbBook">📖 Книга деревни</button>
     <button class="btn alt" id="lbBack">Выйти</button>`);
   d.querySelectorAll('[data-claim]').forEach(b=>b.onclick=()=>{
     const i=+b.getAttribute('data-claim'),c=L[i];if(!c||!c.ready)return;
@@ -194,6 +195,7 @@ UI.lboard=function(){
   });
   d.querySelectorAll('[data-swap]').forEach(b=>b.onclick=()=>{const i=+b.getAttribute('data-swap');if((player.souls||0)<5)return;player.souls-=5;L[i]=makeLContract();SFX.ui();saveGame();UI.lboard();});
   d.querySelector('#lbBack').onclick=()=>{SFX.uiBack();UI.close();};
+  d.querySelector('#lbBook').onclick=()=>{SFX.ui();UI.lbook();};
 };
 
 /* ---------- Карусель удачи: рулетка, блэкджек, кости и «Карусель» ---------- */

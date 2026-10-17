@@ -1929,7 +1929,7 @@ const UI={
     }else if(tab==='world'){
       const off=dimInfo().b0;
       body=`<div class="sect" style="border:none;margin-top:0;padding-top:0">Измерение: ${DIM_NAMES[G.dim]}</div>
-        <div class="cheatGrid">${dimBtns('')}${act('toLobby','🏠 В лобби')}${G.dim===2?act('lilNight',lilNight()>0.5?'☀ День в деревне':'🌙 Ночь в деревне')+act('san100','👁 Рассудок 100')+act('san30','👁 Рассудок 30')+act('san0','👁 Рассудок 0')+act('ltea','🍵 +10 настоев')+act('abMax','🪞 Все способности')+act('lbSny','🌙 +30 Снов')+act('lbHerbs','🌿 Травы и отвары')+act('lbGrow','🌱 Вырастить грядки')+act('lbBk5','🗼 Маяк 5')+act('lgMax','☀ Снаряжение Зари')+act('lgMats','▰ Слитки Зари'):''}</div>
+        <div class="cheatGrid">${dimBtns('')}${act('toLobby','🏠 В лобби')}${G.dim===2?act('lilNight',lilNight()>0.5?'☀ День в деревне':'🌙 Ночь в деревне')+act('san100','👁 Рассудок 100')+act('san30','👁 Рассудок 30')+act('san0','👁 Рассудок 0')+act('ltea','🍵 +10 настоев')+act('abMax','🪞 Все способности')+act('lbSny','🌙 +30 Снов')+act('lbHerbs','🌿 Травы и отвары')+act('lbGrow','🌱 Вырастить грядки')+act('lbBk5','🗼 Маяк 5')+act('lgMax','☀ Снаряжение Зари')+act('lgMats','▰ Слитки Зари')+act('lstAll','📖 Все записи')+act('lstHints','💡 Подсказки заново'):''}${G.dim!==2?act('lcut','🎬 Прибытие в Лиловые небеса'):''}</div>
         <div class="sect">Телепорт по биомам</div>
         <div class="cheatGrid">${Array.from({length:dimInfo().bn},(_,b)=>act('tpB'+(off+b),'⬇ '+BIOMES[off+b].n+' ('+BIOMES[off+b].d0+' м)')).join('')}</div>
         ${G.dim===2?`<div class="sect">Постройки Лиловых небес</div><div class="cheatGrid">${LS_DEFS.map(d=>act('lst_'+d.id,'🏠 '+LS_NAMES[d.id])).join('')}</div>`:''}
@@ -2056,6 +2056,9 @@ const UI={
           case 'abMax':{const P=abP();for(const d of AB_DEFS)P.lv[d.id]=5;P.slot=['shadow','blink'];LAB.eth=AB_ETHER;UI.toast('🪞 Все способности на 5 уровне — мутации выбираются в Зале');break;}
           case 'lbSny': lbCheat('sny');break;
           case 'lgMax': lgCheat('max');break;
+          case 'lstAll': lstCheat('all');break;
+          case 'lstHints': lstCheat('hints');break;
+          case 'lcut': startCutscene(2); return;
           case 'lgMats': lgCheat('mats');break;
           case 'lbHerbs': lbCheat('herbs');break;
           case 'lbGrow': lbCheat('grow');break;

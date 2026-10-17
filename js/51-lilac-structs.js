@@ -262,7 +262,7 @@ function lsReadNote(q,wx,wy){
   for(let i=0;i<LIL_NOTES.length;i++)if(L.indexOf(i)<0){id=i;break;}
   const money=Math.round((40000+wy*300)*rnd(0.8,1.2));player.money+=money;
   if(id<0)id=Math.floor(Math.random()*LIL_NOTES.length);else L.push(id);
-  floatText(wx*TILE+16,wy*TILE-20,'Записка · +'+fmt(money)+' 💰','#ffe6a0');SFX.chest();saveGame();
+  floatText(wx*TILE+16,wy*TILE-20,'Записка · +'+fmt(money)+' 💰','#ffe6a0');SFX.chest();lstHint('note');saveGame();
   UI.lnote(id);
 }
 UI.lnote=function(id){
@@ -289,6 +289,7 @@ function lilOpenChest(wx,wy,rich){
   if(rich||Math.random()<0.3){const e=LIL_ESS[b];addMat(e[0],1);txt+=' · '+e[1];}
   const sl=3+Math.floor(Math.random()*6)+(rich?10:0);player.souls=(player.souls||0)+sl;txt+=' · +'+sl+' 👻';
   {const sn=lbChestSny(wy,rich);if(sn)txt+=' · +'+sn+' 🌙';}
+  lstPageChest(wx,wy);
   if(Math.random()<0.4){player.potions++;txt+=' · 🧪';}
   if(Math.random()<0.5){player.ladders+=5;txt+=' · 🪜×5';}
   if(player.gunLvl>0&&Math.random()<0.45){const g=curGun();player.gunAmmo+=g.pack;txt+=' · 🔸×'+g.pack;}

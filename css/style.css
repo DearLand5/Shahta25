@@ -504,3 +504,20 @@ body.cutscene .toast{display:none!important}
 .lgRow .cost{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
 .lgRow .btn{flex:0 0 auto}
 .lgRow.locked{opacity:.8;filter:saturate(.7)}
+/* ===== Лиловые небеса: книга деревни и подсказки (60-lilac-story) ===== */
+.lnote .lnh{font-family:var(--font-head);font-size:15px;color:#5a2a4a;margin-bottom:6px}
+.lnote.diary{background:linear-gradient(180deg,#f6ead2,#e8d6b2);}
+.lnote.tea{background:linear-gradient(180deg,#fff0f6,#f4d8e4);}
+.lbkList{display:flex;flex-direction:column;gap:4px;max-height:30vh;overflow:auto;margin-top:8px}
+.lbkItem{text-align:left;font-size:13px;padding:7px 10px;border-radius:8px;background:rgba(30,16,46,.55);border:1px solid rgba(200,170,255,.18);color:#ecdcff;font-family:var(--font-body)}
+button.lbkItem{pointer-events:auto;cursor:pointer}
+.lbkItem.on{background:rgba(200,150,255,.25);border-color:rgba(230,200,255,.55)}
+.lbkItem.locked{opacity:.55}
+.lhint{position:absolute;left:50%;top:26%;transform:translateX(-50%) translateY(-8px);width:min(92vw,420px);display:flex;gap:10px;align-items:flex-start;
+  background:rgba(26,14,38,.92);border:1px solid rgba(220,180,255,.45);border-left:3px solid #d8a8ff;border-radius:12px;padding:9px 12px;color:#f2e6ff;
+  z-index:39;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.lhint.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+.lhint .lhIc{font-size:22px;line-height:1}
+.lhint .lhTx{display:flex;flex-direction:column;gap:2px;font-size:13px;line-height:1.3}
+.lhint .lhTx b{font-family:var(--font-head);font-weight:400;color:#e8c0ff;font-size:14px}
+body.cutscene .lhint{display:none!important}

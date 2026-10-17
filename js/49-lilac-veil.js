@@ -63,7 +63,7 @@ function lilTrueOre(tx,ty,t){
 /* вызывается из копания: true — руда не выдаётся (иллюзия) */
 function lilOreDug(tx,ty,oreId,mx,my){
   if(G.dim!==2||!oreId||!ORES[oreId]||ORES[oreId].dim!==2||!lilIllusory(tx,ty))return false;
-  floatText(mx,my-14,'Иллюзия рассыпалась','#d8b0ff');burst(mx,my,14,'#c8a0ff',120,2.6);SFX.uiBack();
+  floatText(mx,my-14,'Иллюзия рассыпалась','#d8b0ff');lstHint('illusion');burst(mx,my,14,'#c8a0ff',120,2.6);SFX.uiBack();
   return true;
 }
 /* копание пустой породы: в Истине там может быть истинная руда */

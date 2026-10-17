@@ -472,6 +472,7 @@ function portalReqs(){
 }
 /* ---------- Катсцена перехода ---------- */
 function startCutscene(to){
+  if(to===2&&G.dim!==2){lilacCutStart();return;}
   if(to===2||G.dim===2){lilacJump(to);return;}
   UI.clear();resetAllInputs();
   G.cut={t:0,to:to,dur:10.2,from:G.dim,seed:Math.random()*1000};
@@ -515,6 +516,7 @@ function cutsceneSound(to,sp){
 }
 function finishCutscene(){
   const c=G.cut;if(!c)return;
+  if(c.lil){finishLilacCut();return;}
   G.cut=null;
   if(c.nodes&&c.t<c.dur-0.2){for(const n of c.nodes){try{n.stop();}catch(e){}}}
   G.cutHide=false;
@@ -526,6 +528,7 @@ function finishCutscene(){
 }
 function renderCutscene(dt){
   const c=G.cut;if(!c)return;
+  if(c.lil){renderLilacCut(dt);return;}
   /* ~10 с: 0–3.35 активация портала · 3.35–5.35 тоннель · 5.35–9.6 прибытие и титр · 9.6–10.2 затемнение */
   const W=view.W,H=view.H,t=c.t,T=t,hell=c.to===1,cx=W/2,M=Math.max(W,H),R=Math.min(W,H)*0.19;
   const fromHell=c.from===1;

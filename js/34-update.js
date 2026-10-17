@@ -47,6 +47,7 @@ function update(dt){
     G.cam.x=clamp(G.cam.x,view.W/(2*view.scale)-100,LOBBY_W-view.W/(2*view.scale)+100);
     G.cam.y=0;
     Input.jumpPressed=false;
+    lstTick(dt);
     return;
   }
   if(G.scene!=='mine')return;
@@ -259,6 +260,7 @@ function update(dt){
   lilAbTick(dt);
   lbTick(dt);
   lgTick(dt);
+  if(G.dim===2)lstTick(dt);
   updateHellBlocks(dt);
   updateAnchors();
   updateTraps(dt);

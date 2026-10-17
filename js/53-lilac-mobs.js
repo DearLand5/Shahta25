@@ -379,7 +379,7 @@ function lilMobAI(m,def,dt,dx,dy,dist,nx,ny,aggro,seen){
 /* смерть: слизень делится, в Истине — лишняя руда */
 function lilMobDeath(m,quiet){
   const d=m.def;
-  if(!quiet)lbMobKill(m);
+  if(!quiet){lbMobKill(m);lstPageTruth(m);}
   if(m.tf&&!quiet&&Math.random()<0.5){const o=d.drops[1]||d.drops[0];addOre(o.ore,1);floatText(m.x-10,m.y-m.h-36,'Истинная добыча','#ff9ab8');}
   if(d.id==='lslime'&&!m.child&&!quiet){
     for(let i=0;i<2;i++){const c=spawnMobAt(d,m.x+(i?14:-14),m.y);c.child=1;c.w=d.w*0.65;c.h=d.h*0.65;c.hp=c.maxHp=Math.round(m.maxHp*0.35);c.vy=-260;c.vx=(i?1:-1)*120;c.noSouls=true;}

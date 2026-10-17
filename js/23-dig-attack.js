@@ -32,6 +32,7 @@ function digUpdate(dt){
     if(!player._toolMsg||performance.now()-player._toolMsg>1400){
       player._toolMsg=performance.now();
       floatText(player.x,player.y-64,'Нужна '+pickName(ORES[oreId].tier)+' (кузница)','#ff9a3c');
+      if(G.dim===2)lstHint('pick');
       SFX.uiBack();
     }
     return;
