@@ -101,7 +101,6 @@ function autoAttackUpdate(dt){
   let best=null,bestD=1e9;
   for(const m of mobs){
     if(!m.alive||m.untargetable||m.hidden)continue;     /* под землёй / спрятан — меч не машет впустую и не мешает копать */
-    if(G.dim===2&&m.def.lm&&lmCalm(m))continue;        /* мирных и нейтральных в Иллюзии меч не трогает сам */
     const d=m.def.hb?hbDistToMob(m,player.x,player.y-player.h*0.5):Math.hypot(m.x-player.x,(m.y-m.h*0.5)-(player.y-player.h*0.5));
     if(d<(m.def.hb?54:62+(m.def.boss?m.w*0.4:0))&&d<bestD){bestD=d;best=m;}
   }
@@ -114,7 +113,6 @@ function autoAttackUpdate(dt){
   let anyHit=false,vampBest=0;
   for(const m of mobs){
     if(!m.alive||m.untargetable||m.hidden)continue;
-    if(G.dim===2&&m.def.lm&&lmCalm(m))continue;
     const dx=m.x-cx,dy=(m.y-m.h*0.5)-cy;
     const d=m.def.hb?hbDistToMob(m,cx,cy):Math.hypot(dx,dy);
     if(d<(m.def.hb?54:62+(m.def.boss?m.w*0.4:0))){

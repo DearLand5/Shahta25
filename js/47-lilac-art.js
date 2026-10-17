@@ -7,6 +7,41 @@
    ============================================================ */
 function lilIsTile(t){return t>=40&&t<=53;}
 
+/* ---------- сшитый лист 8×8 клеток для пород и стен ----------
+   Узор кладётся листом 256×256 в мировых координатах. Раньше каждая клетка рисовалась
+   отдельно и всё, что выходило за её край (стебли, корни, пласты, пузыри), обрезалось —
+   на стыках клеток рисунок рвался. Здесь клетки рисуются в один лист в два прохода:
+   1) каждая клетка в своих границах — как раньше;
+   2) то же самое ещё раз, но только снаружи клетки (на соседях) и без заливки фона —
+      линии продолжаются в соседние клетки, а на краях листа переходят на другую сторону.
+   Оттенок фона у соседних клеток почти одинаковый, чтобы не было «шахматки». */
+function lilMixHex(a,b,t){const A=parseInt(a.slice(1),16),B=parseInt(b.slice(1),16),m=(s)=>Math.round(((A>>s)&255)*(1-t)+((B>>s)&255)*t);
+  return '#'+((1<<24)|(m(16)<<16)|(m(8)<<8)|m(0)).toString(16).slice(1);}
+/* где в листе 8×8 рисуется клетка: по нему линии на общем крае совпадают у соседей */
+const LIL_CELL={x:0,y:0};
+/* значение 0–1 на общем крае: (X,Y) — угол сетки листа, у соседей одинаковый; лист повторяется через 8 клеток */
+function lilE(X,Y,k){return (hash2(X&7,Y&7,k)%1000)/1000;}
+function lilAtlas(g,kind,id){
+  const c=document.createElement('canvas');c.width=c.height=256;const cg=c.getContext('2d');
+  const col=kind==='t'?(TILECOL[id]||['#555555','#5b5b5b','#4f4f4f']):null;
+  /* без заливки целой клетки: второй проход не должен закрашивать соседей фоном */
+  const nofill=new Proxy(cg,{get(o,k){if(k==='fillRect')return (x,y,w,h)=>{if(x<=0&&y<=0&&w>=32&&h>=32)return;o.fillRect(x,y,w,h);};
+    const v=o[k];return typeof v==='function'?v.bind(o):v;},set(o,k,v){o[k]=v;return true;}});
+  const cell=(gx,x,y,pass)=>{
+    const v=hash2(x,y,id*31+7)&3,seed=id*92821+(y*8+x)*68917+7;
+    LIL_CELL.x=x;LIL_CELL.y=y;gx.save();gx.translate(x*32,y*32);
+    if(pass===1){gx.beginPath();gx.rect(0,0,32,32);gx.clip();}
+    else{gx.beginPath();gx.rect(-34,-34,100,100);gx.rect(0,0,32,32);gx.clip('evenodd');}
+    if(kind==='t'){const base=lilMixHex(col[v%3],col[0],0.85);if(pass===1){cg.fillStyle=base;cg.fillRect(0,0,32,32);}lilacTex(gx,id,v,texRng(seed),base);}
+    else lilacWall(id,v,gx,texRng(seed));
+    gx.restore();};
+  for(let y=0;y<8;y++)for(let x=0;x<8;x++)cell(cg,x,y,1);
+  for(let y=0;y<8;y++)for(let x=0;x<8;x++)for(const ox of [-8,0,8])for(const oy of [-8,0,8]){LIL_CELL.x=x;LIL_CELL.y=y;
+    if((ox&&x>0&&x<7)||(oy&&y>0&&y<7))continue;   /* через край листа — только крайним клеткам */
+    nofill.save();nofill.translate(ox*32,oy*32);cell(nofill,x,y,2);nofill.restore();}
+  LIL_CELL.x=0;LIL_CELL.y=0;return g.createPattern(c,'repeat');
+}
+
 /* ---------- текстуры пород 32×32 (вызывается из makeTex) ---------- */
 function lilacTex(g,type,v,R,base){
   const dots=(n,s0,s1,k,col)=>{for(let i=0;i<n;i++){const x=R()*32|0,y=R()*32|0,sz=Math.ceil(s0+R()*(s1-s0));g.fillStyle=shadeHex(col||base,(R()-0.5)*k);g.fillRect(x,y,sz,sz);}};
@@ -42,7 +77,8 @@ function lilacTex(g,type,v,R,base){
       break;}
     case T_LPORC:{/* фарфоровый камень: кракелюр, глянец, обломок росписи */
       dots(30,1,2,0.12);
-      const gr=g.createLinearGradient(0,0,32,32);gr.addColorStop(0,'rgba(255,255,255,.18)');gr.addColorStop(0.5,'rgba(255,255,255,0)');gr.addColorStop(1,'rgba(40,20,50,.16)');g.fillStyle=gr;g.fillRect(0,0,32,32);
+      /* мягкие пятна глазури и тени — не по форме клетки, чтобы не было видно сетки */
+      for(let i=0;i<2;i++){const x=R()*32,y=R()*32,r=7+R()*7,rg=g.createRadialGradient(x,y,0,x,y,r);rg.addColorStop(0,i?'rgba(40,20,50,.12)':'rgba(255,255,255,.16)');rg.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=rg;g.beginPath();g.arc(x,y,r,0,TAU);g.fill();}
       for(let i=0;i<4;i++){g.strokeStyle=hexA(shadeHex(base,-0.42),0.6);g.lineWidth=0.6;g.beginPath();let x=R()*32,y=R()*32;g.moveTo(x,y);for(let k=0;k<4;k++){x+=(R()-0.5)*12;y+=(R()-0.5)*12;g.lineTo(x,y);}g.stroke();}
       if(v===1||v===3){const x=6+R()*18,y=6+R()*18,c=v===1?'#7a8ad8':'#d87aa8';
         g.strokeStyle=hexA(c,0.6);g.lineWidth=1.1;g.beginPath();g.arc(x,y,4,0.2,Math.PI*1.5);g.stroke();
@@ -67,8 +103,10 @@ function lilacTex(g,type,v,R,base){
       break;}
     case T_LMIRROR:{/* зеркальный сланец: пласты, серебряные блики, осколки */
       dots(30,1,2,0.2);
-      for(let i=0;i<4;i++){const y0=3+i*8+R()*3;g.fillStyle=hexA(i%2?dk:shadeHex(base,0.1),0.55);g.beginPath();g.moveTo(0,y0);for(let x=0;x<=32;x+=8)g.lineTo(x,y0+(R()-0.5)*2);g.lineTo(32,y0+3);g.lineTo(0,y0+3);g.closePath();g.fill();
-        g.fillStyle='rgba(220,240,250,.22)';g.fillRect(0,y0,32,0.8);}
+      {const cx=LIL_CELL.x,cy=LIL_CELL.y;
+      for(let i=0;i<4;i++){const yL=3+i*8+lilE(cx,cy,i+40)*3,yR=3+i*8+lilE(cx+1,cy,i+40)*3,yy=(x)=>yL+(yR-yL)*x/32+(x>0&&x<32?(R()-0.5)*2:0);
+        g.fillStyle=hexA(i%2?dk:shadeHex(base,0.1),0.55);g.beginPath();const pts=[0,8,16,24,32].map(x=>[x,yy(x)]);g.moveTo(0,pts[0][1]);for(const q of pts)g.lineTo(q[0],q[1]);for(let k=pts.length-1;k>=0;k--)g.lineTo(pts[k][0],pts[k][1]+3);g.closePath();g.fill();
+        g.strokeStyle='rgba(220,240,250,.22)';g.lineWidth=0.8;g.beginPath();g.moveTo(0,pts[0][1]+0.4);for(const q of pts)g.lineTo(q[0],q[1]+0.4);g.stroke();}}
       for(let i=0;i<3;i++){const x=R()*26+2,y=R()*26+2,w=3+R()*4;const gr=g.createLinearGradient(x,y,x+w,y+w);gr.addColorStop(0,'rgba(255,255,255,.8)');gr.addColorStop(0.5,'rgba(180,220,235,.6)');gr.addColorStop(1,'rgba(60,90,100,.6)');
         g.fillStyle=gr;g.beginPath();g.moveTo(x,y);g.lineTo(x+w,y+1);g.lineTo(x+w*0.6,y+w*0.7);g.closePath();g.fill();}
       break;}
@@ -82,9 +120,12 @@ function lilacTex(g,type,v,R,base){
       break;}
     case T_LROOT:{/* сплетённые корни */
       g.fillStyle=shadeHex(base,-0.5);g.fillRect(0,0,32,32);
-      for(let i=0;i<5;i++){const x0=R()*32,c=shadeHex(base,(R()-0.4)*0.3),w=3+R()*3;
-        g.strokeStyle=c;g.lineWidth=w;g.lineCap='round';g.beginPath();g.moveTo(x0,-2);g.bezierCurveTo(x0+(R()-0.5)*24,10,x0+(R()-0.5)*24,22,x0+(R()-0.5)*14,34);g.stroke();
-        g.strokeStyle=hexA(lit,0.5);g.lineWidth=0.9;g.beginPath();g.moveTo(x0-w*0.3,-2);g.bezierCurveTo(x0-w*0.3+(R()-0.5)*6,10,x0-w*0.3,22,x0-w*0.3,34);g.stroke();}
+      {const cx=LIL_CELL.x,cy=LIL_CELL.y;
+      for(let i=0;i<4;i++){const x0=(i+0.15+lilE(cx,cy,i+50)*0.7)*8,x1=(i+0.15+lilE(cx,cy+1,i+50)*0.7)*8,w=3+lilE(cx*8+i,0,51)*3,c=shadeHex(base,(lilE(cx*8+i,1,52)-0.4)*0.3);
+        const a=(x0+x1)/2+(R()-0.5)*10,b=(x0+x1)/2+(R()-0.5)*10;
+        g.strokeStyle=shadeHex(c,-0.35);g.lineWidth=w+1.4;g.lineCap='butt';g.beginPath();g.moveTo(x0+0.6,-1);g.bezierCurveTo(a+0.6,10,b+0.6,22,x1+0.6,33);g.stroke();
+        g.strokeStyle=c;g.lineWidth=w;g.beginPath();g.moveTo(x0,-1);g.bezierCurveTo(a,10,b,22,x1,33);g.stroke();
+        g.strokeStyle=hexA(lit,0.5);g.lineWidth=0.9;g.beginPath();g.moveTo(x0-w*0.3,0);g.bezierCurveTo(a-w*0.3,10,b-w*0.3,22,x1-w*0.3,32);g.stroke();}}
       for(let i=0;i<6;i++){g.fillStyle='rgba(20,10,4,.45)';g.fillRect(R()*31|0,R()*31|0,2,1);}
       break;}
     case T_LQUARTZ:{/* хрустальный столб: три грани, внутреннее свечение, вертикальные блики */
@@ -109,8 +150,8 @@ function lilacTex(g,type,v,R,base){
     case T_LTOY:{/* кукольный кирпич: пастельные блоки со скруглением и глянцем */
       const pal=['#d88aa8','#8ac8b4','#b8a0dc','#e8c890','#9ab8e8'];
       g.fillStyle='#5a4058';g.fillRect(0,0,32,32);
-      for(let r=0;r<2;r++){const off=(r+v)%2?8:0;
-        for(let k=-1;k<2;k++){const bx=off+k*16+1,by=r*16+1,bw=14,bh=14,c=pal[(R()*pal.length)|0];
+      for(let r=0;r<2;r++){const row=LIL_CELL.y*2+r,off=row%2?8:0;
+        for(let k=-1;k<2;k++){const bx=off+k*16+1,by=r*16+1,bw=14,bh=14,col=Math.floor((LIL_CELL.x*32+bx+8)/16)&15,c=pal[hash2(col,row&15,140)%pal.length];
           g.fillStyle=shadeHex(c,-0.3);g.beginPath();g.roundRect?g.roundRect(bx,by+1,bw,bh,3):g.rect(bx,by+1,bw,bh);g.fill();
           g.fillStyle=c;g.beginPath();g.roundRect?g.roundRect(bx,by,bw,bh-1,3):g.rect(bx,by,bw,bh-1);g.fill();
           g.fillStyle='rgba(255,255,255,.4)';g.fillRect(bx+2,by+1.5,bw-6,1.4);g.fillRect(bx+1.5,by+2,1.2,bh-7);
@@ -119,7 +160,7 @@ function lilacTex(g,type,v,R,base){
       break;}
     case T_LBRIAR:{/* шипастая лоза: толстые стебли с крупными шипами */
       g.fillStyle=shadeHex(base,-0.35);g.fillRect(0,0,32,32);
-      for(let i=0;i<3;i++){const y0=4+i*11+R()*3,dir=R()<0.5?1:-1;
+      for(let i=0;i<3;i++){const y0=5+i*11,dir=R()<0.5?1:-1;
         const path=(dy)=>{g.beginPath();g.moveTo(-2,y0+dy);g.bezierCurveTo(10,y0+dy+dir*7,22,y0+dy-dir*7,34,y0+dy);};
         g.strokeStyle=shadeHex(base,-0.15);g.lineWidth=6;path(1);g.stroke();
         g.strokeStyle=base;g.lineWidth=4.4;path(0);g.stroke();
@@ -129,9 +170,10 @@ function lilacTex(g,type,v,R,base){
           g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.moveTo(x+0.5,y+up*5);g.lineTo(x+2,y);g.lineTo(x+0.6,y);g.closePath();g.fill();}}
       break;}
     case T_LSILVER:{/* серебряная жила: ртутный блеск, мягкие волны отражения, отражённое лиловое небо */
-      const gr=g.createLinearGradient(0,0,8,32);gr.addColorStop(0,shadeHex(base,0.25));gr.addColorStop(0.5,shadeHex(base,-0.05));gr.addColorStop(1,shadeHex(base,-0.35));g.fillStyle=gr;g.fillRect(0,0,32,32);
-      for(let i=0;i<3;i++){const y0=4+i*10+R()*4;g.fillStyle=i===1?'rgba(200,160,255,.22)':'rgba(255,255,255,.28)';g.beginPath();g.moveTo(0,y0);
-        for(let x=0;x<=32;x+=4)g.lineTo(x,y0+Math.sin(x*0.25+v+i*2)*2);for(let x=32;x>=0;x-=4)g.lineTo(x,y0+1.6+Math.sin(x*0.25+v+i*2+0.6)*2);g.closePath();g.fill();}
+      for(let i=0;i<2;i++){const x=R()*32,y=R()*32,r=8+R()*8,rg=g.createRadialGradient(x,y,0,x,y,r);rg.addColorStop(0,i?'rgba(30,40,60,.18)':'rgba(255,255,255,.2)');rg.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=rg;g.beginPath();g.arc(x,y,r,0,TAU);g.fill();}
+      {const gx0=LIL_CELL.x*32,K=TAU*8/256;   /* волны непрерывны по всему листу */
+      for(let i=0;i<3;i++){const y0=4+i*10,ph=i*2+LIL_CELL.y;g.fillStyle=i===1?'rgba(200,160,255,.22)':'rgba(255,255,255,.28)';g.beginPath();g.moveTo(0,y0);
+        for(let x=0;x<=32;x+=4)g.lineTo(x,y0+Math.sin((gx0+x)*K+ph)*2);for(let x=32;x>=0;x-=4)g.lineTo(x,y0+1.6+Math.sin((gx0+x)*K+ph+0.6)*2);g.closePath();g.fill();}}
       for(let i=0;i<5;i++){const x=R()*30,y=R()*30,r=1+R()*2;const rg=g.createRadialGradient(x-r*0.3,y-r*0.3,0.2,x,y,r);rg.addColorStop(0,'#ffffff');rg.addColorStop(0.6,shadeHex(base,0.2));rg.addColorStop(1,shadeHex(base,-0.3));
         g.fillStyle=rg;g.beginPath();g.arc(x,y,r,0,TAU);g.fill();}
       g.fillStyle='rgba(20,40,50,.3)';g.beginPath();g.ellipse(R()*32,R()*32,4,1.2,R(),0,TAU);g.fill();
@@ -152,30 +194,32 @@ function lilacTex(g,type,v,R,base){
 }
 
 /* ---------- задние стены пещер биомов 10–16 ---------- */
-function lilacWall(bi,v){
-  const c=texCanvas(),g=c.getContext('2d'),R=texRng(bi*3571+v*911+3);
+function lilacWall(bi,v,gIn,RIn){
+  const c=gIn?null:texCanvas(),g=gIn||c.getContext('2d'),R=RIn||texRng(bi*3571+v*911+3);
   const rock=LIL_ROCK[bi-10]||T_LSOD;
-  const base=shadeHex(TILECOL[rock][v%3],bi===14?-0.72:-0.6);
+  const base=shadeHex(gIn?lilMixHex(TILECOL[rock][v%3],TILECOL[rock][0],0.85):TILECOL[rock][v%3],bi===14?-0.72:-0.6);
   g.fillStyle=base;g.fillRect(0,0,32,32);
   for(let i=0;i<46;i++){g.fillStyle=shadeHex(base,(R()-0.5)*0.45);g.fillRect(R()*32|0,R()*32|0,1+(R()*2|0),1+(R()*2|0));}
   for(let i=0;i<3;i++){g.fillStyle=hexA(shadeHex(base,-0.35),0.5);g.beginPath();g.ellipse(R()*32,R()*32,3+R()*6,2+R()*4,R()*3,0,TAU);g.fill();}
   const b=bi-10;
   if(b===0){/* тени корней и лепестки */
-    g.strokeStyle=hexA(shadeHex(base,-0.4),0.6);g.lineWidth=1.4;g.beginPath();const x=R()*32;g.moveTo(x,0);g.quadraticCurveTo(x+6,16,x-3,32);g.stroke();
+    {const cx=LIL_CELL.x,cy=LIL_CELL.y,xa=4+lilE(cx,cy,60)*24,xb=4+lilE(cx,cy+1,60)*24;if(hash2(cx,0,61)%3===0){g.strokeStyle=hexA(shadeHex(base,-0.4),0.6);g.lineWidth=1.4;g.beginPath();g.moveTo(xa,0);g.quadraticCurveTo((xa+xb)/2+6,16,xb,32);g.stroke();}}
     for(let i=0;i<2;i++){g.fillStyle='rgba(255,170,220,.16)';g.beginPath();g.ellipse(R()*32,R()*32,1.6,0.9,R()*3,0,TAU);g.fill();}}
   else if(b===1){for(let i=0;i<2;i++){g.fillStyle='rgba(170,220,255,.2)';const x=R()*32,y=R()*32;g.beginPath();g.moveTo(x,y-5);g.lineTo(x+2,y);g.lineTo(x,y+5);g.lineTo(x-2,y);g.closePath();g.fill();}}
   else if(b===2){/* соты на стене */
-    const r0=5.2,sx=r0*Math.sqrt(3),sy=r0*1.5;g.strokeStyle=hexA(shadeHex(base,0.25),0.4);g.lineWidth=0.8;
-    for(let j=-1;j<7;j++)for(let i=-1;i<5;i++){const cx=i*sx+((j&1)?sx/2:0),cy=j*sy;g.beginPath();for(let k=0;k<6;k++){const a=Math.PI/6+k*Math.PI/3;g.lineTo(cx+Math.cos(a)*r0,cy+Math.sin(a)*r0);}g.closePath();g.stroke();}}
+    /* сетка сот с шагом 8 — делит клетку ровно, соты у соседей стыкуются */
+    const rx=8/Math.sqrt(3),ry=8/1.5;g.strokeStyle=hexA(shadeHex(base,0.25),0.4);g.lineWidth=0.8;
+    for(let j=-1;j<6;j++)for(let i=-1;i<6;i++){const cx=i*8+((j&1)?4:0),cy=j*8;g.beginPath();for(let k=0;k<6;k++){const a=Math.PI/6+k*Math.PI/3;g.lineTo(cx+Math.cos(a)*rx,cy+Math.sin(a)*ry);}g.closePath();g.stroke();}}
   else if(b===3){/* обои с узором */
     g.fillStyle=hexA(shadeHex(base,0.18),0.35);for(let y=2;y<32;y+=8)for(let x=(y/8%2)*4+2;x<32;x+=8){g.beginPath();g.arc(x,y,1.2,0,TAU);g.fill();}
     g.fillStyle=hexA(shadeHex(base,-0.3),0.4);g.fillRect(0,30,32,2);}
-  else if(b===4){g.strokeStyle=hexA('#3a0a1a',0.6);g.lineWidth=1.6;g.beginPath();let x=0,y=R()*32;g.moveTo(x,y);for(let k=0;k<4;k++){x+=8;y+=(R()-0.5)*10;g.lineTo(x,y);}g.stroke();
+  else if(b===4){const cx=LIL_CELL.x,cy=LIL_CELL.y,yL=4+lilE(cx,cy,64)*24,yR=4+lilE(cx+1,cy,64)*24;g.strokeStyle=hexA('#3a0a1a',0.6);g.lineWidth=1.6;g.beginPath();g.moveTo(0,yL);for(let k=1;k<4;k++)g.lineTo(k*8,yL+(yR-yL)*k/4+(R()-0.5)*8);g.lineTo(32,yR);g.stroke();
     g.fillStyle='rgba(200,40,70,.18)';g.beginPath();g.arc(R()*32,R()*32,2,0,TAU);g.fill();}
-  else if(b===5){g.fillStyle='rgba(180,220,230,.12)';for(let i=0;i<3;i++)g.fillRect(0,4+i*10+R()*3,32,1);}
+  else if(b===5){g.fillStyle='rgba(180,220,230,.12)';for(let i=0;i<3;i++)g.fillRect(0,5+i*10,32,1);}
   else{/* рёбра колыбели */
-    g.strokeStyle=hexA(shadeHex(base,0.2),0.35);g.lineWidth=2;g.beginPath();const x=8+R()*16;g.moveTo(x,0);g.lineTo(x,32);g.stroke();
-    g.strokeStyle='rgba(140,60,160,.3)';g.lineWidth=0.8;g.beginPath();g.moveTo(0,R()*32);g.quadraticCurveTo(16,R()*32,32,R()*32);g.stroke();}
+    const cx=LIL_CELL.x,cy=LIL_CELL.y;
+    if(hash2(cx,0,66)%3===0){const x=8+lilE(cx,0,67)*16;g.strokeStyle=hexA(shadeHex(base,0.2),0.35);g.lineWidth=2;g.beginPath();g.moveTo(x,0);g.lineTo(x,32);g.stroke();}   /* ребро идёт через всю колонну */
+    const yL=4+lilE(cx,cy,68)*24,yR=4+lilE(cx+1,cy,68)*24;g.strokeStyle='rgba(140,60,160,.3)';g.lineWidth=0.8;g.beginPath();g.moveTo(0,yL);g.quadraticCurveTo(16,(yL+yR)/2+(R()-0.5)*14,32,yR);g.stroke();}
   return c;
 }
 

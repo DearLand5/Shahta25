@@ -54,8 +54,7 @@ function renderLilacLobby(){
   for(let L=0;L<2;L++){const per=W+600,spd=6+L*5;
     for(let i=0;i<4;i++){const x=((llbRand(i*7+L)*per+t*spd+px(0.02+L*0.02))%per+per)%per-300,y=HZ*(0.12+L*0.2+llbRand(i+L*9)*0.12),s=(0.8+llbRand(i*3)*0.6)*(1+L*0.3);
       const c1=mx(L?'#ffd8ec':'#f0c0e0','#3a1428'),c2=mx(L?'#d898c8':'#b878b8','#1a0814');
-      for(let k=0;k<5;k++){const cx=x+(k-2)*28*s,cy=y-Math.abs(k-2)*-4*s-(k%2)*8*s,r=(26-Math.abs(k-2)*5)*s;
-        const gr=ctx.createLinearGradient(0,cy-r,0,cy+r);gr.addColorStop(0,c1);gr.addColorStop(1,c2);ctx.globalAlpha=0.7;ctx.fillStyle=gr;ctx.beginPath();ctx.arc(cx,cy,r,0,TAU);ctx.fill();}
+      llbCloud(ctx,x,y,s,c1,c2,i*5+L*31,N);
       ctx.globalAlpha=1;}}
   /* 4. холмы с крышами пряничных домиков вдали */
   const hills=(k,base,amp,col,seed,step,houses)=>{const off=px(k);ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(0,H);
@@ -137,11 +136,7 @@ function llbScenery(g,x0,x1,t,N,glowList){
   /* деревья с глазами */
   for(let x=Math.floor(x0/310)*310+120;x<x1;x+=310){const i=x/310|0;if(llbNearB(x,150)||llbRand(i+21)<0.3)continue;
     const R=36+llbRand(i)*14,ty=-70-llbRand(i+1)*20,sw=Math.sin(t*0.6+i)*2,leaf=mx(['#e080b8','#b890e8','#f0a0c0'][(i%3+3)%3],'#2a1020');
-    g.strokeStyle=mx('#6a4a3a','#1a0c0a');g.lineWidth=9;g.lineCap='round';g.beginPath();g.moveTo(x,0);g.quadraticCurveTo(x+6,ty*0.5,x+sw,ty+10);g.stroke();
-    g.lineWidth=4;g.beginPath();g.moveTo(x+3,ty*0.55);g.lineTo(x-18,ty*0.7);g.stroke();
-    const blob=(dx,dy,r,c)=>{g.fillStyle=c;g.beginPath();g.arc(x+sw+dx,ty+dy,r,0,TAU);g.fill();};
-    blob(6,6,R*0.85,shadeHex(leaf,-0.3));blob(-R*0.5,4,R*0.6,shadeHex(leaf,-0.15));blob(0,0,R*0.8,leaf);blob(R*0.45,-6,R*0.55,leaf);blob(-R*0.2,-R*0.35,R*0.5,shadeHex(leaf,0.15));
-    g.fillStyle=mx('rgba(255,255,255,.35)','rgba(255,255,255,.05)');for(let k=0;k<6;k++){g.beginPath();g.arc(x+sw-R*0.6+llbRand(i*9+k)*R*1.2,ty-R*0.5+llbRand(i*7+k)*R,2,0,TAU);g.fill();}
+    llbTree(g,x,ty,R,sw,leaf,i,N,t);
     /* глаза в кроне: днём — едва заметные щёлки, ночью открыты и следят */
     const open=N>0.4?Math.min(1,(N-0.4)*2.5):(((t*0.11+i*0.37)%1)>0.97?0.6:0);
     for(let k=0;k<2;k++){const ex=x+sw-8+k*16,ey=ty-2;
@@ -161,12 +156,17 @@ function llbScenery(g,x0,x1,t,N,glowList){
     glowList.push([x+6+sw,-42,40,col]);}
   /* качели на ветке: ночью раскачиваются сильнее — сами по себе */
   for(let x=Math.floor(x0/1150)*1150+640;x<x1;x+=1150){if(llbNearB(x,140))continue;
-    g.strokeStyle=mx('#6a4a3a','#1a0c0a');g.lineWidth=11;g.lineCap='round';g.beginPath();g.moveTo(x-40,0);g.quadraticCurveTo(x-34,-80,x-20,-120);g.stroke();
-    g.lineWidth=6;g.beginPath();g.moveTo(x-24,-112);g.quadraticCurveTo(x+20,-130,x+60,-118);g.stroke();
-    const leaf=mx('#c890e0','#241020');for(let k=0;k<5;k++){g.fillStyle=k%2?leaf:shadeHex(leaf,-0.2);g.beginPath();g.arc(x-36+k*24,-128-Math.sin(k)*10,26,0,TAU);g.fill();}
-    const amp=0.25+0.35*N,a=Math.sin(t*(1.1+0.6*N))*amp,px2=x+28,py=-114,L=86;
+    /* большое дерево: крона над стволом, качели висят на толстой ветке, которая выходит из-под кроны */
+    llbTree(g,x-36,-150,58,Math.sin(t*0.5)*1.5,mx('#c890e0','#241020'),77,N,t,true);
+    {const bark=mx('#6a4a3a','#1a0c0a');g.strokeStyle=shadeHex(bark,-0.3);g.lineWidth=9;g.lineCap='round';g.beginPath();g.moveTo(x-30,-104);g.quadraticCurveTo(x+10,-122,x+52,-112);g.stroke();
+      g.strokeStyle=bark;g.lineWidth=7;g.beginPath();g.moveTo(x-30,-106);g.quadraticCurveTo(x+10,-124,x+52,-114);g.stroke();
+      g.strokeStyle=shadeHex(bark,0.25);g.lineWidth=1.6;g.beginPath();g.moveTo(x-26,-109);g.quadraticCurveTo(x+10,-126,x+50,-117);g.stroke();
+      /* листва на конце ветки */
+      for(let k=0;k<4;k++){const lf=mx('#c890e0','#241020'),c=[shadeHex(lf,-0.25),lf,shadeHex(lf,0.15),lf][k];g.fillStyle=c;g.beginPath();g.arc(x+50+[0,8,-2,10][k],-118+[0,-6,-10,4][k],[13,11,8,7][k],0,TAU);g.fill();}}
+    const amp=0.25+0.35*N,a=Math.sin(t*(1.1+0.6*N))*amp,px2=x+20,py=-117,L=88;
     const sx=px2+Math.sin(a)*L,sy=py+Math.cos(a)*L;
     g.strokeStyle=mx('#d8c8b0','#5a5050');g.lineWidth=1.4;g.beginPath();g.moveTo(px2-10,py);g.lineTo(sx-10,sy);g.moveTo(px2+10,py);g.lineTo(sx+10,sy);g.stroke();
+    g.fillStyle=mx('#e8d8c0','#5a5050');for(const kx of [-10,10]){g.beginPath();g.ellipse(px2+kx,py,2.4,3.2,0,0,TAU);g.fill();}
     g.save();g.translate(sx,sy);g.rotate(a);g.fillStyle=mx('#c8805a','#3a2018');g.fillRect(-14,-2,28,5);g.fillStyle=mx('#e8a070','#4a2a20');g.fillRect(-14,-2,28,1.6);g.restore();}
 }
 
@@ -239,11 +239,19 @@ function drawLilacBuilding(g,b,glowList,t,N){
     g.strokeStyle=mx('#7a4a2a','#1a0e08');g.lineWidth=6;
     g.beginPath();g.moveTo(-104,-120);g.lineTo(104,-120);g.moveTo(-104,-60);g.lineTo(-60,-60);g.moveTo(60,-60);g.lineTo(104,-60);
     g.moveTo(-104,-120);g.lineTo(-60,-60);g.moveTo(-60,-120);g.lineTo(-104,-60);g.moveTo(104,-120);g.lineTo(60,-60);g.moveTo(60,-120);g.lineTo(104,-60);g.stroke();
+    /* кирпичная труба: стоит на скате и уходит под крышу (рисуется до крыши) */
+    {const bx=56,bw=24,top=-212,bot=-128,br=mx('#9a6a58','#2a1a14'),L=shadeHex(br,0.25),D=shadeHex(br,-0.35);
+      g.fillStyle=D;g.fillRect(bx,top,bw,bot-top);g.fillStyle=br;g.fillRect(bx,top,bw-6,bot-top);g.fillStyle=L;g.fillRect(bx,top,3,bot-top);
+      g.strokeStyle=hexA(shadeHex(br,-0.5),0.6);g.lineWidth=1;
+      for(let yy=top+7,r=0;yy<bot;yy+=7,r++){g.beginPath();g.moveTo(bx,yy);g.lineTo(bx+bw,yy);g.stroke();for(let xx=bx+(r%2?6:12);xx<bx+bw;xx+=12){g.beginPath();g.moveTo(xx,yy-7);g.lineTo(xx,yy);g.stroke();}}
+      g.fillStyle=mx('#b08878','#3a2a20');g.fillRect(bx-4,top-6,bw+8,8);g.fillStyle=shadeHex(mx('#b08878','#3a2a20'),0.25);g.fillRect(bx-4,top-6,bw+8,2);g.fillStyle='rgba(0,0,0,.3)';g.fillRect(bx-2,top+2,bw+4,2);
+      g.fillStyle='#1a0e0c';g.fillRect(bx+3,top-5,bw-6,3);}
     g.fillStyle=mx('#c0507a','#2a0a18');g.beginPath();g.moveTo(-124,-116);g.lineTo(0,-188);g.lineTo(124,-116);g.closePath();g.fill();
+    /* оклад трубы — полоска металла по скату там, где труба входит в крышу */
+    {const y0=-188+56*72/124,y1=-188+80*72/124;g.fillStyle=mx('#c8b8b0','#4a4048');g.beginPath();g.moveTo(52,y0-1);g.lineTo(84,y1-1);g.lineTo(84,y1+4);g.lineTo(52,y0+4);g.closePath();g.fill();g.fillStyle='rgba(0,0,0,.25)';g.beginPath();g.moveTo(52,y0+4);g.lineTo(84,y1+4);g.lineTo(84,y1+6);g.lineTo(52,y0+6);g.closePath();g.fill();}
     g.fillStyle=mx('#e070a0','#3a1022');g.beginPath();g.moveTo(-118,-118);g.lineTo(0,-184);g.lineTo(0,-118);g.closePath();g.fill();
     g.fillStyle=mx('#fff8f4','#7a6a70');g.beginPath();g.moveTo(-124,-116);for(let k=0;k<=12;k++){const xx=-124+k*248/12;g.quadraticCurveTo(xx-10,-106,xx,-116);}g.lineTo(124,-120);g.lineTo(-124,-120);g.closePath();g.fill();
-    g.fillStyle=mx('#8a6a5a','#2a1a14');g.fillRect(56,-210,24,50);g.fillStyle=mx('#a08070','#3a2a20');g.fillRect(52,-214,32,8);
-    if(settings.quality!=='low'&&Math.random()<0.2)spawnPart(x+68,-220,rnd(-6,6),rnd(-40,-20),2.6,N>0.5?'#3a2a3a':'#ffe8b0',3.6,-6);
+    if(settings.quality!=='low'&&Math.random()<0.2)spawnPart(x+68,-222,rnd(-6,6),rnd(-40,-20),2.6,N>0.5?'#3a2a3a':'#ffe8b0',3.6,-6);
     /* солнце-эмблема */
     {const sx=0,sy2=-148,rr=16;g.save();g.translate(sx,sy2);g.rotate(t*0.2);g.fillStyle=mx('#ffd040','#6a4a1a');for(let k=0;k<12;k++){g.rotate(TAU/12);g.beginPath();g.moveTo(-3,-rr);g.lineTo(0,-rr-9);g.lineTo(3,-rr);g.closePath();g.fill();}g.restore();
       const sg=g.createRadialGradient(sx-5,sy2-5,2,sx,sy2,rr);sg.addColorStop(0,mx('#fff8c0','#8a7a40'));sg.addColorStop(1,mx('#e8a020','#4a2a08'));g.fillStyle=sg;g.beginPath();g.arc(sx,sy2,rr,0,TAU);g.fill();
@@ -256,8 +264,14 @@ function drawLilacBuilding(g,b,glowList,t,N){
     for(let k=0;k<3;k++){const fh=12+Math.sin(t*11+k*2)*4;g.fillStyle=k%2?'rgba(255,240,170,.95)':'rgba(255,170,40,.9)';g.beginPath();g.moveTo(-48+k*14,-42);g.quadraticCurveTo(-42+k*14,-42-fh*1.5,-36+k*14,-42);g.closePath();g.fill();}
     g.fillStyle=mx('#5a5a6a','#1a1a20');g.fillRect(14,-20,24,20);g.beginPath();g.moveTo(2,-34);g.lineTo(52,-34);g.lineTo(58,-28);g.lineTo(50,-24);g.lineTo(10,-24);g.closePath();g.fill();g.fillStyle=mx('#8a8a9a','#2a2a30');g.fillRect(2,-34,50,2.4);
     {const ph=(t*1.5)%1,ang=ph<0.75?-1.3+ph/0.75*0.3:-1.0+((ph-0.75)/0.25)*1.15;
+      /* опора молота: балка от косяка двери, ось и подкос — молот качается на оси, а не висит в воздухе */
+      {const wd=mx('#7a5030','#2a1a10'),wL=shadeHex(wd,0.25),wD=shadeHex(wd,-0.35);
+        g.fillStyle=wD;g.fillRect(34,-85,28,8);g.fillStyle=wd;g.fillRect(34,-86,28,6);g.fillStyle=wL;g.fillRect(34,-86,28,1.6);
+        g.strokeStyle=wd;g.lineWidth=4;g.beginPath();g.moveTo(58,-80);g.lineTo(58,-60);g.lineTo(46,-80);g.stroke();
+        g.fillStyle=mx('#5a5a6a','#1a1a20');g.fillRect(55,-90,7,12);g.fillStyle=mx('#9a9aaa','#2a2a30');for(const yy of [-87,-81]){g.beginPath();g.arc(58.5,yy,1.2,0,TAU);g.fill();}}
       g.save();g.translate(40,-80);g.rotate(Math.PI-ang);g.strokeStyle=mx('#7a5030','#2a1a10');g.lineWidth=4;g.beginPath();g.moveTo(0,0);g.lineTo(0,40);g.stroke();
       g.fillStyle=mx('#c8a040','#4a3a10');g.fillRect(-10,36,20,12);g.fillStyle=mx('#ffe080','#6a5020');g.fillRect(-10,36,20,2.4);g.restore();
+      g.fillStyle=mx('#9a9aaa','#2a2a30');g.beginPath();g.arc(40,-80,3.4,0,TAU);g.fill();g.fillStyle=mx('#4a4a5a','#101014');g.beginPath();g.arc(40,-80,1.4,0,TAU);g.fill();
       if(ph>0.95&&settings.quality!=='low')for(let k=0;k<3;k++)spawnPart(x+28,-36,rnd(-120,120),rnd(-160,-60),0.4,Math.random()<0.5?'#fff0a0':'#ffc040',2,500);
       if(ph>0.93)gpush([28,-36,50,'#ffe080']);}
     g.fillStyle='rgba(255,'+(170+Math.floor(70*hot))+',80,1)';g.fillRect(20,-38,20,4);
@@ -431,4 +445,57 @@ function llbUnderground(g,x0w,x1w,t,N,glowList,mx){
     else if(r<0.72){/* спящая косточка — напоминание, что под деревней не всё так мило */
       g.fillStyle=mx('#d8ccc0','#5a4a44');g.save();g.translate(cx,cy);g.rotate(llbRand(i+30)*3);
       g.fillRect(-7,-1.2,14,2.4);for(const sx of [-7,7]){g.beginPath();g.arc(sx,-1.4,1.8,0,TAU);g.arc(sx,1.4,1.8,0,TAU);g.fill();}g.restore();}}
+}
+
+/* дерево деревни: сужающийся ствол с корой, ветви уходят в крону, крона из множества клубов листвы
+   (дальние — темнее, ближние сверху-слева — светлее), цветы и контурный свет */
+function llbTree(g,x,ty,R,sw,leaf,i,N,t,big){
+  const mx=(a,b)=>llbMix(a,b,N),bark=mx('#6a4a3a','#1a0c0a'),bL=shadeHex(bark,0.28),bD=shadeHex(bark,-0.35),W0=big?16:11,W1=big?8:5;
+  const top=ty+R*0.35;   /* ствол уходит в середину кроны */
+  /* ствол: заливка между двумя кривыми */
+  g.fillStyle=bark;g.beginPath();g.moveTo(x-W0/2-3,0);g.quadraticCurveTo(x-W0/2+2,top*0.5,x+sw-W1/2,top);g.lineTo(x+sw+W1/2,top);g.quadraticCurveTo(x+W0/2+4,top*0.5,x+W0/2+3,0);g.closePath();g.fill();
+  g.fillStyle=bD;g.beginPath();g.moveTo(x+W0/2-2,0);g.quadraticCurveTo(x+W0/2+2,top*0.5,x+sw+W1/2,top);g.lineTo(x+sw+W1/2-2,top);g.quadraticCurveTo(x+W0/2-3,top*0.5,x+W0/2-5,0);g.closePath();g.fill();
+  g.strokeStyle=bL;g.lineWidth=1.4;g.beginPath();g.moveTo(x-W0/2,-2);g.quadraticCurveTo(x-W0/2+3,top*0.5,x+sw-W1/2+1,top);g.stroke();
+  g.strokeStyle=hexA(bD,0.7);g.lineWidth=0.8;for(let k=0;k<5;k++){const yy=-8-k*(-top/6);g.beginPath();g.moveTo(x-2+llbRand(i*3+k)*4,yy);g.lineTo(x+llbRand(i*5+k)*3,yy-7);g.stroke();}
+  /* корни у земли */
+  g.fillStyle=bark;for(const d of [-1,1]){g.beginPath();g.moveTo(x+d*W0*0.3,-6);g.quadraticCurveTo(x+d*W0*0.9,-2,x+d*W0*1.2,1);g.lineTo(x+d*W0*0.2,1);g.closePath();g.fill();}
+  /* ветви: от ствола в крону */
+  g.strokeStyle=bark;g.lineCap='round';
+  for(const [d,k] of [[-1,0.62],[1,0.48]]){const by=top*k+(1-k)*0;g.lineWidth=big?5:3.4;g.beginPath();g.moveTo(x+sw*0.5,by);g.quadraticCurveTo(x+d*R*0.3,by-R*0.25,x+sw+d*R*0.55,ty+R*0.1);g.stroke();}
+  /* крона: клубы листвы по куполу */
+  const L=shadeHex(leaf,0.2),D=shadeHex(leaf,-0.32),DD=shadeHex(leaf,-0.48),cx=x+sw;
+  const n=big?13:10,lumps=[];
+  for(let k=0;k<n;k++){const a=Math.PI*(1.05+k/(n-1)*0.9),rr=R*(0.62+llbRand(i*13+k)*0.18);lumps.push([cx+Math.cos(a)*R*0.62,ty+Math.sin(a)*R*0.5+R*0.12,rr*0.5]);}
+  for(let k=0;k<5;k++)lumps.push([cx+(k-2)*R*0.3,ty+R*0.2+llbRand(i*17+k)*R*0.12,R*0.36]);
+  /* тёмная подложка (низ и правый бок — тень) */
+  g.fillStyle=DD;g.beginPath();for(const [lx,ly,r] of lumps){g.moveTo(lx+3+r,ly+5);g.arc(lx+3,ly+5,r,0,TAU);}g.fill();
+  g.fillStyle=D;g.beginPath();for(const [lx,ly,r] of lumps){g.moveTo(lx+r,ly+2);g.arc(lx,ly+2,r,0,TAU);}g.fill();
+  /* основной тон — чуть сдвинут вверх-влево */
+  g.fillStyle=leaf;g.beginPath();for(const [lx,ly,r] of lumps){g.moveTo(lx-1+r*0.92,ly-1);g.arc(lx-1,ly-1,r*0.92,0,TAU);}g.fill();
+  /* свет на верхних клубах */
+  g.fillStyle=L;g.beginPath();for(const [lx,ly,r] of lumps){if(ly>ty)continue;g.moveTo(lx-r*0.25+r*0.55,ly-r*0.3);g.arc(lx-r*0.25,ly-r*0.3,r*0.55,0,TAU);}g.fill();
+  /* контурный свет по краю кроны сверху-слева */
+  g.strokeStyle=mx('rgba(255,240,250,.45)','rgba(255,255,255,.06)');g.lineWidth=1.4;
+  for(const [lx,ly,r] of lumps){if(ly>ty)continue;g.beginPath();g.arc(lx-1,ly-1,r*0.92,Math.PI*1.1,Math.PI*1.55);g.stroke();}
+  /* отдельные листики по краю и цветы */
+  for(let k=0;k<14;k++){const a=Math.PI*(0.95+llbRand(i*23+k)*1.1),rr=R*(0.85+llbRand(i*29+k)*0.15),lx=cx+Math.cos(a)*rr*0.95,ly=ty+Math.sin(a)*rr*0.72+R*0.1;
+    g.fillStyle=k%3?leaf:L;g.beginPath();g.ellipse(lx,ly,3.2,1.8,a,0,TAU);g.fill();}
+  const fl=N>0.5?['#5a3a4a','#4a3a5a']:['#fff4fa','#ffe08a','#ffffff'];
+  for(let k=0;k<(big?14:9);k++){const fx=cx-R*0.7+llbRand(i*9+k)*R*1.4,fy=ty-R*0.4+llbRand(i*7+k)*R*0.75;g.fillStyle=fl[k%fl.length];g.beginPath();g.arc(fx,fy,1.8,0,TAU);g.fill();}
+  /* падающий лепесток */
+  if(N<0.5){const ph=(t*0.15+llbRand(i))%1,px=cx-R*0.5+ph*R*0.8+Math.sin(t*2+i)*6,py=ty+R*0.3+ph*(-ty-R*0.3);g.globalAlpha=1-ph;g.fillStyle=L;g.beginPath();g.ellipse(px,py,2.4,1.3,t*2+i,0,TAU);g.fill();g.globalAlpha=1;}
+}
+/* облако: единый силуэт из клубов, плоское дно, свет сверху-слева, тень снизу */
+function llbCloud(g,x,y,s,c1,c2,seed,N){
+  const P=[];const n=6;
+  for(let k=0;k<n;k++){const f=k/(n-1),r=(14+Math.sin(f*Math.PI)*16+llbRand(seed+k)*6)*s;P.push([x+(f-0.5)*110*s,y-Math.sin(f*Math.PI)*12*s-r*0.35,r]);}
+  P.push([x-18*s,y-34*s,18*s],[x+14*s,y-38*s,20*s]);
+  const base=y+6*s;
+  const path=(dx,dy,k)=>{g.beginPath();for(const [px,py,r] of P){g.moveTo(px+dx+r*k,py+dy);g.arc(px+dx,py+dy,r*k,0,TAU);}g.rect(x-60*s,y-10*s,120*s,base-(y-10*s));};
+  g.save();g.beginPath();g.rect(x-200*s,y-200*s,400*s,base-(y-200*s));g.clip();   /* плоское дно */
+  g.globalAlpha=0.88;
+  const gr=g.createLinearGradient(0,y-55*s,0,base);gr.addColorStop(0,c1);gr.addColorStop(1,c2);g.fillStyle=gr;path(0,0,1);g.fill();
+  g.globalAlpha=0.5;g.fillStyle=shadeHex(c2,-0.18);path(3*s,5*s,0.9);g.save();g.clip();g.fillStyle=shadeHex(c2,-0.2);g.fillRect(x-80*s,y-4*s,160*s,20*s);g.restore();
+  g.globalAlpha=0.55;g.fillStyle=llbMix('#fff6fb','#5a3a4a',N);g.beginPath();for(const [px,py,r] of P){if(py>y-8*s)continue;g.moveTo(px-r*0.3+r*0.5,py-r*0.35);g.arc(px-r*0.3,py-r*0.35,r*0.5,0,TAU);}g.fill();
+  g.restore();g.globalAlpha=1;
 }

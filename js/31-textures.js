@@ -242,6 +242,7 @@ function makeAtlasPattern(g,variants,salt){
 function texPat(g,type){
   if(type===T_ARENA&&G.dim===1){if(!TEXPAT.hbw){if(!TEX.hbw)TEX.hbw=[10,11,12,13].map(v=>makeTex(type,v));TEXPAT.hbw=makeAtlasPattern(g,TEX.hbw,977);}return TEXPAT.hbw;}
   let pt=TEXPAT[type];
+  if(!pt&&type>=40&&type<=53)pt=TEXPAT[type]=lilAtlas(g,'t',type);   /* Лиловые небеса — сшитый лист (47) */
   if(!pt){if(!TEX[type])TEX[type]=(type===T_BONEROCK?[0,1,2,3,4,5]:[0,1,2,3]).map(v=>makeTex(type,v));pt=TEXPAT[type]=makeAtlasPattern(g,TEX[type],type*31+7);}
   return pt;
 }
@@ -255,12 +256,12 @@ function makeWall(bi,v){
   for(let i=0;i<50;i++){g.fillStyle=shadeHex(base,(R()-0.5)*0.5);g.fillRect(R()*32|0,R()*32|0,1+(R()*2|0),1+(R()*2|0));}
   for(let i=0;i<3;i++){g.fillStyle=hexA(shadeHex(base,-0.35),0.5);g.beginPath();g.ellipse(R()*32,R()*32,3+R()*6,2+R()*4,R()*3,0,TAU);g.fill();}
   if(bi===0){g.fillStyle=hexA(shadeHex(base,-0.3),0.5);g.fillRect(0,8+R()*16|0,32,2);}
-  else if(bi===1){g.strokeStyle=hexA(shadeHex(base,0.25),0.35);g.lineWidth=1;g.beginPath();g.moveTo(R()*32,0);g.lineTo(R()*32,32);g.stroke();}
+  else if(bi===1){/* трещина внутри клетки — не упирается в край, стыков не видно */g.strokeStyle=hexA(shadeHex(base,0.25),0.35);g.lineWidth=1;g.lineCap='round';g.beginPath();const x=6+R()*20;g.moveTo(x,5+R()*4);g.lineTo(x+(R()-0.5)*8,16);g.lineTo(x+(R()-0.5)*10,24+R()*3);g.stroke();}
   else if(bi===2){for(let i=0;i<2;i++){g.fillStyle='rgba(170,150,255,.28)';g.beginPath();const x=R()*32,y=R()*32;g.moveTo(x,y-4);g.lineTo(x+2,y);g.lineTo(x,y+4);g.lineTo(x-2,y);g.fill();}}
   else if(bi===3){g.strokeStyle='rgba(255,100,30,.16)';g.lineWidth=1;g.beginPath();let x=R()*32,y=R()*32;g.moveTo(x,y);for(let k=0;k<3;k++){x+=(R()-0.5)*14;y+=(R()-0.5)*14;g.lineTo(x,y);}g.stroke();}
   else if(bi===4){for(let i=0;i<3;i++){g.fillStyle='rgba(160,110,255,.35)';g.fillRect(R()*31|0,R()*31|0,1,1);}}
-  else if(bi===5){for(let i=0;i<3;i++){g.fillStyle='rgba(255,110,50,.22)';g.fillRect(R()*31|0,R()*31|0,1,1);}g.fillStyle='rgba(0,0,0,.25)';g.fillRect(R()*28|0,0,2,32);}
-  else if(bi===6){g.strokeStyle='rgba(120,0,20,.45)';g.lineWidth=1.4;g.beginPath();let x=R()*32,y=0;g.moveTo(x,y);for(let k=0;k<4;k++){x+=(R()-0.5)*12;y+=8;g.lineTo(x,y);}g.stroke();}
+  else if(bi===5){for(let i=0;i<3;i++){g.fillStyle='rgba(255,110,50,.22)';g.fillRect(R()*31|0,R()*31|0,1,1);}g.fillStyle='rgba(0,0,0,.25)';g.beginPath();g.ellipse(4+R()*24,16,1.2,11,0,0,TAU);g.fill();}
+  else if(bi===6){g.strokeStyle='rgba(120,0,20,.45)';g.lineWidth=1.4;g.lineCap='round';g.beginPath();let x=8+R()*16,y=4;g.moveTo(x,y);for(let k=0;k<3;k++){x=clamp(x+(R()-0.5)*10,3,29);y+=8;g.lineTo(x,y);}g.stroke();}
   else if(bi===7){for(let i=0;i<3;i++){g.fillStyle='rgba(200,230,60,.16)';g.beginPath();g.arc(R()*32,R()*32,1.5+R()*2,0,TAU);g.fill();}}
   else if(bi===8){/* стена оссуария: приглушённые ряды черепов и костей, местами голый камень */
     const sk=shadeHex(base,0.2),skD=shadeHex(base,0.1),hol=shadeHex(base,-0.45);
@@ -277,6 +278,7 @@ function makeWall(bi,v){
 }
 function wallPat(g,bi){
   let pt=WALLPAT[bi];
+  if(!pt&&bi>=10)pt=WALLPAT[bi]=lilAtlas(g,'w',bi);
   if(!pt){if(!WALLTEX[bi])WALLTEX[bi]=[0,1,2].map(v=>makeWall(bi,v));pt=WALLPAT[bi]=makeAtlasPattern(g,WALLTEX[bi],bi*17+3);}
   return pt;
 }

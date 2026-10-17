@@ -295,7 +295,7 @@ function findAutoTarget(range){
   for(let pass=0;pass<2&&!best;pass++){
     for(const m of mobs){
       if(!m.alive||m.untargetable)continue;
-      const hostile=(m.def.dmg>0&&!(G.dim===2&&m.def.lm&&lmCalm(m)))||m.provoked>0;
+      const hostile=m.def.dmg>0||m.provoked>0;
       if(pass===0&&!hostile)continue;
       const mx=m.x,my=m.y-m.h*0.5,d=Math.hypot(mx-px,my-py);
       if(d>range||d>=bd)continue;
