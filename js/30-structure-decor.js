@@ -746,6 +746,7 @@ function renderMine(dt){
   drawDebris(ctx);drawDeathFxOver(ctx);
   for(const m of mobs){if(!m.def.boss&&(Math.abs(m.x-cam.x)>halfW+160||Math.abs(m.y-m.h*0.5-cam.y)>halfH+160))continue;drawMobSprite(ctx,m,G.time);}
   drawBossCutFx(ctx);drawBossDeath(ctx);
+  if(G.dim===2)lilMobFx(ctx);
   for(const b of beams){
     const k=b.boss?1:clamp(b.t/0.22,0,1);
     ctx.save();ctx.lineCap='round';
@@ -766,6 +767,7 @@ function renderMine(dt){
   drawFxLists(ctx);
   for(const p of projectiles){
     if(p.hbk&&hbDrawProj(ctx,p))continue;
+    if(p.kind&&p.kind.charCodeAt(0)===108&&lilDrawProj(ctx,p))continue;
     if(p.hook&&p.src){ctx.strokeStyle='#8a8e98';ctx.lineWidth=2;ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(p.src.x,p.src.y-p.src.h*0.6);ctx.lineTo(p.x,p.y);ctx.stroke();ctx.setLineDash([]);
       ctx.strokeStyle='#c8ccd8';ctx.lineWidth=2.4;ctx.beginPath();ctx.arc(p.x,p.y,5,0.3,Math.PI*1.4);ctx.stroke();continue;}
     if(p.ground){

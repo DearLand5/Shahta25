@@ -201,7 +201,7 @@ function trySpawnMob(){
     const wy=player.y+rnd(-7,7)*TILE;
     const tx=Math.floor(wx/TILE),ty=Math.floor(wy/TILE);
     if(tx<1||tx>=MW-1)continue;
-    const d=MOBDEFS.filter(dd=>!dd.swim&&(dd.dim||0)===G.dim&&ty>=dd.d0&&ty<=dd.d1&&dd.d0<90000&&!dd.boss);
+    const d=MOBDEFS.filter(dd=>!dd.swim&&(dd.dim||0)===G.dim&&ty>=dd.d0&&ty<=dd.d1&&dd.d0<90000&&!dd.boss&&!(dd.truthOnly&&veilT<0.35));
     if(!d.length)continue;
     let wsum=0;for(const dd of d)wsum+=dd.neutral?1:2.2;
     let pick=Math.random()*wsum,def=d[0];

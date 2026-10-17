@@ -254,6 +254,7 @@ function update(dt){
   updateVeil(dt);
   lilLivingTick(dt);
   lilStructTick(dt);
+  lilMobHzTick(dt);
   updateHellBlocks(dt);
   updateAnchors();
   updateTraps(dt);

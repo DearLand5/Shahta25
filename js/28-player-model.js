@@ -1581,6 +1581,9 @@ function drawMobSprite0(g,m,t){
       if(prov)mobGlow(g,18,0,6,'#ffb040',0.5+0.3*Math.sin(t*20));
       break;}
     case 'lmimic':lilMimicModel(g,m,FY,t);break;
+    case 'l_lbunny':case 'l_lbutterfly':case 'l_ldaisy':case 'l_lglassbird':case 'l_lstatue':case 'l_lchime':case 'l_lbee':case 'l_lslime':case 'l_lwaxknight':
+    case 'l_ldoll':case 'l_lsoldier':case 'l_ljack':case 'l_lrosehound':case 'l_lgardener':case 'l_lfairy':case 'l_lmirror':case 'l_lswan':case 'l_lfrog':
+    case 'l_lsheep':case 'l_lsandman':case 'l_lnightmare':lilMobModel(g,m,FY,t);break;
     case 'turret':{
       /* череп-турель: рогатый череп на кованом кронштейне, прибитом к стене цепями; глазницы разгораются при зарядке, челюсть отбрасывает при выстреле */
       const ch=m.ch||0,jaw=Math.max(0,m.jaw||0),bone='#e2d6bc',boneD='#b8aa8c';

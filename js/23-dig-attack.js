@@ -165,6 +165,7 @@ function damageMob(m,dmg,kb,src){
   if((def.boss||def.hp>=1500||def.w>=44)&&player.perks&&player.perks.slayer)dmg=Math.round(dmg*(1+0.1*player.perks.slayer));
   if(m.eShield){m.eShieldT=(m.eShieldT||0);if(G.time>m.eShieldT){dmg=Math.round(dmg*0.35);floatText(m.x,m.y-m.h-16,'щит','#9ad8ff');}}
   if(def.hb)dmg=Math.max(1,Math.round(dmg*hbDmgMul(m)));
+  if(def.lm&&m.dmgMul){dmg=Math.max(1,Math.round(dmg*m.dmgMul));if(m.dmgMul<1)floatText(m.x,m.y-m.h-18,'крепко','#cfd8e8');else if(m.dmgMul>=1.5)floatText(m.x,m.y-m.h-18,'уязвим!','#ffd060');}
   if(def.boss)dmg=Math.max(1,Math.round(dmg*bfDmgMul(m)));     /* окна ×2, вне окон ×0.7 */
   m.hp-=dmg;m.hurt=0.24;SFX.mobHit(def);
   if(def.boss)bfOnBossDamage(m,dmg);

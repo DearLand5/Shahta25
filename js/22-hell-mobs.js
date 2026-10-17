@@ -929,7 +929,8 @@ function updateMobs(dt){
         }else wander(0.4);
         break;}
       default:
-        if(aggro)mvx=dx/dist*0.9;
+        if(def.lm){const r=lilMobAI(m,def,dt,dx,dy,dist,nx,ny,aggro,seen);mvx=r[0];mvy=r[1];noPhys=r[2];}
+        else if(aggro)mvx=dx/dist*0.9;
     }
     if(!def.fly&&!noPhys&&aggro&&Math.abs(dx)<14&&Math.abs(mvx)<=1.05)mvx=0;
     if(noPhys){
@@ -978,7 +979,7 @@ function updateMobs(dt){
       }
     }
     /* контактный урон */
-    if(def.dmg>0&&hostile&&!['mole','spitter','bomber','laser','gazer','web','blinker','charger','slammer','colossus','diver','swooper','bomb','thief','phantom','provoke','skitter','shielder','leech','gasbag','archer','boss','turret','pod','rift','lmimic','berserk','hound','lavaworm','toad','priest','necro','soulwraith','blademaster','scorpion','infernal','magmael','acidmother','ashgolem','bonecolossus','hookgolem'].includes(def.mech)){
+    if(def.dmg>0&&hostile&&!def.lm&&!['mole','spitter','bomber','laser','gazer','web','blinker','charger','slammer','colossus','diver','swooper','bomb','thief','phantom','provoke','skitter','shielder','leech','gasbag','archer','boss','turret','pod','rift','lmimic','berserk','hound','lavaworm','toad','priest','necro','soulwraith','blademaster','scorpion','infernal','magmael','acidmother','ashgolem','bonecolossus','hookgolem'].includes(def.mech)){
       const hitDist=Math.hypot(player.x-m.x,(player.y-player.h*0.5)-(m.y-m.h*0.5));
       if(hitDist<(m.w+player.w)/2+8&&m.atkCd<=0){m.atkCd=0.95;mobMelee(m,def.dmg,def.fx);}
     }
@@ -1044,6 +1045,7 @@ function killMob(m,quiet){
       c.def=Object.assign({},def,{split:false,mech:def.mech,dmg:Math.round(def.dmg*0.6),drops:def.drops.map(d=>({ore:d.ore,ch:d.ch*0.4})),hp:Math.floor(def.hp*0.4)});
     }
   }
+  if(def.lm)lilMobDeath(m,quiet);
   const idx=mobs.indexOf(m);
   if(idx>=0)mobs.splice(idx,1);
   if(fancyDeath){if(deadMobs.length>=24)deadMobs.shift();m.deadT=0;m.dstyle=deathStyle(def);m.kbx=Math.sign(m.x-player.x||1)*(def.fly?70:(def.h>48?60:130));m.dvy=def.fly?-90:Math.min(0,m.vy||0);m.landed=false;m.state='dead';m.tele=0;m.atkT=0;m.hurt=0;m.vx=0;m.deathK=0;deathStart(m);deadMobs.push(m);}
