@@ -110,7 +110,7 @@ const Music={
     b16:{root:45,scale:[0,1,4,5,7,8,11],prog:[0,1,5,4],barsPer:2,bpm:44,
       pad:{type:'triangle',lp:560,vol:0.05,att:3.6,rel:4.4,det:7},
       mel:{inst:'box',vol:0.05,dens:0.2,oct:2,dur:2.4},
-      bass:{vol:0.07,every:4},drone:{note:33,vol:0.04,lp:180},amb:{wind:0.022,wlp:300,rumble:0.02,drip:0.05}},
+      bass:{vol:0.07,every:4},drone:{note:33,vol:0.04,lp:180},amb:{wind:0.022,wlp:300,rumble:0.02,drip:0.05,breath:0.08}},
     /* бой с боссом: напряжённо, но без грохота — мягкая перкуссия и пульс баса */
     boss:{root:38,scale:[0,2,3,5,7,8,10],prog:[0,5,6,4],barsPer:1,bpm:84,
       pad:{type:'sawtooth',lp:700,vol:0.045,att:0.8,rel:1.2,det:9},
@@ -421,6 +421,11 @@ const Amb={
       for(let k=0;k<2;k++){const tt=t+k*rr(0.1,0.25),o=c.createOscillator(),g=envGain(c);o.type='sine';o.frequency.value=base*(k?1.5:1);
         g.gain.setValueAtTime(0,tt);g.gain.linearRampToValueAtTime(0.018,tt+0.01);g.gain.exponentialRampToValueAtTime(0.0008,tt+1.6);
         o.connect(g);g.connect(out);g.connect(AU.sfxSend);o.start(tt);o.stop(tt+1.65);}});
+    if(A.breath&&P(A.breath))Amb.ev((c,out,t)=>{      /* дыхание Колыбели: медленный вдох и выдох */
+      const s=c.createBufferSource();s.buffer=AU.nbuf;s.loop=true;const f=c.createBiquadFilter();f.type='bandpass';f.Q.value=1.4;
+      f.frequency.setValueAtTime(260,t);f.frequency.linearRampToValueAtTime(520,t+1.6);f.frequency.linearRampToValueAtTime(220,t+3.6);
+      const g=envGain(c);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.035,t+1.4);g.gain.linearRampToValueAtTime(0.012,t+1.9);g.gain.linearRampToValueAtTime(0.03,t+2.6);g.gain.linearRampToValueAtTime(0,t+3.8);
+      s.connect(f);f.connect(g);g.connect(out);s.start(t,Math.random()*0.5);s.stop(t+3.9);});
     if(A.buzz&&P(A.buzz))Amb.ev((c,out,t)=>{          /* пчела пролетает мимо: тихое жужжание с допплером и панорамой */
       const d=rr(1.2,2.2),f0=rr(190,240),o=c.createOscillator(),f=c.createBiquadFilter(),g=envGain(c),pn=c.createStereoPanner?c.createStereoPanner():null;
       o.type='sawtooth';o.frequency.setValueAtTime(f0*1.04,t);o.frequency.linearRampToValueAtTime(f0*0.95,t+d);

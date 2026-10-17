@@ -54,6 +54,7 @@ function digUpdate(dt){
   let prog=sameTile?player.digProg:getDmg(tx,ty)/255;
   prog+=power*dt/total;
   player.digProg=clamp(prog,0,1);
+  if(G.dim===2&&oreId&&lilDigProgress(tx,ty,oreId,player.digProg))return;   /* живая руда убежала */
 
   if(player.digProg>=1&&t===T_BARRICADE){
     barricades.delete(tx+','+ty);
@@ -73,6 +74,7 @@ function digUpdate(dt){
       SFX.ore();
       burst(mx,my,10,ORES[oreId].glow,150,3.2);
       floatText(mx,my-14,'+1 '+ORES[oreId].name,RARITY[ORES[oreId].rar].c);
+      if(G.dim===2)lilOreMined(tx,ty,oreId,mx,my);
     }else{
       if(G.dim===2)lilRockDug(tx,ty,t,mx,my);
       SFX.breakBlock(t);

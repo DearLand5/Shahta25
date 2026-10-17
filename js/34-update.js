@@ -57,7 +57,7 @@ function update(dt){
   const bodyT=getTile(Math.floor(player.x/TILE),Math.floor((player.y-player.h*0.4)/TILE));
   const headT=getTile(Math.floor(player.x/TILE),Math.floor((player.y-player.h+6)/TILE));
   const inWaterP=isLiq(bodyT);
-  const inAcidP=(bodyT===T_ACID),inBloodP=(bodyT===T_BLOOD);
+  const inAcidP=(bodyT===T_ACID),inBloodP=(bodyT===T_BLOOD),inHoneyP=(bodyT===T_HONEY);
   const inLavaP=(bodyT===T_LAVA);
   if(inWaterP)player.fx.burn=0;
   /* дыхание под водой */
@@ -89,7 +89,7 @@ function update(dt){
   updatePlayerFx(dt);
   const stunned=player.fx.stun>0||!!G.bossCut;
   if(stunned)ax=0;
-  const speedK=(1+0.05*perkLv('swift'))*(cheats.superSpeed?3:1)*(player.fx.slow>0?0.5:1)*(inWaterP?(inBloodP?0.4:0.62):1)*(inLavaP?0.4:1)*(G.dim===1&&onSoulSand()?0.55:1);
+  const speedK=(1+0.05*perkLv('swift'))*(cheats.superSpeed?3:1)*(player.fx.slow>0?0.5:1)*(inWaterP?(inBloodP?0.4:inHoneyP?0.3:0.62):1)*(inLavaP?0.4:1)*(G.dim===1&&onSoulSand()?0.55:1);
   const maxV=175*speedK;
   if(ax!==0){
     player.vx+=ax*1800*speedK*dt;
@@ -118,17 +118,19 @@ function update(dt){
   } else if((inWaterP||inLavaP)&&!grappling){
     /* плавание: плавучесть, гребок прыжком, вверх/вниз джойстиком */
     /* плавучесть: в воде медленно тонешь, в густой крови почти держишься на плаву, в лаве вязнешь */
-    player.vy+=(inLavaP?900:inBloodP?160:260)*dt;
-    const cap=inLavaP?70:inBloodP?55:95;
-    if(player.vy>cap)player.vy=lerp(player.vy,cap,Math.min(1,dt*6));
+    const gs=lilGrav();
+    player.vy+=(inLavaP?900:inBloodP?160:inHoneyP?110:260)*dt*gs;
+    const cap=inLavaP?70:inBloodP?55:inHoneyP?40:95;
+    if(gs>0){if(player.vy>cap)player.vy=lerp(player.vy,cap,Math.min(1,dt*6));}else if(player.vy<-cap)player.vy=lerp(player.vy,-cap,Math.min(1,dt*6));
     /* течения и водопады сносят */
     {const fl=liqFlowAt(Math.floor(player.x/TILE),Math.floor((player.y-player.h*0.4)/TILE))||liqFlowAt(Math.floor(player.x/TILE),Math.floor((player.y-player.h*0.4)/TILE)-1);
       if(fl){player.vx+=fl.dx*320*dt;player.vy+=fl.dy*520*dt;}}
     if(j.active&&Math.abs(j.dy)>0.2)player.vy=lerp(player.vy,j.dy*(inLavaP?90:175),dt*5);
     player.peakY=player.y;
   } else if(!grappling){
-    player.vy += 1500*dt;
-    if(player.vy>950)player.vy=950;
+    const gs=lilGrav();                       /* в Зеркальных топях мир может перевернуться */
+    player.vy += 1500*dt*gs;
+    if(gs>0){if(player.vy>950)player.vy=950;}else if(player.vy<-950)player.vy=-950;
     /* ранец-реактор: удерживай прыжок в воздухе */
     const jl=itemLv('jet');
     if(jl>0){
@@ -149,11 +151,11 @@ function update(dt){
     if(grappling){
       player.vy = -430;grapple = null;SFX.jump();
     } else if(player.onGround || cheats.flyMode){
-      player.vy = cheats.superJump ? -900 : -520;
+      player.vy = (cheats.superJump ? -900 : -520)*lilGrav();
       player.onGround = false;
       SFX.jump();
     } else if(inWaterP||inLavaP){
-      player.vy = inLavaP?(bfOn()?-360:-200):-290;SFX.jump();   /* в святилище кладку не прокопать — из лавы надо уметь выпрыгнуть */
+      player.vy = (inLavaP?(bfOn()?-360:-200):inHoneyP?-210:-290)*lilGrav();SFX.jump();   /* в святилище кладку не прокопать — из лавы надо уметь выпрыгнуть */
     } else if(onLadder){
       player.vy = -340;player.ladderCd = 0.35;SFX.jump();
     }
@@ -250,6 +252,7 @@ function update(dt){
   checkHeartPickup();
   updateHell(dt);
   updateVeil(dt);
+  lilLivingTick(dt);
   updateHellBlocks(dt);
   updateAnchors();
   updateTraps(dt);

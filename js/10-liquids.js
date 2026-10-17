@@ -46,7 +46,7 @@ function liqReact(x,y,tt){
     if(tt===T_LAVA&&isLiq(o)){liq=o;lx=x+ax;ly=y+ay;lavaX=x;lavaY=y;}
     else if(isLiq(tt)&&o===T_LAVA){liq=tt;lx=x;ly=y;lavaX=x+ax;lavaY=y+ay;}
     if(liq<0)continue;
-    const res=liq===T_WATER?T_OBS:liq===T_ACID?T_SULFUR:T_FLESH;
+    const res=liq===T_WATER?T_OBS:liq===T_ACID?T_SULFUR:liq===T_HONEY?T_LWAX:T_FLESH;
     if(liq===T_WATER){rawSet(lavaX,lavaY,res);rawSet(lx,ly,T_AIR);}
     else{rawSet(lavaX,lavaY,res);rawSet(lx,ly,T_AIR);}
     liqSteam(x,y);SFX.hit();
@@ -55,7 +55,7 @@ function liqReact(x,y,tt){
   return false;
 }
 /* плотность (тяжёлая жидкость тонет в лёгкой), скорость падения за такт (вязкость) */
-const LIQ_DENS={9:1,23:2,22:3},LIQ_FALL={9:3,22:3,23:2,7:1};
+const LIQ_DENS={9:1,23:2,22:3,54:4},LIQ_FALL={9:3,22:3,23:2,7:1,54:1};
 /* направление недавнего течения в клетке — течения и водопады сносят игрока */
 const liqFlow=new Map();
 function liqFlowMark(x,y,dx,dy){if(liqFlow.size>4000)liqFlow.clear();liqFlow.set(x+y*MW,{dx,dy,t:G.time});}
@@ -63,7 +63,7 @@ function liqFlowAt(x,y){const f=liqFlow.get(x+y*MW);return f&&G.time-f.t<0.4?f:n
 function liqMove(x,y,nx,ny,tt){rawSet(nx,ny,tt);rawSet(x,y,T_AIR);liqFlowMark(nx,ny,Math.sign(nx-x),Math.sign(ny-y));}
 function liqSplash(x,y,tt){
   if(settings.quality==='low'||Math.random()>0.35||Math.abs(x*TILE-G.cam.x)>view.W||Math.abs(y*TILE-G.cam.y)>view.H)return;
-  const c=tt===T_WATER?'#cfe8ff':tt===T_ACID?'#b8ff7a':tt===T_BLOOD?'#d01830':'#ffb040';
+  const c=tt===T_WATER?'#cfe8ff':tt===T_ACID?'#b8ff7a':tt===T_BLOOD?'#d01830':tt===T_HONEY?'#ffc040':'#ffb040';
   for(let k=0;k<3;k++)spawnPart(x*TILE+16+rnd(-10,10),y*TILE+4,rnd(-70,70),rnd(-170,-70),0.5,c,rnd(1.6,2.6),600);
 }
 /* напор: есть ли за спиной (по ряду, против направления) столб той же жидкости выше этого ряда */
@@ -121,6 +121,7 @@ function simLiquids(dt){
           else if(t===T_ACID){count++;liqStep(cx*16+lx,cy*16+ly,T_ACID,7);}
           else if(t===T_BLOOD){if(lavaTick||(liqTick&1)){count++;liqStep(cx*16+lx,cy*16+ly,T_BLOOD,4);}}
           else if(t===T_LAVA){if(lavaTick)liqStep(cx*16+lx,cy*16+ly,T_LAVA,3);}
+          else if(t===T_HONEY){if(lavaTick){count++;liqStep(cx*16+lx,cy*16+ly,T_HONEY,3);}}
           else if(t===T_SPRING){
             const wx=cx*16+lx,wy=cy*16+ly,key=wx+','+wy;
             if(liqCount<700&&liqFree(wx,wy+1)&&(springT.get(key)||0)<G.time){

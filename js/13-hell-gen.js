@@ -285,10 +285,10 @@ function setTile(tx,ty,t){
     dugTiles.delete(k);
   }
 }
-function isLiq(t){return t===T_WATER||t===T_ACID||t===T_BLOOD;}
+function isLiq(t){return t===T_WATER||t===T_ACID||t===T_BLOOD||t===T_HONEY;}
 function isSolid(tx,ty){
   const t=getTile(tx,ty);
-  return t!==T_AIR&&t!==T_LAVA&&t!==T_LADDER&&t!==T_WATER&&t!==T_ACID&&t!==T_BLOOD;
+  return t!==T_AIR&&t!==T_LAVA&&t!==T_LADDER&&t!==T_WATER&&t!==T_ACID&&t!==T_BLOOD&&t!==T_HONEY;
 }
 function solidAtPx(x,y){return isSolid(Math.floor(x/TILE),Math.floor(y/TILE));}
 

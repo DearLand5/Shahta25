@@ -11,7 +11,8 @@ const T_AIR=0,T_DIRT=1,T_STONE=2,T_CRYSTAL=3,T_MAGMA=4,T_OBS=5,T_BEDROCK=6,T_LAV
   T_SOULSAND=27,T_ASHVENT=28,T_FLESHPOD=29,T_SULFBOMB=30,T_CRUST=31,T_BSPIKE=32,
   /* Лиловые небеса: породы биомов 40–46 и особые блоки 47–53 */
   T_LSOD=40,T_LGLASS=41,T_LWAX=42,T_LPORC=43,T_LTHORN=44,T_LMIRROR=45,T_LCRADLE=46,
-  T_LROOT=47,T_LQUARTZ=48,T_LCOMB=49,T_LTOY=50,T_LBRIAR=51,T_LSILVER=52,T_LDOWN=53;
+  T_LROOT=47,T_LQUARTZ=48,T_LCOMB=49,T_LTOY=50,T_LBRIAR=51,T_LSILVER=52,T_LDOWN=53,
+  T_HONEY=54;   /* мёд — вязкая жидкость Медовых сот */
 const TILECOL={
   1:['#6b4a2e','#755132','#5f4129'],
   2:['#575c68','#606573','#4c515d'],
@@ -58,7 +59,8 @@ const TILECOL={
   50:['#c87a9a','#d084a2','#ba6e8c'],   /* кукольный кирпич */
   51:['#2a3a24','#32422a','#24321e'],   /* шипастая лоза */
   52:['#a8b8c4','#b4c4ce','#9aaab6'],   /* серебряная плита */
-  53:['#b8a0c8','#c0a8d0','#ae96be']    /* пух */
+  53:['#b8a0c8','#c0a8d0','#ae96be'],   /* пух */
+  54:['#e8a020','#f0aa28','#d8901a']    /* мёд */
 };
 /* Прочность породы. Подобрана так, чтобы кирка «своего» уровня копала породу
    за 1-2 секунды, а руду — за 2-6 секунд. */

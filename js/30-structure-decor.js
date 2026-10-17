@@ -546,7 +546,8 @@ function drawStructDecor(g,tx0,tx1,ty0,ty1){
 const LIQ_LOOK={
   9:{deep:'rgba(36,98,176,0.50)',top:'rgba(46,120,200,0.46)',line:'rgba(205,238,255,.85)',caust:'190,230,255',glint:'rgba(255,255,255,.7)'},
   22:{deep:'rgba(70,170,40,0.62)',top:'rgba(110,210,60,0.55)',line:'rgba(210,255,150,.9)',caust:'200,255,140',glint:'rgba(230,255,190,.8)'},
-  23:{deep:'rgba(110,6,20,0.78)',top:'rgba(150,12,30,0.72)',line:'rgba(255,120,130,.75)',caust:'255,110,120',glint:'rgba(255,190,190,.6)'}
+  23:{deep:'rgba(110,6,20,0.78)',top:'rgba(150,12,30,0.72)',line:'rgba(255,120,130,.75)',caust:'255,110,120',glint:'rgba(255,190,190,.6)'},
+  54:{deep:'rgba(196,112,16,0.86)',top:'rgba(236,158,34,0.84)',line:'rgba(255,232,150,.95)',caust:'255,225,130',glint:'rgba(255,255,225,.9)'}
 };
 function drawWater(g,tx0,tx1,ty0,ty1){
   const T=G.time;
@@ -555,7 +556,7 @@ function drawWater(g,tx0,tx1,ty0,ty1){
     for(let tx=tx0;tx<=tx1;tx++){
       const lt=getTile(tx,ty);
       if(!isLiq(lt))continue;
-      const L=LIQ_LOOK[lt];
+      const L=(lt===T_HONEY&&veilT>0.5)?LIQ_LOOK[23]:LIQ_LOOK[lt];   /* в Истине мёд — кровь */
       const x=tx*TILE,y=ty*TILE;
       const above=getTile(tx,ty-1)===lt;
       const deep=getTile(tx,ty+1)===lt;
@@ -570,7 +571,7 @@ function drawWater(g,tx0,tx1,ty0,ty1){
         g.globalAlpha=1;continue;
       }
       if(!above){
-        const sp=lt===T_BLOOD?1.2:2.4,amp=lt===T_BLOOD?0.9:1.6;
+        const sp=lt===T_BLOOD?1.2:lt===T_HONEY?0.7:2.4,amp=lt===T_BLOOD?0.9:lt===T_HONEY?0.5:1.6;
         const w1=Math.sin(T*sp+tx*0.9)*amp,w2=Math.sin(T*sp+(tx+1)*0.9)*amp;
         g.beginPath();g.moveTo(x,y+4+w1);g.lineTo(x+TILE,y+4+w2);g.lineTo(x+TILE,y+TILE);g.lineTo(x,y+TILE);g.closePath();g.fill();
         g.strokeStyle=L.line;g.lineWidth=2;
@@ -612,6 +613,7 @@ function renderMine(dt){
     }
   }
   drawBiomeDecor(ctx,tx0,tx1,ty0,ty1);
+  if(G.dim===2)lilDrawWorld(ctx,tx0,tx1,ty0,ty1);
   drawStructDecor(ctx,tx0,tx1,ty0,ty1);
   drawBarricades(ctx,tx0,tx1,ty0,ty1);
   drawArenaDecor(ctx,tx0,tx1,ty0,ty1);
@@ -818,11 +820,14 @@ function renderMine(dt){
   {
     const bT=getTile(Math.floor(player.x/TILE),Math.floor((player.y-player.h*0.4)/TILE));
     const gunNow=(player.gunAnim>0&&player.gunLvl>0)?curGun().id:null;
+    const flipG=player.grav===-1&&G.dim===2;
+    if(flipG){ctx.save();ctx.translate(0,(player.y-player.h/2)*2);ctx.scale(1,-1);}   /* ходит по потолку */
     drawPlayerSprite(ctx,player.x,player.y,player.animState,player.anim,player.facing,
       {tool:tool,swing:swing,hurt:player.hurtCd>0?player.hurtCd/0.7:0,
        armor:player.armorLvl,pickLvl:player.pickLvl,torch:player.torchLvl,vy:player.vy,sword:player.swordLvl,
        swim:(isLiq(bT)||bT===T_LAVA),hang:!!(grapple&&grapple.state==='anchored'),climb:!!player.onLadder,
        gun:gunNow,gunAnim:gunNow?clamp(player.gunAnim*1.3,0,1):0,digging:typeof digging!=='undefined'&&digging,sq:player.landSq||0,lamp:player.y>4*TILE,groundY:playerGroundY()});
+    if(flipG)ctx.restore();
   }
   drawCrateLabels(ctx);
 

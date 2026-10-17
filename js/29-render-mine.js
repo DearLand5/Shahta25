@@ -42,7 +42,7 @@ function drawEarthAtmos(W,H){
 /* парящие частицы атмосферы: одинаковый параллакс по обеим осям, плавный перенос по краям */
 function atmWrap(v,span){return ((v%span)+span)%span;}
 function drawHellAtmos(W,H,dt){
-  if(G.dim===2){drawLilacAtmos(W,H);drawLilacTruthGrade(W,H);return;}
+  if(G.dim===2){drawLilacAtmos(W,H);drawLilacTruthGrade(W,H);lilDrawSleep(W,H);return;}
   if(G.dim!==1||settings.quality==='low'){drawEarthAtmos(W,H);return;}
   const depth=Math.max(0,player.y)/TILE,bi=biomeAt(depth),T=G.time,cam=G.cam;
   if(!_atm){_atm=[];for(let i=0;i<70;i++)_atm.push({x:Math.random(),y:Math.random(),s:Math.random(),p:Math.random()*TAU});}

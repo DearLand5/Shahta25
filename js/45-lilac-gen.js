@@ -163,6 +163,8 @@ function genLilacTileAt(wx,wy){
     if(k===2&&H.hd<LH_RI-1.15)return {t:T_LCOMB,o:0};
   }
   if(lilacAir(wx,wy)){
+    /* соты: в части открытых ячеек на дне стоит мёд */
+    if(band===2&&waterAmt()>0){const H=lilHex(wx,wy);if(hash2(H.c.i,H.c.j,G.seed+90071)%3===0&&H.hd<LH_RI-1.15&&(wy+0.5)-H.c.cy>0.6)return {t:T_HONEY,o:0};}
     if(band===1){   /* рощи стеклянных колонн */
       if(vnoise(wx/30,wy/30,s+25)>0.45){
         const cc=Math.floor(wx/7),h=hash2(cc,Math.floor(wy/26),s+27);

@@ -1061,6 +1061,7 @@ function explode(x,y,r,dmg){
     if(dx*dx+dy*dy>rr*rr)continue;
     const t=getTile(tx+dx,ty+dy);
     if(t===T_BARRICADE){damageBarricade(tx+dx,ty+dy,dmg*1.5);continue;}
+    if(t===T_LWAX){setTile(tx+dx,ty+dy,T_HONEY);continue;}   /* воск тает от взрыва */
     if(t!==T_AIR&&t!==T_BEDROCK&&t!==T_ARENA&&t!==T_LAVA&&t!==T_LADDER&&!isLiq(t))setTile(tx+dx,ty+dy,T_AIR);
   }
 }
