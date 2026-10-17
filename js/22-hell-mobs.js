@@ -162,7 +162,7 @@ function updateMobs(dt){
     const hostile=def.dmg>0&&(!def.neutral||m.provoked>0);
     const seen=mobLOS(m);
     if(m.mem>0)m.mem-=dt;
-    const aggro=hostile&&(m.provoked>0||(def.aggro>0&&dist<def.aggro&&(seen||dist<100||m.mem>0)))&&!cheats.god;
+    const aggro=hostile&&(m.provoked>0||(def.aggro>0&&dist<def.aggro&&(seen||dist<100||m.mem>0)))&&!cheats.god&&!(def.lm&&lmCalm(m));
     if(aggro)m.mem=4;            /* помнит цель ещё 4 секунды */
     let mvx=0,mvy=0,noPhys=false;
     const face=(v)=>{if(Math.abs(v)>0.05)m.facing=v>0?1:-1;};

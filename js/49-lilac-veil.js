@@ -187,8 +187,11 @@ function drawLilacTruthBackdrop(g,W,H,cam,T,time){
 function drawLilacTruthGrade(W,H){
   const T=veilT;if(T<0.03)return;
   const g=ctx;g.save();g.setTransform(dpr,0,0,dpr,0,0);
-  g.globalCompositeOperation='color';g.fillStyle='rgba(120,14,40,'+(0.5*T).toFixed(3)+')';g.fillRect(0,0,W,H);
-  g.globalCompositeOperation='multiply';g.fillStyle='rgba(190,150,160,'+(0.45*T).toFixed(3)+')';g.fillRect(0,0,W,H);
+  /* вокруг шахтёра оттенок слабее — его фигура не тонет в красном */
+  const sc=view.scale,qx=(player.x-G.cam.x)*sc+W/2,qy=(player.y-player.h*0.5-G.cam.y)*sc+H/2,r0=TILE*1.1*sc,r1=TILE*3.2*sc;
+  const lens=(rgb,a)=>{const gr=g.createRadialGradient(qx,qy,r0,qx,qy,r1);gr.addColorStop(0,'rgba('+rgb+','+(a*0.2).toFixed(3)+')');gr.addColorStop(1,'rgba('+rgb+','+a.toFixed(3)+')');return gr;};
+  g.globalCompositeOperation='color';g.fillStyle=lens('120,14,40',0.5*T);g.fillRect(0,0,W,H);
+  g.globalCompositeOperation='multiply';g.fillStyle=lens('190,150,160',0.45*T);g.fillRect(0,0,W,H);
   g.globalCompositeOperation='source-over';
   const p=0.5+0.5*Math.sin(G.time*(1.2+T));
   const vg=g.createRadialGradient(W/2,H/2,Math.min(W,H)*0.3,W/2,H/2,Math.max(W,H)*0.72);vg.addColorStop(0,'rgba(40,0,10,0)');vg.addColorStop(1,'rgba(40,0,10,'+(0.55*T*(0.8+0.2*p)).toFixed(3)+')');g.fillStyle=vg;g.fillRect(0,0,W,H);

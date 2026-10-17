@@ -664,6 +664,30 @@ function lilStructDecor(g,lst,tx0,tx1,ty0,ty1){
             const lit=S&&S.lit&&S.lit[wx+','+wy],len=lit?clamp((lit-G.time)/12,0.15,1)*20:(S&&S.done?6:20);
             lsCandle(g,x+16,y+32,len,!!lit||(S&&S.done),time,h,gl);
             if(lit&&!low&&Math.random()<0.05)spawnPart(x+19,y+32-len,0,30,0.8,'#f4ead6',1.6,200);break;}
+          case 'V':{               /* медный котёл с расплавленным воском над углями */
+            const c=L3('#b8703a'),bx=x-4,bw=40,top=y+10,T2=T>0.5;
+            g.fillStyle='#2a1a14';g.fillRect(bx+6,y+26,bw-12,6);
+            for(let k=0;k<4;k++){const f=0.6+0.4*Math.sin(time*7+k*1.9+h);g.fillStyle=k%2?'#ff9a30':'#ffd060';g.beginPath();g.ellipse(bx+12+k*7,y+27,2.6,2.6+f*2.4,0,0,TAU);g.fill();}
+            gl(x+16,y+26,34,'#ffb060');
+            g.fillStyle=c[2];g.beginPath();g.moveTo(bx,top);g.lineTo(bx+bw,top);g.quadraticCurveTo(bx+bw-2,y+28,bx+bw/2,y+28);g.quadraticCurveTo(bx+2,y+28,bx,top);g.fill();
+            g.fillStyle=c[1];g.beginPath();g.moveTo(bx+3,top);g.lineTo(bx+bw-6,top);g.quadraticCurveTo(bx+bw-8,y+25,bx+bw/2-2,y+25);g.quadraticCurveTo(bx+4,y+25,bx+3,top);g.fill();
+            g.fillStyle=c[0];g.fillRect(bx+6,top+3,3,8);g.fillStyle='rgba(0,0,0,.4)';for(let k=0;k<5;k++)g.fillRect(bx+8+k*7,top+5,1.4,1.4);
+            g.fillStyle=c[2];g.fillRect(bx-2,top-3,bw+4,4);g.fillStyle=c[0];g.fillRect(bx-2,top-3,bw+4,1.2);
+            /* расплавленный воск; в Истине — тёмный, с пузырями, как кровь */
+            g.fillStyle=T2?'#7a1a24':'#f4dca0';g.beginPath();g.ellipse(bx+bw/2,top-1,bw/2-1,2.4,0,0,TAU);g.fill();
+            for(let k=0;k<3;k++){const ph=(time*0.8+k*0.37+h%7*0.1)%1;g.fillStyle=T2?'rgba(200,60,70,'+(1-ph)+')':'rgba(255,250,220,'+(1-ph)+')';g.beginPath();g.arc(bx+8+k*13,top-1,1.2+ph*1.6,0,TAU);g.fill();}
+            g.fillStyle=T2?'#7a1a24':'#f4dca0';g.fillRect(bx+bw-9,top+1,2.6,6+Math.sin(time+h)*1.5);
+            if(!low)for(let k=0;k<3;k++){const ph=(time*0.35+k/3+(h%5)*0.07)%1;g.fillStyle='rgba(255,240,230,'+(0.22*(1-ph))+')';g.beginPath();g.arc(bx+bw/2+Math.sin(ph*6+k)*6,top-4-ph*30,3+ph*5,0,TAU);g.fill();}
+            break;}
+          case 'D':{               /* сушилка: на палке висят свечи на фитилях и раскачиваются */
+            const c=L3('#8a5a3a'),sw=Math.sin(time*1.3+h%11)*0.06;
+            g.fillStyle=c[1];g.fillRect(x+15,ceilY,2,6);g.fillStyle=c[2];g.fillRect(x-4,ceilY+6,40,3.4);g.fillStyle=c[0];g.fillRect(x-4,ceilY+6,40,1);
+            for(let k=0;k<4;k++){const lx=x+k*10,ln=15+((h>>k)%3)*4,cl=['#f4ead6','#ffc0d8','#c8b0ff','#fff0c0'][(h+k)%4];
+              g.save();g.translate(lx,ceilY+9);g.rotate(sw*(1+k*0.2));
+              g.strokeStyle='#3a2a20';g.lineWidth=0.8;g.beginPath();g.moveTo(0,0);g.lineTo(0,4);g.stroke();
+              const L=L3(cl);g.fillStyle=L[2];g.fillRect(-2.2,4,4.4,ln);g.fillStyle=L[1];g.fillRect(-2.2,4,3.2,ln);g.fillStyle=L[0];g.fillRect(-1.6,4,1,ln);
+              g.fillStyle=L[1];g.beginPath();g.arc(0,4+ln,2.2,0,Math.PI);g.fill();g.restore();}
+            break;}
           case 'Y':{               /* рычаг карусели */
             const on=S&&(S.run||S.done),c=L3('#e0b050');g.fillStyle='#3a2a3a';g.fillRect(x+8,y+22,16,10);g.fillStyle='#5a4a5a';g.fillRect(x+8,y+22,16,2);
             g.save();g.translate(x+16,y+24);g.rotate(on?0.7:-0.7);g.fillStyle=c[1];g.fillRect(-1.6,-20,3.2,20);g.fillStyle=c[0];g.fillRect(-1.6,-20,1,20);

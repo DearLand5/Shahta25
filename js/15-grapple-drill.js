@@ -29,8 +29,8 @@ function hellSupUnit(id){
 }
 function hellPricesOn(){return !!(player.prog&&player.prog.hellUnlocked);}
 function earthSupCost(id,base,n){return hellPricesOn()?Math.max(base,Math.round(hellSupUnit(id)*n)):base;}
-function drillPower(){return DRILL_POWER[clamp(player.drillLvl-1,0,9)];}
-function drillWidth(){return DRILL_RADIUS[clamp(player.drillLvl-1,0,9)]*2+1;}
+function drillPower(){return DRILL_POWER[clamp(player.drillLvl-1,0,DRILL_POWER.length-1)];}
+function drillWidth(){return DRILL_RADIUS[clamp(player.drillLvl-1,0,DRILL_RADIUS.length-1)]*2+1;}
 function launchDrill(){
   if(G.scene!=='mine')return;
   if(!player.drillBought){floatText(player.x,player.y-64,'Бур продаётся в кузнице','#ff9a3c');SFX.uiBack();return;}
@@ -53,7 +53,7 @@ function launchDrill(){
   drills.push({
     x:player.x+ax*20, y:player.y-player.h*0.5+ay*20,
     vx:ax*420, vy:ay*420,
-    power:drillPower(), spin:0, r:DRILL_RADIUS[clamp(player.drillLvl-1,0,9)], lvl:player.drillLvl
+    power:drillPower(), spin:0, r:DRILL_RADIUS[clamp(player.drillLvl-1,0,DRILL_RADIUS.length-1)], lvl:player.drillLvl
   });
   SFX.grapple();vib(18);shake(2);
   floatText(player.x,player.y-70,'Бур пошёл!','#ffd98a');

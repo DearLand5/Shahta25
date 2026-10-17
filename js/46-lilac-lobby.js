@@ -77,6 +77,7 @@ function renderLilacLobby(){
   ctx.fillStyle=gnd;ctx.fillRect(x0w,0,x1w-x0w,700);
   ctx.fillStyle=mx('#8ad0aa','#2a3a30');ctx.fillRect(x0w,0,x1w-x0w,2);
   const glowList=[];
+  llbUnderground(ctx,x0w,x1w,t,N,glowList,mx);
   llbScenery(ctx,x0w,x1w,t,N,glowList);
   /* дорожка из светлой плитки */
   for(let x=Math.floor(x0w/40)*40;x<x1w;x+=40){const h0=llbRand(x/40);
@@ -394,4 +395,40 @@ function lilacJump(to){
   UI.toast(to===2?'🌸 Лиловые небеса':to===1?'🔥 Добро пожаловать в Ад':'🌄 Ты снова на Земле надежды');
   G.fadeIn=0.9;
   saveGame();
+}
+
+/* разрез земли под деревней: пласты, корни, камешки-леденцы, светящиеся кристаллы и спящие косточки */
+function llbUnderground(g,x0w,x1w,t,N,glowList,mx){
+  /* волнистые пласты */
+  const bands=[[34,mx('#3a2e52','#100c1a'),0.55],[96,mx('#2e2644','#0c0914'),0.6],[190,mx('#221c36','#08060e'),0.65]];
+  for(const [y0,col,a] of bands){g.fillStyle=hexA(col,a);g.beginPath();g.moveTo(x0w,y0+40);
+    for(let x=Math.floor(x0w/30)*30;x<=x1w+30;x+=30)g.lineTo(x,y0+Math.sin(x*0.013+y0)*6+llbRand(x/30+y0)*5);
+    g.lineTo(x1w+30,y0+60);g.lineTo(x0w,y0+60);g.closePath();g.fill();
+    g.strokeStyle=mx('rgba(200,170,230,.12)','rgba(120,60,90,.1)');g.lineWidth=1;g.beginPath();
+    for(let x=Math.floor(x0w/30)*30;x<=x1w+30;x+=30){const yy=y0+Math.sin(x*0.013+y0)*6+llbRand(x/30+y0)*5;x===Math.floor(x0w/30)*30?g.moveTo(x,yy):g.lineTo(x,yy);}g.stroke();}
+  /* корни из-под травы */
+  g.lineCap='round';
+  for(let x=Math.floor(x0w/36)*36;x<x1w;x+=36){const r=llbRand(x*0.17+3);if(r<0.45)continue;
+    const len=10+r*22,bx=x+llbRand(x+1)*20;g.strokeStyle=mx('#5a4258','#1e1420');g.lineWidth=2.2;
+    g.beginPath();g.moveTo(bx,3);g.quadraticCurveTo(bx+6,len*0.5,bx+2,len);g.stroke();
+    g.lineWidth=1.1;g.beginPath();g.moveTo(bx+4,len*0.45);g.quadraticCurveTo(bx+10,len*0.6,bx+12,len*0.8);g.stroke();}
+  /* камешки-леденцы: свет сверху-слева, тень снизу */
+  const pc=N>0.5?['#3a3044','#2e2a3a','#3a2a34']:['#b8a0d8','#a0c8d0','#e0b0c8','#c8c0e0'];
+  for(let x=Math.floor(x0w/22)*22;x<x1w;x+=22){const r=llbRand(x*0.31+9);if(r<0.35)continue;
+    const px=x+llbRand(x+2)*18,py=22+llbRand(x+4)*230,s=2+llbRand(x+6)*4,c=pc[Math.floor(r*40)%pc.length];
+    g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.ellipse(px+0.8,py+1.2,s,s*0.7,0,0,TAU);g.fill();
+    g.fillStyle=hexA(c,0.55);g.beginPath();g.ellipse(px,py,s,s*0.7,0,0,TAU);g.fill();
+    g.fillStyle=hexA('#ffffff',N>0.5?0.06:0.22);g.beginPath();g.ellipse(px-s*0.35,py-s*0.25,s*0.4,s*0.22,-0.4,0,TAU);g.fill();}
+  /* светящиеся кристаллы и косточки (ночью кристаллы краснеют) */
+  for(let x=Math.floor(x0w/150)*150;x<x1w;x+=150){const i=x/150|0,r=llbRand(i*7+13);
+    const cx=x+llbRand(i+21)*110,cy=60+llbRand(i+22)*160;
+    if(r<0.5){const col=N>0.5?'#ff5a70':['#d8a8ff','#a8e8ff','#ffb0e0'][i%3],L=shadeHex(col,0.35),D=shadeHex(col,-0.4),tw=0.7+0.3*Math.sin(t*1.4+i);
+      for(let k=0;k<3;k++){const h=8+k*4-(k===2?6:0),a=(k-1)*0.45;g.save();g.translate(cx+(k-1)*4,cy);g.rotate(a);
+        g.fillStyle=D;g.beginPath();g.moveTo(0,-h);g.lineTo(3,-h*0.6);g.lineTo(3,0);g.lineTo(-3,0);g.lineTo(-3,-h*0.6);g.closePath();g.fill();
+        g.fillStyle=col;g.beginPath();g.moveTo(0,-h);g.lineTo(0,0);g.lineTo(-3,0);g.lineTo(-3,-h*0.6);g.closePath();g.fill();
+        g.fillStyle=L;g.fillRect(-2.2,-h*0.6,0.9,h*0.5);g.restore();}
+      glowList.push([cx,cy-6,26*tw,col]);}
+    else if(r<0.72){/* спящая косточка — напоминание, что под деревней не всё так мило */
+      g.fillStyle=mx('#d8ccc0','#5a4a44');g.save();g.translate(cx,cy);g.rotate(llbRand(i+30)*3);
+      g.fillRect(-7,-1.2,14,2.4);for(const sx of [-7,7]){g.beginPath();g.arc(sx,-1.4,1.8,0,TAU);g.arc(sx,1.4,1.8,0,TAU);g.fill();}g.restore();}}
 }

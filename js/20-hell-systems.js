@@ -820,7 +820,7 @@ function drawMinimap(){
   const toS=(wx,wy)=>[r.x+(wx-MM.x0)*k,r.y+(wy-MM.y0)*k];const r0=r;
   /* мобы */
   for(const m of mobs){if(!m.alive)continue;const [sx,sy]=toS(m.x/TILE,(m.y-m.h*0.5)/TILE);
-    g.fillStyle=m.def.boss?'#ff5aff':(m.def.neutral?'#7ad07a':'#ff4d4d');g.fillRect(sx-(m.def.boss?3:1.5),sy-(m.def.boss?3:1.5),m.def.boss?6:3,m.def.boss?6:3);}
+    g.fillStyle=m.def.boss?'#ff5aff':(m.def.neutral||(m.def.lm&&lmCalm(m))?'#7ad07a':'#ff4d4d');g.fillRect(sx-(m.def.boss?3:1.5),sy-(m.def.boss?3:1.5),m.def.boss?6:3,m.def.boss?6:3);}
   /* сердце бездны */
   if(G.dim===0&&!player.prog.heart&&_hs&&_hsSeed===G.seed){const [sx,sy]=toS(_hs.x+0.5,_hs.y-0.5);
     if(sx>r.x&&sx<r.x+r.s&&sy>r.y&&sy<r.y+r.s){g.fillStyle='#e090ff';g.font='bold '+Math.max(9,k*4)+'px system-ui';g.textAlign='center';g.textBaseline='middle';g.fillText('💜',sx,sy);}}

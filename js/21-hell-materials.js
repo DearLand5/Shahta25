@@ -222,6 +222,7 @@ function playerSplash(p){
   SFX.boom();shake(3);
 }
 function thrownBoom(p){
+  if(p.sleep){lfuSleepBoom(p);return;}
   if(p.ice){
     const tx=Math.floor(p.x/TILE),ty=Math.floor(p.y/TILE);
     for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++){if(dx*dx+dy*dy>10)continue;const t=getTile(tx+dx,ty+dy);if(t===T_LAVA||isLiq(t))setTile(tx+dx,ty+dy,T_OBS);}
@@ -239,7 +240,7 @@ function throwItem(kind){
   let ax=player.facing,ay=-0.6;
   if(aim.active){ax=aim.x-sx;ay=aim.y-sy;const l=Math.hypot(ax,ay)||1;ax/=l;ay/=l;ay-=0.25;}
   const l=Math.hypot(ax,ay)||1;
-  projectiles.push({x:sx,y:sy,vx:ax/l*480,vy:ay/l*480,life:5,dmg:0,color:kind==='ice'?'#9be8ff':'#ff8a30',size:6,owner:'player',thrown:true,fuse:1.4,ice:kind==='ice'});
+  projectiles.push({x:sx,y:sy,vx:ax/l*480,vy:ay/l*480,life:5,dmg:0,color:kind==='ice'?'#9be8ff':kind==='sleep'?'#d8b0ff':'#ff8a30',size:6,owner:'player',thrown:true,fuse:1.4,ice:kind==='ice',sleep:kind==='sleep'});
   SFX.jump();
 }
 const pBeams=[],shockRings=[];

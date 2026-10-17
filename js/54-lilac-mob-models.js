@@ -524,7 +524,11 @@ const LM_MODEL={
     g.fillStyle=T?'#c8b878':'#e8f8e0';g.beginPath();g.ellipse(4,FY-5,7,4.6,0,0,TAU);g.fill();
     if(T){g.fillStyle='rgba(40,50,20,.55)';for(const [x,y,r] of [[-6,-14,1.6],[-1,-16,1.2],[-9,-8,1.4],[3,-14,1],[-4,-10,1]]){g.beginPath();g.arc(x,FY+y,r,0,TAU);g.fill();}}
     /* щёки-пузырь на замахе */
-    if(puff>0){g.fillStyle=T?'rgba(200,180,120,.85)':'rgba(220,250,230,.85)';g.beginPath();g.arc(10,FY-6,2+puff*4,0,TAU);g.fill();}
+    if(puff>0){const r=3+puff*7,cl=T?'#c8b478':'#dcf6e4';
+      g.fillStyle=shadeHex(cl,-0.35);g.beginPath();g.ellipse(9,FY-5+r*0.25,r*1.05,r*0.85,0,0,TAU);g.fill();
+      g.fillStyle=hexA(cl,0.92);g.beginPath();g.ellipse(9,FY-5+r*0.2,r,r*0.78,0,0,TAU);g.fill();
+      g.fillStyle='rgba(255,255,255,.55)';g.beginPath();g.ellipse(9-r*0.35,FY-5-r*0.15,r*0.32,r*0.18,-0.5,0,TAU);g.fill();
+      if(T){g.strokeStyle='rgba(120,30,30,.5)';g.lineWidth=0.7;for(let q=0;q<3;q++){g.beginPath();g.moveTo(9-r*0.5+q*r*0.4,FY-5);g.quadraticCurveTo(9+q*2-r*0.3,FY-5+r*0.4,9-r*0.2+q*r*0.4,FY-5+r*0.7);g.stroke();}}}
     /* передние лапы */
     g.strokeStyle=shadeHex(c,-0.1);g.lineWidth=2;g.beginPath();g.moveTo(6,FY-4);g.lineTo(8,FY);g.stroke();
     /* глаза */

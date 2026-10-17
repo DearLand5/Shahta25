@@ -621,6 +621,7 @@ function renderMine(dt){
   hbDrawWorld(ctx,tx0,tx1,ty0,ty1);
   drawAnchors(ctx,tx0,tx1,ty0,ty1);
   if(G.dim===2){lbDrawLanterns(ctx,tx0,tx1,ty0,ty1);lgWorldBack(ctx,tx0,tx1,ty0,ty1);}
+  lfuTunerDraw(ctx,tx0,tx1,ty0,ty1);
   drawHeartShrine(ctx,tx0,tx1,ty0,ty1);
   for(let ty=ty0;ty<=ty1;ty++){
     if(ty<0)continue;

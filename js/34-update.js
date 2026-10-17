@@ -259,7 +259,7 @@ function update(dt){
   lilMobHzTick(dt);
   lilAbTick(dt);
   lbTick(dt);
-  lgTick(dt);
+  lgTick(dt);lfuTick(dt);
   if(G.dim===2)lstTick(dt);
   updateHellBlocks(dt);
   updateAnchors();

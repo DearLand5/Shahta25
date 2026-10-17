@@ -29,7 +29,8 @@ const SETTINGS_DEFAULTS=JSON.parse(JSON.stringify(settings));
 const DIG_SPEED_MAX=12;
 const DIG_SPEED_COSTS=[400,760,1450,2750,5200,9900,18800,35700,67900,129000,245000,465000];
 const DIG_SPEED_HMAX=20;
-function digSpeedMult(lv){lv=lv|0;return lv<=DIG_SPEED_MAX?1+0.45*Math.max(0,lv):6.4+0.5*Math.min(lv-DIG_SPEED_MAX,DIG_SPEED_HMAX-DIG_SPEED_MAX);}
+const DIG_SPEED_LMAX=30;   /* уровни 21–30 — Кузница Зари (61-lilac-forge) */
+function digSpeedMult(lv){lv=lv|0;return lv<=DIG_SPEED_MAX?1+0.45*Math.max(0,lv):6.4+0.5*Math.min(lv-DIG_SPEED_MAX,DIG_SPEED_HMAX-DIG_SPEED_MAX)+0.6*Math.max(0,Math.min(lv,DIG_SPEED_LMAX)-DIG_SPEED_HMAX);}
 function applySettings(){
   AU.setVol(settings.sfx);
   AU.setMusicVol(typeof settings.music==='number'?settings.music:0.5);

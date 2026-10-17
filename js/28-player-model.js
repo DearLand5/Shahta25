@@ -2201,7 +2201,7 @@ function drawMobSprite0(g,m,t){
     g.fillStyle='#ffe066';
     for(let k=0;k<3;k++){const a=t*6+k*2.1;g.fillRect(Math.cos(a)*10-1.5,-m.h-8+Math.sin(a)*3,3,3);}
   }
-  if(def.neutral&&m.provoked>0){g.fillStyle='#ff5a4a';g.font='800 13px system-ui,sans-serif';g.textAlign='center';g.fillText('💢',0,-m.h-10);}
+  if((def.neutral||(def.lm&&lmTemper(m)==='n'))&&m.provoked>0){g.fillStyle='#ff5a4a';g.font='800 13px system-ui,sans-serif';g.textAlign='center';g.fillText('💢',0,-m.h-10);}
   g.scale(m.facing,1);
   if(m.elite){
     olLight(g,(g)=>{const ea=0.25+0.15*Math.sin(t*5);
@@ -2213,7 +2213,7 @@ function drawMobSprite0(g,m,t){
     const bw=Math.max(24,m.w*0.9),bh=4;
     const by=-m.h-12;
     g.fillStyle='rgba(0,0,0,.6)';g.fillRect(-bw/2-1,by-1,bw+2,bh+2);
-    g.fillStyle=def.neutral&&!(m.provoked>0)?'#7ad07a':'#ff4d4d';g.fillRect(-bw/2,by,bw*clamp(m.hp/m.maxHp,0,1),bh);
+    g.fillStyle=(def.neutral&&!(m.provoked>0))||(def.lm&&lmCalm(m))?'#7ad07a':'#ff4d4d';g.fillRect(-bw/2,by,bw*clamp(m.hp/m.maxHp,0,1),bh);
   }
   g.restore();
 }

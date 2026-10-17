@@ -2055,7 +2055,7 @@ const UI={
           case 'mask': player.gasMask=!player.gasMask; UI.toast('😷 Противогаз: '+(player.gasMask?'есть':'нет')); break;
           case 'dimSwap': switchDimension(G.dim===0?1:0); UI.toast('Измерение: '+DIM_NAMES[G.dim]); UI.clear(); return;
           case 'san100': case 'san30': case 'san0': player.sanity=+a.slice(3);veilT=veilTarget();UI.toast('Рассудок: '+player.sanity);UI.clear();return;
-          case 'abMax':{const P=abP();for(const d of AB_DEFS)P.lv[d.id]=5;P.slot=['shadow','blink'];LAB.eth=AB_ETHER;UI.toast('🪞 Все способности на 5 уровне — мутации выбираются в Зале');break;}
+          case 'abMax':{const P=abP();for(const d of AB_DEFS)P.lv[d.id]=5;P.slot=['shadow','blink'];LAB.eth=abEthMax();UI.toast('🪞 Все способности на 5 уровне — мутации выбираются в Зале');break;}
           case 'lbSny': lbCheat('sny');break;
           case 'lgMax': lgCheat('max');break;
           case 'lstAll': lstCheat('all');break;

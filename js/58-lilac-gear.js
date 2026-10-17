@@ -80,7 +80,7 @@ const LG_ITEMS=[
    desc:lv=>'Снаряды мобов отражаются обратно с шансом '+(lv?(10+lv*10)+'%'+(lv<3?' → '+(20+lv*10)+'%':''):'20%')}
 ];
 const LG_ITEM_BY={};for(const it of LG_ITEMS)LG_ITEM_BY[it.id]=it;
-IT_CAT_OF.lnet='use';IT_CAT_OF.lmbox='fight';
+IT_CAT_OF.lnet='use';IT_CAT_OF.lmbox='fight';IT_CAT_OF.lsbomb='fight';IT_CAT_OF.ltuner='use';
 
 /* ---------- питомцы ---------- */
 const LG_PETS=[
@@ -253,6 +253,8 @@ function lgQsMeta(id){
   const b=LB_BY[id];if(b)return {n:matN(id),icon:b.ic,name:b.n};
   if(id==='lnet')return {n:lgi('net'),icon:'🥅',name:'Сачок'};
   if(id==='lmbox')return {n:lgi('mbox'),icon:'🎶',name:'Шкатулка'};
+  if(id==='lsbomb')return {n:(player.hitems&&player.hitems.lsbomb)|0,icon:'💤',name:'Сонная бомба'};
+  if(id==='ltuner')return {n:(player.hitems&&player.hitems.ltuner)|0,icon:'🔔',name:'Камертон'};
   return null;
 }
 
@@ -278,6 +280,8 @@ UI.lforge=function(tab){
       return `<div class="lgRow">${lbCvHtml(56,56,'data-prev="'+kind+':'+n.lv+'"')}<div class="txt"><b>${nx.name}</b><div class="tiny">${lgStat(kind,c,nx)}</div><div class="cost">${lgChips(n.r)}</div></div>
         <button class="btn small" data-lg="${kind}" ${lgCanPay(n.r)?'':'disabled'}>Ковать</button></div>`;}).join('')
       +`<p class="tiny muted" style="margin-top:6px">Снаряжение Зари куётся из слитков руды Лиловых небес (Перегонный куб), эссенций и Снов. Кирка XI открывает руду 11-го уровня и так далее.</p>`;
+  }else if(tab==='upg'){body=lfuUpgHtml();
+  }else if(tab==='shop'){body=lfuShopHtml();
   }else if(tab==='items'){
     body=LG_ITEMS.map(it=>{const lv=lgi(it.id),max=lv>=it.max,r=max?null:it.cost(lv);
       return `<div class="lgRow">${lbCvHtml(56,56,'data-iprev="'+it.id+'"')}<div class="txt"><b>${it.n}${it.max>1?' · '+lv+'/'+it.max:''}</b><div class="tiny">${it.desc(lv)}</div>${r?`<div class="cost">${lgChips(r)}</div>`:''}</div>
@@ -287,11 +291,11 @@ UI.lforge=function(tab){
     <div class="card lilac" style="max-width:580px;width:96vw">
       <h3>☀ Кузница Зари</h3>
       <div class="bal"><span>Мастера Зари</span><b style="color:#ffd98a">${fmt(player.money)} 💰 · <span style="color:#e6c8ff">${snyN()} 🌙</span></b></div>
-      <div class="tabs"><button data-t="gear" class="${tab==='gear'?'on':''}">Снаряжение</button><button data-t="items" class="${tab==='items'?'on':''}">Предметы</button><button data-t="hell">Прокачки и лавка</button></div>
+      <div class="tabs"><button data-t="gear" class="${tab==='gear'?'on':''}">Снаряжение</button><button data-t="upg" class="${tab==='upg'?'on':''}">Прокачки</button><button data-t="items" class="${tab==='items'?'on':''}">Предметы</button><button data-t="shop" class="${tab==='shop'?'on':''}">Лавка</button></div>
       <div class="scroll" style="max-height:60vh">${body}</div>
     </div>
     <button class="btn alt" id="lgBack">Выйти</button>`);
-  d.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{SFX.ui();const t=b.getAttribute('data-t');if(t==='hell')UI.hforge(UI._hgTab==='gear'||!UI._hgTab?'upg':UI._hgTab);else UI.lforge(t);});
+  d.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{SFX.ui();UI.lforge(b.getAttribute('data-t'));});
   const done=(msg)=>{SFX.buy();SFX.boom();vib(50);AU.bell(1319,1,0.06,0,{ratio:2.01,index:0.8,rev:0.6});UI.toast(msg);recomputeStats();validateSelection();saveGame();UI.lforge();};
   d.querySelectorAll('[data-lg]').forEach(b=>b.onclick=()=>{
     const kind=b.getAttribute('data-lg'),n=lgNext(kind);if(!n||n.lock||!lgPay(n.r)){UI.toast('Не хватает');return;}
@@ -301,6 +305,7 @@ UI.lforge=function(tab){
   d.querySelectorAll('[data-li]').forEach(b=>b.onclick=()=>{const it=LG_ITEM_BY[b.getAttribute('data-li')],lv=lgi(it.id);if(lv>=it.max||!lgPay(it.cost(lv)))return;
     lgiP()[it.id]=lv+1;done(it.ic+' '+it.n+(it.max>1?' ур. '+(lv+1):''));});
   d.querySelector('#lgBack').onclick=()=>{SFX.uiBack();UI.close();};
+  lfuBind(d,(msg)=>{SFX.buy();SFX.boom();vib(50);UI.toast(msg);recomputeStats();validateSelection();saveGame();UI.lforge();});
   d.querySelectorAll('canvas[data-prev]').forEach(cv=>{const [k,l]=cv.getAttribute('data-prev').split(':');lbAnim(cv,(c,t)=>lgPreview(c,56,56,k,+l,t));});
   d.querySelectorAll('canvas[data-iprev]').forEach(cv=>{const id=cv.getAttribute('data-iprev');lbAnim(cv,(c,t)=>lgItemPreview(c,56,56,id,t));});
 };
@@ -331,7 +336,7 @@ function gdPetsBind(d){
 /* ---------- тест-панель ---------- */
 function lgCheat(k){
   if(k==='max'){player.pickLvl=15;player.swordLvl=15;player.armorLvl=15;player.gunLvl=GUNS.length;player.gunAmmo+=400;recomputeStats();player.hp=player.maxHp;
-    const I=lgiP();for(const it of LG_ITEMS)I[it.id]=it.max;const P=petP();for(const p of LG_PETS)P.own[p.id]=3;if(!P.act)P.act='bee';validateSelection();UI.toast('☀ Всё снаряжение Зари, предметы и питомцы');}
+    const I=lgiP();for(const it of LG_ITEMS)I[it.id]=it.max;player.digSpeedLvl=DIG_SPEED_LMAX;player.digSpeed=digSpeedMult(DIG_SPEED_LMAX);player.drillBought=true;player.drillLvl=15;player.barricadeBought=true;player.barricadeLvl=10;player.slots=40;player.stackLvl=24;player.torchLvl=12;Object.assign(lfuP(),{eth:5,truth:5,dream:3});const P=petP();for(const p of LG_PETS)P.own[p.id]=3;if(!P.act)P.act='bee';validateSelection();UI.toast('☀ Всё снаряжение Зари, предметы и питомцы');}
   else if(k==='mats'){for(let o=37;o<=61;o++)addMat('i'+o,30);for(const e of LIL_ESS)addMat(e[0],20);snyAdd(60);UI.toast('▰ Слитки, эссенции и Сны');}
   saveGame();
 }

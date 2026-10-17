@@ -304,18 +304,18 @@ function applySaveData(d){
       {
         /* старые сохранения: уровней могло быть сколько угодно — лишнее возвращаем монетами */
         const oldLvl=Math.max(0,Math.floor(p.digSpeedLvl||0));
-        player.digSpeedLvl=Math.min(oldLvl,DIG_SPEED_HMAX);
-        for(let i=DIG_SPEED_HMAX;i<oldLvl;i++)player.money+=Math.floor(400*Math.pow(1.85,i));
+        player.digSpeedLvl=Math.min(oldLvl,DIG_SPEED_LMAX);
+        for(let i=DIG_SPEED_LMAX;i<oldLvl;i++)player.money+=Math.floor(400*Math.pow(1.85,i));
         player.digSpeed=digSpeedMult(player.digSpeedLvl);
       }
       player.digRadius=clamp(p.digRadius||0,0,3);
       player.swordLvl=clamp(p.swordLvl||1,1,15);
       player.armorLvl=clamp(p.armorLvl||1,1,15);
       player.slots=clamp(p.slots||8,8,40);
-      player.stackLvl=clamp(Math.floor(p.stackLvl||0),0,16);
+      player.stackLvl=clamp(Math.floor(p.stackLvl||0),0,24);
       player.maxDepth=p.maxDepth||0;
       player.ladders=Math.max(0,Math.floor(p.ladders==null?20:p.ladders));
-      player.drillLvl=clamp(p.drillLvl||1,1,10);
+      player.drillLvl=clamp(p.drillLvl||1,1,15);
       /* бур теперь нужно купить; старые сохранения: куплен, если уже прокачан */
       player.drillBought=(p.drillBought!==undefined)?!!p.drillBought:(player.drillLvl>1);
       player.barricadeBought=!!p.barricadeBought;
@@ -341,7 +341,7 @@ function applySaveData(d){
       if(p.lfurn&&Array.isArray(p.lfurn.q)){player.lfurn={q:p.lfurn.q.filter(j=>SMELT_BY[j.r]&&j.n>0),lvl:clamp(p.lfurn.lvl|0,0,3),ts:p.lfurn.ts||Date.now()};
         const el=clamp((Date.now()-(p.lfurn.ts||Date.now()))/1000,0,4*3600);if(el>0)updateStill(el,true);}else player.lfurn={q:[],lvl:0,ts:Date.now()};
       player.lcontracts=(p.lcontracts&&Array.isArray(p.lcontracts.list))?p.lcontracts:null;
-      player.barricadeLvl=clamp(Math.floor(p.barricadeLvl||1),1,7);
+      player.barricadeLvl=clamp(Math.floor(p.barricadeLvl||1),1,10);
       player.barricades=player.barricadeBought?Math.max(0,Math.floor(p.barricades||0)):0;
       player.drills=player.drillBought?Math.max(0,Math.floor(p.drills||0)):0;
       player.gunLvl=clamp(Math.floor(p.gunLvl||0),0,GUNS.length);
@@ -351,7 +351,7 @@ function applySaveData(d){
       }
       player.grappleUnlocked=!!p.grappleUnlocked;
       player.grappleAmmo=Math.max(0,Math.floor(p.grappleAmmo||0));
-      player.torchLvl=clamp(p.torchLvl||0,0,8);
+      player.torchLvl=clamp(p.torchLvl||0,0,12);
       player.potions=Math.max(0,Math.floor(p.potions||0));
       player.fallProtLvl=clamp(p.fallProtLvl||0,0,3);
       if(p.inv&&typeof p.inv==='object'){

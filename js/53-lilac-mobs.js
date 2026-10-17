@@ -93,7 +93,7 @@ function lmForm(m){
   else if(G.time>(m.tfT||0)){m.tfT=G.time+rnd(0.06,0.3);m.tf=Math.random()<(v-0.38)/0.24;}
   return m.tf;
 }
-function lmTm(m){return m.tf?1.2:1;}
+function lmTm(m){return m.tf?1.2*lfuTruthMul():1;}
 const LMR=[0,0,false];
 function lmMelee(m,k,fx,kbx,kby,san){mobMelee(m,m.def.dmg*k*lmTm(m)*(m.sc||1),fx,kbx,kby);if(san&&!cheats.god)lsSan(-san*(m.tf?1.5:1));}
 function lmShoot(m,ang,spd,k,col,size,kind,o){
@@ -372,10 +372,39 @@ const LM_AI={
   }
 };
 /* вызывается из updateMobs (22) вместо обычной логики */
+/* нрав в Иллюзии: p — мирный (никогда не нападает, от удара убегает),
+   n — нейтральный (нападает, только если его ударить; стая заступается), h — злой всегда.
+   В Истине агрессивны все */
+const LM_TEMPER={lbunny:'p',lbutterfly:'p',ldaisy:'n',lglassbird:'p',lstatue:'n',lchime:'n',lbee:'n',lslime:'p',lwaxknight:'n',
+  ldoll:'n',lsoldier:'n',ljack:'n',lrosehound:'n',lgardener:'n',lfairy:'p',lmirror:'n',lswan:'p',lfrog:'n',lsheep:'p',lsandman:'p',lnightmare:'h'};
+function lmTemper(m){return (m.def.lm&&!m.tf&&LM_TEMPER[m.def.id])||'h';}
+/* моб сейчас мирный: не нападает и не трогается автоатакой */
+function lmCalm(m){const k=lmTemper(m);return k==='p'||(k==='n'&&!(m.provoked>0));}
+/* удар по мобу Лиловых небес: нейтральный злится (и зовёт своих), мирный убегает */
+function lmOnHit(m){
+  const k=lmTemper(m);
+  if(k==='n'){if(!(m.provoked>0))floatText(m.x,m.y-m.h-26,'разозлился!','#ff8a8a');
+    for(const o of mobs)if(o.alive&&o.def===m.def&&Math.hypot(o.x-m.x,o.y-m.y)<6*TILE)o.provoked=Math.max(o.provoked||0,15);}
+  else if(k==='p'){m.fleeT=3.5;}
+}
+/* мирное поведение: бродит, порхает, убегает от шахтёра после удара */
+function lmCalmAI(m,def,dt,dx){
+  if(m.state!=='idle'){m.state='idle';m.tele=0;m.ax=undefined;m.ext=0;m.st=0;}
+  m.dashT=0;
+  if(m.fleeT>0){m.fleeT-=dt;const d=dx>0?-1:1;LMR[0]=d*1.25;m.facing=d;if(def.fly)LMR[1]=-0.4;return;}
+  m.wT=(m.wT||0)-dt;
+  if(m.wT<=0){m.wT=rnd(1.5,3.5);m.wDir=Math.random()<0.35?0:(Math.random()<0.5?-1:1);m.wY=rnd(-0.3,0.3);}
+  if(m.vx!==undefined&&Math.abs(m.vx)<4&&m.wDir&&m.wT<rnd(0,3)&&!def.fly)m.wDir=-m.wDir;
+  LMR[0]=(m.wDir||0)*0.3;
+  if(def.fly){const hy=m.homeY===undefined?(m.homeY=m.y):m.homeY;LMR[1]=clamp((hy-m.y)/60,-0.5,0.5)+m.wY*0.5+Math.sin(G.time*1.7+m.phase)*0.15;}
+  if(m.wDir)m.facing=m.wDir;
+}
 function lilMobAI(m,def,dt,dx,dy,dist,nx,ny,aggro,seen){
   LMR[0]=0;LMR[1]=0;LMR[2]=false;
   lmForm(m);
   if(m.dmgMul===undefined)m.dmgMul=0;
+  if(lmCalm(m)){lmCalmAI(m,def,dt,dx);return LMR;}
+  m.homeY=undefined;
   const f=LM_AI[def.id];if(f)f(m,def,dt,dx,dy,dist,nx,ny,aggro,seen);
   if(m.dead){m.dead=0;const i=mobs.indexOf(m);if(i>=0){mobs.splice(i,1);burst(m.x,m.y-m.h*0.5,14,'#4a3a6a',90,3);}}
   return LMR;

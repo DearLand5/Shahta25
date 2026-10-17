@@ -132,6 +132,7 @@ function drawBarricades(g,tx0,tx1,ty0,ty1){
         g.strokeStyle='#4a5260';g.lineWidth=2;g.strokeRect(x+2,y+2,TILE-4,TILE-4);
         g.strokeStyle='rgba(60,70,84,.8)';g.lineWidth=3;g.beginPath();g.moveTo(x+4,y+4);g.lineTo(x+28,y+28);g.moveTo(x+28,y+4);g.lineTo(x+4,y+28);g.stroke();
         g.fillStyle='#e8eef6';for(const [nx,ny] of [[5,5],[27,5],[5,27],[27,27]]){g.beginPath();g.arc(x+nx,y+ny,1.8,0,TAU);g.fill();}
+      }else if(lv>=8){lfuBarrArt(g,x,y,lv,tx,ty);
       }else if(lv>=5){
         const C=lv===5?['#2a201c','#4a3a34','#ff8a3a']:lv===6?['#2a0806','#6a1408','#ffb030']:['#8a8270','#d8d0bc','#7ad8ff'];
         g.fillStyle=C[0];g.fillRect(x,y,TILE,TILE);

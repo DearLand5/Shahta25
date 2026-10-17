@@ -59,10 +59,10 @@ const LS_TPL={
     "..######################.."],
   candleWorks:[
     "########################",
+    "#..D.....D......D...D..#",
     "#......................#",
     "#......................#",
-    "#......................#",
-    "#......j........j......#",
+    "#....V.j......V.j......#",
     ".....wwwww....wwwww.....",
     "...j........j.......j.k.",
     "########################"],
@@ -361,12 +361,12 @@ function lilDreamEnter(q,wx,wy){
   G.wf.dreamN=((G.wf.dreamN||0)+1)%1000;
   G.wf.dreamRet={x:wx*TILE+16,y:(glyphFloorRow(wx,wy)+1)*TILE-1};
   lilDreamRebuild();
-  G.dream={t:DREAM_T,ret:G.wf.dreamRet,san:player.sanity};
+  G.dream={t:lilDreamT(),ret:G.wf.dreamRet,san:player.sanity};
   for(const m of mobs)if(m.trapKey)trapSpawned.delete(m.trapKey);
   mobs.length=0;
   player.x=(MW/2)*TILE+16;player.y=(DREAM_Y0+12)*TILE-1;player.vx=0;player.vy=0;player.grav=1;
   G.cam.x=player.x;G.cam.y=player.y-player.h*0.5;G.fadeIn=1.2;
-  SFX.portal();vib(60);UI.toast('🌙 Ты спишь. Сон продлится '+DREAM_T+' секунд');
+  SFX.portal();vib(60);UI.toast('🌙 Ты спишь. Сон продлится '+lilDreamT()+' секунд');
 }
 function lilDreamExit(msg){
   const r=G.dream&&G.dream.ret||G.wf.dreamRet;G.dream=null;

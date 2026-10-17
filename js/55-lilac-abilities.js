@@ -156,9 +156,9 @@ function abShadowEnd(timeUp){
 
 /* ---------- такт ---------- */
 function lilAbTick(dt){
-  if(!abOn()){if(LAB.sh)LAB.sh=null;LAB.dome=null;LAB.eyeT=0;LAB.rifts.length=0;LAB.phase=0;if(G.scene!=='mine'){LAB.marks=[];LAB.eth=AB_ETHER;}return;}
+  if(!abOn()){if(LAB.sh)LAB.sh=null;LAB.dome=null;LAB.eyeT=0;LAB.rifts.length=0;LAB.phase=0;if(G.scene!=='mine'){LAB.marks=[];LAB.eth=abEthMax();}return;}
   if(player.hp<=0){LAB.sh=null;LAB.dome=null;}
-  LAB.eth=Math.min(AB_ETHER,LAB.eth+AB_REGEN*dt*(LAB.sh?0:1)*lbEthMul());
+  LAB.eth=Math.min(abEthMax(),LAB.eth+AB_REGEN*dt*(LAB.sh?0:1)*lbEthMul());
   for(const k in LAB.cd)if(LAB.cd[k]>0)LAB.cd[k]-=dt;
   if(LAB.phase>0)LAB.phase-=dt;
   if(LAB.eyeT>0){LAB.eyeT-=dt;if(LAB.eyeT<=0)UI.toast('Око закрылось');}
@@ -234,7 +234,7 @@ function lilAbDraw(){
   const x0=B[0].x-B[0].r,w=B[1].x+B[1].r-x0,yb=B[0].y-B[0].r-12;
   ctx.globalAlpha=0.95;hudPlate(x0-4,yb-5,w+8,10);
   ctx.fillStyle='rgba(0,0,0,.45)';roundRect(ctx,x0,yb-2,w,4,2);ctx.fill();
-  const eg=ctx.createLinearGradient(x0,0,x0+w,0);eg.addColorStop(0,'#7a4ab8');eg.addColorStop(1,'#e0c8ff');ctx.fillStyle=eg;roundRect(ctx,x0,yb-2,Math.max(4,w*LAB.eth/AB_ETHER),4,2);ctx.fill();
+  const eg=ctx.createLinearGradient(x0,0,x0+w,0);eg.addColorStop(0,'#7a4ab8');eg.addColorStop(1,'#e0c8ff');ctx.fillStyle=eg;roundRect(ctx,x0,yb-2,Math.max(4,w*LAB.eth/abEthMax()),4,2);ctx.fill();
   for(let i=0;i<2;i++){
     const b=B[i],id=P.slot[i],pr=!!LAB.press[i];
     ctx.globalAlpha=0.92;

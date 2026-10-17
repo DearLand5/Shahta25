@@ -64,7 +64,7 @@ function lbDrink(id){
   if(heal){const h=Math.round(player.maxHp*(id==='lbmoon'?1:0.4));player.hp=Math.min(player.maxHp,player.hp+h);floatText(player.x,player.y-84,'+'+h+' HP','#5ee06a');SFX.heal();}
   if(b.buf==='all'){for(const q of LB_BUFS)G.lbuf[q[0]]=Math.max(lbBuf(q[0]),b.t);}
   else if(b.buf)G.lbuf[b.buf]=Math.max(lbBuf(b.buf),b.t);
-  if((b.buf==='eth'||b.buf==='all')&&typeof LAB!=='undefined')LAB.eth=AB_ETHER;
+  if((b.buf==='eth'||b.buf==='all')&&typeof LAB!=='undefined')LAB.eth=abEthMax();
   SFX.splash();burst(player.x,player.y-30,22,b.c,150,3);floatText(player.x,player.y-64,b.ic+' '+b.n,b.c);vib(15);
   validateSelection();
 }
@@ -97,7 +97,7 @@ function lbEnterMine(){
   let san0=100;
   for(const id of P.mact){const q=LB_MODS[id];if(q.san0)san0=Math.min(san0,q.san0);if(q.calm)G.lbCalm=Math.max(G.lbCalm,q.calm);}
   player.sanity=san0;
-  if(G.lbCalm>0&&typeof LAB!=='undefined')LAB.eth=AB_ETHER;
+  if(G.lbCalm>0&&typeof LAB!=='undefined')LAB.eth=abEthMax();
   G.lbModToast=P.mact.length?1.4:0;
 }
 function lbExitMine(){if(player.prog)player.prog.mact=[];G.lbuf={};G.lbCalm=0;}

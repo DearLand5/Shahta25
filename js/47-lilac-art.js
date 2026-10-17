@@ -51,7 +51,8 @@ function lilacTex(g,type,v,R,base){
       g.fillStyle='rgba(255,255,255,.55)';g.beginPath();g.ellipse(9+R()*6,6+R()*4,4,1.2,-0.5,0,TAU);g.fill();
       break;}
     case T_LTHORN:{/* терновник: плотное сплетение одревесневших стеблей разной толщины, шипы, засохшие капли */
-      g.fillStyle=shadeHex(base,-0.45);g.fillRect(0,0,32,32);
+      /* фон светлее стены Розария — порода не сливается с пустотой */
+      g.fillStyle=shadeHex(base,-0.24);g.fillRect(0,0,32,32);
       const stem=(x0,y0,x1,y1,cx,cy,w)=>{
         g.strokeStyle=shadeHex(base,-0.2);g.lineWidth=w+1.6;g.beginPath();g.moveTo(x0,y0+0.8);g.quadraticCurveTo(cx,cy+0.8,x1,y1+0.8);g.stroke();
         g.strokeStyle=shadeHex(base,(R()-0.4)*0.25);g.lineWidth=w;g.beginPath();g.moveTo(x0,y0);g.quadraticCurveTo(cx,cy,x1,y1);g.stroke();
@@ -154,7 +155,7 @@ function lilacTex(g,type,v,R,base){
 function lilacWall(bi,v){
   const c=texCanvas(),g=c.getContext('2d'),R=texRng(bi*3571+v*911+3);
   const rock=LIL_ROCK[bi-10]||T_LSOD;
-  const base=shadeHex(TILECOL[rock][v%3],-0.6);
+  const base=shadeHex(TILECOL[rock][v%3],bi===14?-0.72:-0.6);
   g.fillStyle=base;g.fillRect(0,0,32,32);
   for(let i=0;i<46;i++){g.fillStyle=shadeHex(base,(R()-0.5)*0.45);g.fillRect(R()*32|0,R()*32|0,1+(R()*2|0),1+(R()*2|0));}
   for(let i=0;i<3;i++){g.fillStyle=hexA(shadeHex(base,-0.35),0.5);g.beginPath();g.ellipse(R()*32,R()*32,3+R()*6,2+R()*4,R()*3,0,TAU);g.fill();}
