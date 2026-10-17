@@ -1929,7 +1929,7 @@ const UI={
     }else if(tab==='world'){
       const off=dimInfo().b0;
       body=`<div class="sect" style="border:none;margin-top:0;padding-top:0">Измерение: ${DIM_NAMES[G.dim]}</div>
-        <div class="cheatGrid">${dimBtns('')}${act('toLobby','🏠 В лобби')}${G.dim===2?act('lilNight',lilNight()>0.5?'☀ День в деревне':'🌙 Ночь в деревне')+act('san100','👁 Рассудок 100')+act('san30','👁 Рассудок 30')+act('san0','👁 Рассудок 0')+act('ltea','🍵 +10 настоев')+act('abMax','🪞 Все способности'):''}</div>
+        <div class="cheatGrid">${dimBtns('')}${act('toLobby','🏠 В лобби')}${G.dim===2?act('lilNight',lilNight()>0.5?'☀ День в деревне':'🌙 Ночь в деревне')+act('san100','👁 Рассудок 100')+act('san30','👁 Рассудок 30')+act('san0','👁 Рассудок 0')+act('ltea','🍵 +10 настоев')+act('abMax','🪞 Все способности')+act('lbSny','🌙 +30 Снов')+act('lbHerbs','🌿 Травы и отвары')+act('lbGrow','🌱 Вырастить грядки')+act('lbBk5','🗼 Маяк 5'):''}</div>
         <div class="sect">Телепорт по биомам</div>
         <div class="cheatGrid">${Array.from({length:dimInfo().bn},(_,b)=>act('tpB'+(off+b),'⬇ '+BIOMES[off+b].n+' ('+BIOMES[off+b].d0+' м)')).join('')}</div>
         ${G.dim===2?`<div class="sect">Постройки Лиловых небес</div><div class="cheatGrid">${LS_DEFS.map(d=>act('lst_'+d.id,'🏠 '+LS_NAMES[d.id])).join('')}</div>`:''}
@@ -2054,6 +2054,10 @@ const UI={
           case 'dimSwap': switchDimension(G.dim===0?1:0); UI.toast('Измерение: '+DIM_NAMES[G.dim]); UI.clear(); return;
           case 'san100': case 'san30': case 'san0': player.sanity=+a.slice(3);veilT=veilTarget();UI.toast('Рассудок: '+player.sanity);UI.clear();return;
           case 'abMax':{const P=abP();for(const d of AB_DEFS)P.lv[d.id]=5;P.slot=['shadow','blink'];LAB.eth=AB_ETHER;UI.toast('🪞 Все способности на 5 уровне — мутации выбираются в Зале');break;}
+          case 'lbSny': lbCheat('sny');break;
+          case 'lbHerbs': lbCheat('herbs');break;
+          case 'lbGrow': lbCheat('grow');break;
+          case 'lbBk5': lbCheat('bk5');break;
           case 'ltea': addMat('ltea',10);validateSelection();UI.toast('🍵 +10 настоев');break;
           case 'lilNight': lilSetNight(!(lilNight()>0.5)); Music.lastPick=0; UI.toast(lilNight()>0.5?'🌙 Ночь':'☀ День'); UI.clear(); return;
           case 'dim0': case 'dim1': case 'dim2': switchDimension(+a.slice(3)); UI.toast('Измерение: '+DIM_NAMES[G.dim]); UI.clear(); return;
@@ -2288,6 +2292,7 @@ function hudIcon(kind,cx,cy,s){
       c.fillStyle='rgba(255,255,255,.55)';c.beginPath();c.ellipse(-s*0.18,-s*0.14,s*0.08,s*0.05,-0.6,0,TAU);c.fill();break;}
     case 'depth':{c.strokeStyle='#9be8ff';c.lineWidth=Math.max(1.6,s*0.14);c.beginPath();c.moveTo(0,-s*0.4);c.lineTo(0,s*0.22);c.moveTo(-s*0.24,0);c.lineTo(0,s*0.26);c.lineTo(s*0.24,0);c.stroke();
       c.strokeStyle='rgba(155,232,255,.5)';c.beginPath();c.moveTo(-s*0.4,s*0.42);c.lineTo(s*0.4,s*0.42);c.stroke();break;}
+    case 'dream':lbDreamIcon(c,s);break;
     case 'soul':{const g=c.createRadialGradient(0,s*0.1,1,0,0,s*0.5);g.addColorStop(0,'#eafcff');g.addColorStop(0.6,'#7fd8ff');g.addColorStop(1,'#2a6a98');c.fillStyle=g;
       c.beginPath();c.moveTo(0,-s*0.46);c.quadraticCurveTo(s*0.42,0,s*0.3,s*0.24);c.arc(0,s*0.18,s*0.3,0.2,Math.PI-0.2);c.quadraticCurveTo(-s*0.42,0,0,-s*0.46);c.fill();break;}
     case 'ore':{c.fillStyle='#8a8f98';c.beginPath();c.moveTo(-s*0.44,s*0.1);c.lineTo(-s*0.2,-s*0.36);c.lineTo(s*0.3,-s*0.3);c.lineTo(s*0.46,s*0.12);c.lineTo(s*0.1,s*0.4);c.lineTo(-s*0.3,s*0.34);c.closePath();c.fill();
@@ -2362,6 +2367,7 @@ function drawHUD(){
     const sg=ctx.createLinearGradient(bx0,0,bx0+bw0,0);sg.addColorStop(0,'#a01a4a');sg.addColorStop(0.45,'#b07ae0');sg.addColorStop(1,'#f0d0ff');
     if(sf>0){ctx.fillStyle=player.teaT>0?'#bff0d0':sg;roundRect(ctx,bx0,top+29,Math.max(7,bw0*sf),7,3.5);ctx.fill();ctx.fillStyle='rgba(255,255,255,.25)';ctx.fillRect(bx0+4,top+30,Math.max(2,bw0*sf-8),1.4);}
     ctx.fillStyle=lowS?'#ffb0c8':'#ecdcff';ctx.font='700 9px '+HUDF;ctx.textAlign='right';ctx.fillText(Math.round((player.sanity==null?100:player.sanity))+'%',10+hpW-6,top+36);
+    lbHud(10,top+44);
   }
 
   /* правая колонка: левее кнопки паузы, подложки по ширине текста */
@@ -2371,6 +2377,7 @@ function drawHUD(){
   let ry=top;
   hudPillR(rx,ry,'coin',fmt(player.money),'#ffd98a');ry+=24;
   if(G.dim===1||(player.souls||0)>0){hudPillR(rx,ry,'soul',fmt(player.souls||0),'#9ad8ff');ry+=24;}
+  if(G.dim===2){hudPillR(rx,ry,'dream',fmt(snyN()),'#e6c8ff');ry+=24;}
   if(G.scene==='mine'){
     hudPillR(rx,ry,'ore',totalOre()+' шт · '+invCount()+'/'+player.slots,'#e6d9c4');ry+=24;
     if(settings.regen&&dugTiles.size>0){hudPillR(rx,ry,'sprout',dugTiles.size+' в очереди','#7dffb0');ry+=24;}

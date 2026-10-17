@@ -2,7 +2,7 @@
 /* ============================================================
    LOBBY
    ============================================================ */
-const LOBBY_WS=[2800,4760,4880];
+const LOBBY_WS=[2800,4760,7200];
 let LOBBY_W=LOBBY_WS[0];
 const BUILDINGS=[
   [
@@ -30,7 +30,11 @@ const BUILDINGS=[
     {id:'lcasino', name:'Карусель удачи',   x:2680,tip:'Игры на удачу'},
     {id:'lboard',  name:'Доска пропавших',  x:3260,tip:'Задания жителей'},
     {id:'lhall',   name:'Зал Отражений',    x:3840,tip:'Способности и Эфир'},
-    {id:'lportal', name:'Лиловые врата',    x:4420,tip:'Дорога домой'}
+    {id:'lgarden', name:'Оранжерея',        x:4420,tip:'Грядки, травы и отвары'},
+    {id:'lbeacon', name:'Маяк ясности',     x:5000,tip:'Защита Рассудка, фонари-якоря, карта'},
+    {id:'lwell',   name:'Колодец желаний',  x:5580,tip:'Желание на следующий спуск'},
+    {id:'lteah',   name:'Чайный домик',     x:6160,tip:'Лавка за Сны, истории и чашки'},
+    {id:'lportal', name:'Лиловые врата',    x:6740,tip:'Дорога домой'}
   ]
 ];
 let buildings=BUILDINGS[0];
@@ -117,6 +121,7 @@ function enterMine(){
   G.exitGrace=1.0;
   if(G.dim===0&&getTile(ARENA_GX0,ARENA_Y0)===T_ARENA)arenaSetGate(false);
   hbFixWorld();
+  if(G.dim===2)lbEnterMine();
   UI.close();saveGame();
   UI.toast(settings.regen?'⛏ Руды обновлены · порода затягивается':'⛏ Рудные жилы обновились');
 }
@@ -142,6 +147,7 @@ function resumeMine(){
 }
 function exitMine(){
   hbAbort();
+  if(G.dim===2)lbExitMine();
   G.resumeMine=null;
   SFX.enter();
   resetAllInputs();

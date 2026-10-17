@@ -176,6 +176,7 @@ function spawnMobAt(def,x,y){
     gy:y,untargetable:false,hidden:false,losT:0,los:false,aimA:0
   };
   if(def.mech==='mole'){m.state='under';m.untargetable=true;m.alpha=0.4;}
+  if(G.dim===2&&def.lm)lbMobSpawn(m);
   mobs.push(m);
   return m;
 }
@@ -201,6 +202,7 @@ function trySpawnMob(){
     const wy=player.y+rnd(-7,7)*TILE;
     const tx=Math.floor(wx/TILE),ty=Math.floor(wy/TILE);
     if(tx<1||tx>=MW-1)continue;
+    if(G.dim===2&&!lbSpawnOK(tx,ty))return;
     const d=MOBDEFS.filter(dd=>!dd.swim&&(dd.dim||0)===G.dim&&ty>=dd.d0&&ty<=dd.d1&&dd.d0<90000&&!dd.boss&&!(dd.truthOnly&&veilT<0.35));
     if(!d.length)continue;
     let wsum=0;for(const dd of d)wsum+=dd.neutral?1:2.2;

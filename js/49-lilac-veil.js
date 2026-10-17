@@ -24,13 +24,14 @@ function sanityRate(){
   const tx=Math.floor(player.x/TILE),ty=Math.floor((player.y-20)/TILE);
   /* фонари-якоря: рядом с ними Рассудок восстанавливается */
   for(const a of anchorList()){if(Math.abs(a.x-tx)<=5&&Math.abs(a.y-1-ty)<=4)return 5;}
+  if(lbLanNear(tx,ty,5,4))return 5+bkLv();
   let rate=-SAN_RATE[b];
   /* свет: светящиеся блоки рядом и фонарь шахтёра */
   let glow=0;for(let yy=-3;yy<=3;yy++)for(let xx=-3;xx<=3;xx++){const t=getTile(tx+xx,ty+yy);if(t===T_LQUARTZ||t===T_LCOMB)glow++;}
   rate*=1-Math.min(0.5,glow*0.08);
   rate*=1-Math.min(5,player.torchLvl||0)*0.04-Math.max(0,(player.torchLvl||0)-5)*0.03;
   if(player.teaT>0)rate=0.4;
-  return rate;
+  return lbSanRate(rate,tx,ty);
 }
 function updateVeil(dt){
   if(G.dim!==2||G.scene!=='mine'){player.sanity=100;player.teaT=0;veilT=Math.max(0,veilT-dt*2);VEIL.msg50=VEIL.msg20=false;if(typeof Music!=='undefined')Music.sour=0;return;}

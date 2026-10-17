@@ -477,3 +477,23 @@ body.cutscene .toast{display:none!important}
 .abPips{display:flex;gap:4px;margin-top:4px}
 .abPip{width:12px;height:6px;border-radius:3px;background:rgba(255,255,255,.15)}
 .abPip.on{background:linear-gradient(90deg,#b890f0,#ffd0ff)}
+/* ===== Лиловые небеса: здания этапа 8 (56-lilac-buildings) ===== */
+.gdGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (min-width:600px){.gdGrid{grid-template-columns:1fr 1fr 1fr}}
+.gdBed{padding:6px;border-radius:10px;background:rgba(30,16,46,.55);border:1px solid rgba(200,170,255,.22);text-align:center;display:flex;flex-direction:column;gap:4px;align-items:stretch}
+.gdBed canvas{border-radius:8px}
+.gdBed.locked{justify-content:center;opacity:.9;min-height:150px}
+.gdLock{font-size:34px;line-height:1;color:#c8a8f0;font-family:var(--font-head)}
+.gdSt{min-height:2.4em}
+.gdSeeds{display:flex;flex-direction:column;gap:4px}
+.gdSeeds .btn{font-size:11px;padding:6px 6px;min-height:0}
+.lbList{display:flex;flex-direction:column;gap:6px}
+.lbRow{display:flex;gap:8px;align-items:center;padding:7px 8px;border-radius:10px;background:rgba(30,16,46,.55);border:1px solid rgba(200,170,255,.18)}
+.lbRow .btn{flex:0 0 auto}
+.lbIco{flex:0 0 34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:19px;background:rgba(200,170,255,.1);border:1px solid rgba(200,170,255,.3)}
+.lbChips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.lbChip{font-size:11px;padding:3px 7px;border-radius:999px;border:1px solid rgba(200,170,255,.3);background:rgba(20,10,30,.5);color:#ecdcff}
+.thTop{display:flex;gap:10px;align-items:center;margin:4px 0}
+.thTop canvas{flex:0 0 auto;margin:0!important;border-radius:12px;border:2px solid rgba(255,200,230,.35)}
+.thSay{flex:1;position:relative;padding:9px 11px;border-radius:12px;background:#fff4fa;color:#4a2a3a;font-size:13px;line-height:1.35;min-height:60px;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.thSay::before{content:'';position:absolute;left:-8px;top:24px;border:8px solid transparent;border-right-color:#fff4fa;border-left:0}

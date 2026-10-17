@@ -89,7 +89,7 @@ function update(dt){
   updatePlayerFx(dt);
   const stunned=player.fx.stun>0||!!G.bossCut||(G.dim===2&&lilShadowOn());
   if(stunned)ax=0;
-  const speedK=(1+0.05*perkLv('swift'))*(cheats.superSpeed?3:1)*(player.fx.slow>0?0.5:1)*(inWaterP?(inBloodP?0.4:inHoneyP?0.3:0.62):1)*(inLavaP?0.4:1)*(G.dim===1&&onSoulSand()?0.55:1);
+  const speedK=(1+0.05*perkLv('swift'))*(cheats.superSpeed?3:1)*(player.fx.slow>0?0.5:1)*(inWaterP?(inBloodP?0.4:inHoneyP?0.3:0.62):1)*(inLavaP?0.4:1)*(G.dim===1&&onSoulSand()?0.55:1)*(G.dim===2?lbMod('speed'):1);
   const maxV=175*speedK;
   if(ax!==0){
     player.vx+=ax*1800*speedK*dt;
@@ -256,6 +256,7 @@ function update(dt){
   lilStructTick(dt);
   lilMobHzTick(dt);
   lilAbTick(dt);
+  lbTick(dt);
   updateHellBlocks(dt);
   updateAnchors();
   updateTraps(dt);

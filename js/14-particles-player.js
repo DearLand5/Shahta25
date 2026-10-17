@@ -255,6 +255,8 @@ function getPlaceItems(){
     desc:'Ставится на пол в шахте или в лобби. Тапни по ящику рядом — откроется хранилище.'});
   if(player.drillBought)a.push({id:'drill',icon:'🛠️',name:'Бур ур. '+player.drillLvl,count:player.drills,
     desc:'Тап по экрану — направление, «Ставить» — запуск. Тоннель шириной '+drillWidth()+'. Одноразовый.'});
+  if(G.dim===2&&player.prog&&player.prog.bk&&player.prog.bk.own>0)a.push({id:'llan',icon:'🏮',name:'Фонарь-якорь',count:lanFree(),
+    desc:'Ставится на пол в шахте Лиловых небес. Рядом светло, Рассудок не тает, мобы не появляются. Когда все горят — самый старый переносится сюда.'});
   return a;
 }
 function getShootItems(){
@@ -267,6 +269,7 @@ function getShootItems(){
   if((player.hitems&&player.hitems.scrolls)>0)a.push({id:'scroll',icon:'📜',name:'Свиток возврата',count:player.hitems.scrolls,desc:'Мгновенный возврат в лобби, рюкзак сохраняется.'});
   if(matN('ltea')>0)a.push({id:'ltea',icon:'🍵',name:'Настой ясности',count:matN('ltea'),
     desc:'+50 Рассудка, и 30 секунд Пелена не сгущается. Перегоняется в Перегонном кубе.'});
+  for(const b of LB_BREWS)if(matN(b.id)>0)a.push({id:b.id,icon:b.ic,name:b.n,count:matN(b.id),desc:b.txt+' Варится в Оранжерее.'});
   if(player.icePotions>0)a.push({id:'ice',icon:'🧊',name:'Ледяное зелье',count:player.icePotions,
     desc:'Сбрасывает Жар на 70 и 25 секунд не даёт ему расти. Делается в Печи.'});
   {const g=curGun();if(g)a.push({id:'gun',icon:g.icon,name:g.name,count:player.gunAmmo,desc:g.desc+' · урон '+g.dmg+(g.pellets>1?'×'+g.pellets:'')+' · автоприцел'});}
@@ -376,6 +379,7 @@ function useShoot(holdRepeat){
   if(it==='medkit'){if(!holdRepeat)useMedkit();return;}
   if(it==='ice'){if(!holdRepeat)useIcePotion();return;}
   if(it==='ltea'){if(!holdRepeat)useLTea();return;}
+  if(LB_BY[it]){if(!holdRepeat)lbDrink(it);return;}
   if(it==='beacon'){if(!holdRepeat)useBeacon();return;}
   if(it==='scroll'){if(!holdRepeat){player.hitems.scrolls--;validateSelection();for(let i=0;i<30;i++)spawnPart(player.x,player.y-24,rnd(-120,120),rnd(-200,40),0.8,'#c8a0ff',3,-60);SFX.portal();UI.toast('📜 Возврат в лобби');exitMine();}return;}
   if(it==='gun'){fireGun(curGun(),holdRepeat);return;}
@@ -411,6 +415,7 @@ function usePlace(){
   if(G.placeItem==='icegren'){if(player.hitems.icegren>0){player.hitems.icegren--;throwItem('ice');validateSelection();}return;}
   if(G.placeItem==='drill'){launchDrill();return;}
   if(G.placeItem==='barricade'){placeBarricade();return;}
+  if(G.placeItem==='llan'){lbPlaceLantern();return;}
   if(player.ladders<=0){
     floatText(player.x,player.y-64,'Нет лестниц','#ff8a8a');
     SFX.uiBack();return;

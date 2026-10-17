@@ -46,7 +46,8 @@ function qsMeta(code){
     case 'ice':n=player.icePotions||0;icon='🧊';name='Ледяное зелье';break;
     case 'ltea':n=matN('ltea');icon='🍵';name='Настой ясности';break;
     case 'gun':{const g=curGun();n=g?player.gunAmmo:0;icon=g?g.icon:'🔫';name=g?g.name:'Огнестрел';break;}
-    default:return null;
+    case 'llan':n=G.dim===2&&player.prog&&player.prog.bk?lanFree():0;icon='🏮';name='Фонарь-якорь';break;
+    default:{const b=LB_BY[id];if(!b)return null;n=matN(id);icon=b.ic;name=b.n;break;}
   }
   return {c,id,n:Math.max(0,n|0),icon,name};
 }

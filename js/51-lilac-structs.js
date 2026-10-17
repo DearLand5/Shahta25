@@ -280,7 +280,7 @@ UI.lnote=function(id){
 /* ---------- сундуки Лиловых небес ---------- */
 function lilOpenChest(wx,wy,rich){
   const d=wy,b=clamp(lilBand2(d),0,6);
-  let money=Math.round((90000+d*850)*rnd(0.8,1.3)*(rich?3:1));
+  let money=Math.round((90000+d*850)*rnd(0.8,1.3)*(rich?3:1)*lbMod('chest'));
   player.money+=money;statAdd('chests');if(rich)statAdd('bigChests');
   let txt='+'+fmt(money)+' 💰';
   const cand=ORES.filter(o=>o&&o.dim===2&&d>=o.dmin-20&&d<=o.dmax&&o.tier<=Math.max(10,player.pickLvl+1));
@@ -288,6 +288,7 @@ function lilOpenChest(wx,wy,rich){
   if(cand.length&&Math.random()<(rich?0.9:0.45)){const o=cand[Math.floor(Math.random()*cand.length)];addMat('i'+o.id,1+Math.floor(Math.random()*2));txt+=' · слиток';}
   if(rich||Math.random()<0.3){const e=LIL_ESS[b];addMat(e[0],1);txt+=' · '+e[1];}
   const sl=3+Math.floor(Math.random()*6)+(rich?10:0);player.souls=(player.souls||0)+sl;txt+=' · +'+sl+' 👻';
+  {const sn=lbChestSny(wy,rich);if(sn)txt+=' · +'+sn+' 🌙';}
   if(Math.random()<0.4){player.potions++;txt+=' · 🧪';}
   if(Math.random()<0.5){player.ladders+=5;txt+=' · 🪜×5';}
   if(player.gunLvl>0&&Math.random()<0.45){const g=curGun();player.gunAmmo+=g.pack;txt+=' · 🔸×'+g.pack;}

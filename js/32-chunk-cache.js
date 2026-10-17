@@ -153,7 +153,7 @@ function applyLighting(){
   const py=(player.y-player.h*0.5-G.cam.y)*sc+H/2;
   const baseT=lerp(7.4,2.6,clamp(depth/(G.dim===2?2600:900),0,1))*(hbi===8?0.62:hbi>=9?0.7:hbi===7?0.8:1);          /* радиус света без факела, в блоках */
   const hellT=G.dim===1?Math.max(0,player.torchLvl-5):0;    /* уровни Адского фонаря */
-  let R=(baseT*TILE*sc)*(1+Math.min(5,player.torchLvl)*0.42+Math.max(0,player.torchLvl-5)*(G.dim===1?0.6:0.3))*(cheats.megaLight?4:1)*(player.lightBuff>0?1.5:1);
+  let R=(baseT*TILE*sc)*(1+Math.min(5,player.torchLvl)*0.42+Math.max(0,player.torchLvl-5)*(G.dim===1?0.6:0.3))*(cheats.megaLight?4:1)*(player.lightBuff>0?1.5:1)*(G.dim===2?lbMod('light'):1);
   if(player.blind>0)R*=0.45;                                 /* слепота от Глаза Бездны */
   const flick=1+Math.sin(G.time*9)*0.012+Math.sin(G.time*23)*0.008;
   R*=flick;
@@ -200,6 +200,7 @@ function applyLighting(){
       }
       /* фонари-якоря Лиловых небес: островки ясного света */
       if(G.dim===2)for(const a of anchorList()){if(a.x>=tx0-4&&a.x<=tx1+4&&a.y>=ty0-4&&a.y<=ty1+6)L.push(a.x*TILE+16,(a.y-2)*TILE,5,0.75);}
+      if(G.dim===2)lbLanLights(L,tx0,tx1,ty0,ty1);
       /* фонари душ в галереях Катакомб рассеивают тьму */
       if(G.dim===1&&ty1>=850&&ty0<1200){
         for(let ty=Math.max(ty0,850);ty<=Math.min(ty1,1199);ty++){const c=catBand(ty);if(c.row!==1)continue;

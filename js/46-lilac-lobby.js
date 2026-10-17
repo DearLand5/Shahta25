@@ -325,6 +325,10 @@ function drawLilacBuilding(g,b,glowList,t,N){
     gpush([56,-22,36,N>0.5?'#ff4030':'#ffd070']);
     sy=-196;
   }else if(b.id==='lhall'){drawLilacHall(g,b,glowList,t,N);sy=-252;
+  }else if(b.id==='lgarden'){drawLilacGarden(g,gpush,t,N,mx);sy=-238;
+  }else if(b.id==='lbeacon'){drawLilacBeacon(g,gpush,t,N,mx,bkLv());sy=-200;
+  }else if(b.id==='lwell'){drawLilacWell(g,gpush,t,N,mx);sy=-222;
+  }else if(b.id==='lteah'){drawLilacTeaHouse(g,gpush,t,N,mx);sy=-214;
   }else if(b.id==='lportal'){
     /* лиловые врата: каменная арка, увитая лозой, в проёме кружится рассвет */
     const pulse=0.75+0.25*Math.sin(t*1.8);
@@ -356,6 +360,10 @@ function lilacOpen(b){
   if(b.id==='lboard'){UI.lboard();return;}
   if(b.id==='lportal'){UI.lportal();return;}
   if(b.id==='lhall'){UI.lhall();return;}
+  if(b.id==='lgarden'){UI.lgarden();return;}
+  if(b.id==='lbeacon'){UI.lbeacon();return;}
+  if(b.id==='lwell'){UI.lwell();return;}
+  if(b.id==='lteah'){UI.lteah();return;}
   UI.toast(b.name+' ещё строится');
 }
 UI.lportal=function(){

@@ -822,6 +822,7 @@ function drawMinimap(){
   if(G.dim===0&&!player.prog.heart&&_hs&&_hsSeed===G.seed){const [sx,sy]=toS(_hs.x+0.5,_hs.y-0.5);
     if(sx>r.x&&sx<r.x+r.s&&sy>r.y&&sy<r.y+r.s){g.fillStyle='#e090ff';g.font='bold '+Math.max(9,k*4)+'px system-ui';g.textAlign='center';g.textBaseline='middle';g.fillText('💜',sx,sy);}}
   hbMinimap(g,toS,r);
+  if(G.dim===2)lbMinimap(g,toS,r);
   g.restore();
   /* компас сокровищ: сундуки и опасные структуры */
   let tNear=null,tnd=1e9;

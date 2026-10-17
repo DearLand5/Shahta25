@@ -50,7 +50,7 @@ function digUpdate(dt){
   const base=ROCK_HP[t]||20;
   const oreHp=oreId?ORES[oreId].hp:0;
   const total=base+oreHp;
-  const power=cheats.instantDig?total*100:14*pickSpeed()*(player.digSpeed||1);
+  const power=cheats.instantDig?total*100:14*pickSpeed()*(player.digSpeed||1)*(G.dim===2?lbDigMul():1);
   let prog=sameTile?player.digProg:getDmg(tx,ty)/255;
   prog+=power*dt/total;
   player.digProg=clamp(prog,0,1);
@@ -67,9 +67,10 @@ function digUpdate(dt){
   if(player.digProg>=1){
     const isOre=!!oreId;
     setTile(tx,ty,T_AIR);
+    if(G.dim===2)lbDug(tx,ty,t,oreId,mx,my);
     if(isOre&&lilOreDug(tx,ty,oreId,mx,my)){}
     else if(isOre){
-      const dbl=(ritOn('harvest')?2:1)*((perkLv('miner')>0&&Math.random()<0.05*perkLv('miner'))?2:1);
+      const dbl=(ritOn('harvest')?2:1)*((perkLv('miner')>0&&Math.random()<0.05*perkLv('miner'))?2:1)*(G.dim===2?lbMod('ore'):1);
       addOre(oreId,dbl);if(dbl>1)floatText(mx,my-30,'×'+dbl,'#ffd060');
       SFX.ore();
       burst(mx,my,10,ORES[oreId].glow,150,3.2);
