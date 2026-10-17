@@ -4,7 +4,7 @@
    ============================================================ */
 function digUpdate(dt){
   player.digSwing+=dt*14;
-  if(!Input.digActive||Input.digTX<0){
+  if(!Input.digActive||Input.digTX<0||(G.dim===2&&lilShadowOn())){
     player.digProg=0;player.digTileX=-1;player.digTileY=-1;return;
   }
   const enemyNear=mobs.some(m=>m.alive&&!m.untargetable&&!m.hidden&&Math.hypot(m.x-player.x,m.y-player.y)<58);   /* закопанные/спрятанные мобы копать не мешают */
@@ -95,7 +95,7 @@ function digUpdate(dt){
 function autoAttackUpdate(dt){
   if(player.atkCd>0)player.atkCd-=dt;
   if(player.atkAnim>0)player.atkAnim-=dt*3.2;
-  if(G.scene!=='mine'||G.bossCut)return;
+  if(G.scene!=='mine'||G.bossCut||(G.dim===2&&lilShadowOn()))return;
   let best=null,bestD=1e9;
   for(const m of mobs){
     if(!m.alive||m.untargetable||m.hidden)continue;     /* под землёй / спрятан — меч не машет впустую и не мешает копать */
@@ -165,6 +165,7 @@ function damageMob(m,dmg,kb,src){
   if((def.boss||def.hp>=1500||def.w>=44)&&player.perks&&player.perks.slayer)dmg=Math.round(dmg*(1+0.1*player.perks.slayer));
   if(m.eShield){m.eShieldT=(m.eShieldT||0);if(G.time>m.eShieldT){dmg=Math.round(dmg*0.35);floatText(m.x,m.y-m.h-16,'щит','#9ad8ff');}}
   if(def.hb)dmg=Math.max(1,Math.round(dmg*hbDmgMul(m)));
+  if(G.dim===2)dmg=lilAbMobDmg(m,dmg);
   if(def.lm&&m.dmgMul){dmg=Math.max(1,Math.round(dmg*m.dmgMul));if(m.dmgMul<1)floatText(m.x,m.y-m.h-18,'крепко','#cfd8e8');else if(m.dmgMul>=1.5)floatText(m.x,m.y-m.h-18,'уязвим!','#ffd060');}
   if(def.boss)dmg=Math.max(1,Math.round(dmg*bfDmgMul(m)));     /* окна ×2, вне окон ×0.7 */
   m.hp-=dmg;m.hurt=0.24;SFX.mobHit(def);

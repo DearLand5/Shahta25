@@ -1929,7 +1929,7 @@ const UI={
     }else if(tab==='world'){
       const off=dimInfo().b0;
       body=`<div class="sect" style="border:none;margin-top:0;padding-top:0">Измерение: ${DIM_NAMES[G.dim]}</div>
-        <div class="cheatGrid">${dimBtns('')}${act('toLobby','🏠 В лобби')}${G.dim===2?act('lilNight',lilNight()>0.5?'☀ День в деревне':'🌙 Ночь в деревне')+act('san100','👁 Рассудок 100')+act('san30','👁 Рассудок 30')+act('san0','👁 Рассудок 0')+act('ltea','🍵 +10 настоев'):''}</div>
+        <div class="cheatGrid">${dimBtns('')}${act('toLobby','🏠 В лобби')}${G.dim===2?act('lilNight',lilNight()>0.5?'☀ День в деревне':'🌙 Ночь в деревне')+act('san100','👁 Рассудок 100')+act('san30','👁 Рассудок 30')+act('san0','👁 Рассудок 0')+act('ltea','🍵 +10 настоев')+act('abMax','🪞 Все способности'):''}</div>
         <div class="sect">Телепорт по биомам</div>
         <div class="cheatGrid">${Array.from({length:dimInfo().bn},(_,b)=>act('tpB'+(off+b),'⬇ '+BIOMES[off+b].n+' ('+BIOMES[off+b].d0+' м)')).join('')}</div>
         ${G.dim===2?`<div class="sect">Постройки Лиловых небес</div><div class="cheatGrid">${LS_DEFS.map(d=>act('lst_'+d.id,'🏠 '+LS_NAMES[d.id])).join('')}</div>`:''}
@@ -2053,6 +2053,7 @@ const UI={
           case 'mask': player.gasMask=!player.gasMask; UI.toast('😷 Противогаз: '+(player.gasMask?'есть':'нет')); break;
           case 'dimSwap': switchDimension(G.dim===0?1:0); UI.toast('Измерение: '+DIM_NAMES[G.dim]); UI.clear(); return;
           case 'san100': case 'san30': case 'san0': player.sanity=+a.slice(3);veilT=veilTarget();UI.toast('Рассудок: '+player.sanity);UI.clear();return;
+          case 'abMax':{const P=abP();for(const d of AB_DEFS)P.lv[d.id]=5;P.slot=['shadow','blink'];LAB.eth=AB_ETHER;UI.toast('🪞 Все способности на 5 уровне — мутации выбираются в Зале');break;}
           case 'ltea': addMat('ltea',10);validateSelection();UI.toast('🍵 +10 настоев');break;
           case 'lilNight': lilSetNight(!(lilNight()>0.5)); Music.lastPick=0; UI.toast(lilNight()>0.5?'🌙 Ночь':'☀ День'); UI.clear(); return;
           case 'dim0': case 'dim1': case 'dim2': switchDimension(+a.slice(3)); UI.toast('Измерение: '+DIM_NAMES[G.dim]); UI.clear(); return;
@@ -2677,6 +2678,7 @@ function drawTouchControls(){
     ctx.textBaseline='alphabetic';
   }
   ctx.globalAlpha=1;
+  if(G.dim===2&&G.scene==='mine')lilAbDraw();
   if(G.scene==='mine'&&grapple&&grapple.state==='anchored'){
     ctx.textAlign='center';ctx.fillStyle='rgba(155,232,255,.92)';
     ctx.font='800 12px system-ui,sans-serif';

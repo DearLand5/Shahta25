@@ -169,6 +169,7 @@ const HELL_THREAT=[1,1,1,1,1,1,1.12,1.25,1.5,1.5];
 function hellThreat(){if(G.dim!==1)return 1;return HELL_THREAT[clamp(biomeAt(Math.max(0,player.y)/TILE),0,9)]||1;}
 function hurtPlayer(dmg,src,fx){
   if(cheats.god||G.bossCut)return;
+  if(G.dim===2){dmg=lilAbHurt(dmg,src);if(dmg<=0)return;}
   const env=ENV_SRC.has(src);
   if(HAZ_PCT[src]&&!(src==='метеор'&&G.dim!==1))dmg+=player.maxHp*HAZ_PCT[src]*(G.dim===1?1:0.6);
   if(!env&&src!=='падение'&&src!=='своя бомба'&&src!=='чит')dmg*=hellThreat();

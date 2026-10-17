@@ -87,7 +87,7 @@ function update(dt){
   ax=clamp(ax,-1,1);
 
   updatePlayerFx(dt);
-  const stunned=player.fx.stun>0||!!G.bossCut;
+  const stunned=player.fx.stun>0||!!G.bossCut||(G.dim===2&&lilShadowOn());
   if(stunned)ax=0;
   const speedK=(1+0.05*perkLv('swift'))*(cheats.superSpeed?3:1)*(player.fx.slow>0?0.5:1)*(inWaterP?(inBloodP?0.4:inHoneyP?0.3:0.62):1)*(inLavaP?0.4:1)*(G.dim===1&&onSoulSand()?0.55:1);
   const maxV=175*speedK;
@@ -255,6 +255,7 @@ function update(dt){
   lilLivingTick(dt);
   lilStructTick(dt);
   lilMobHzTick(dt);
+  lilAbTick(dt);
   updateHellBlocks(dt);
   updateAnchors();
   updateTraps(dt);
@@ -265,6 +266,7 @@ function update(dt){
   let camTX=player.x+player.facing*10;
   let camTY=player.y-player.h*0.5-10;
   {const f=hbCamBias(camTX,camTY);if(f){camTX=f.x;camTY=f.y;}}
+  if(G.dim===2&&LAB.sh){camTX=LAB.sh.x;camTY=LAB.sh.y;}
   const dx=camTX-G.cam.x, dy=camTY-G.cam.y;
   const dead=6;
   if(Math.abs(dx)>dead)G.cam.x+=dx*Math.min(1,dt*5.5);

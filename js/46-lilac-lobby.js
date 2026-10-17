@@ -324,6 +324,7 @@ function drawLilacBuilding(g,b,glowList,t,N){
     g.fillStyle=mx('#f0e8e0','#8a8080');g.fillRect(52,-16,8,16);const fh=6+Math.sin(t*8)*1.6;g.fillStyle=N>0.5?'#ff5040':'#ffd070';g.beginPath();g.moveTo(53,-16);g.quadraticCurveTo(56,-16-fh*2,59,-16);g.closePath();g.fill();
     gpush([56,-22,36,N>0.5?'#ff4030':'#ffd070']);
     sy=-196;
+  }else if(b.id==='lhall'){drawLilacHall(g,b,glowList,t,N);sy=-252;
   }else if(b.id==='lportal'){
     /* лиловые врата: каменная арка, увитая лозой, в проёме кружится рассвет */
     const pulse=0.75+0.25*Math.sin(t*1.8);
@@ -354,6 +355,7 @@ function lilacOpen(b){
   if(b.id==='lcasino'){UI.lcasino();return;}
   if(b.id==='lboard'){UI.lboard();return;}
   if(b.id==='lportal'){UI.lportal();return;}
+  if(b.id==='lhall'){UI.lhall();return;}
   UI.toast(b.name+' ещё строится');
 }
 UI.lportal=function(){

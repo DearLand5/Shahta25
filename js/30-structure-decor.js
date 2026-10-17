@@ -832,6 +832,7 @@ function renderMine(dt){
        gun:gunNow,gunAnim:gunNow?clamp(player.gunAnim*1.3,0,1):0,digging:typeof digging!=='undefined'&&digging,sq:player.landSq||0,lamp:player.y>4*TILE,groundY:playerGroundY()});
     if(flipG)ctx.restore();
   }
+  if(G.dim===2)lilAbWorld(ctx);
   drawCrateLabels(ctx);
 
   drawWater(ctx,tx0,tx1,ty0,ty1);

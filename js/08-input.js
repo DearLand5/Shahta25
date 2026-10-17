@@ -177,6 +177,7 @@ function pointerDown(e){
 
 
     if(G.scene==='mine'){const qi=qsHit(x,y);if(qi>=0){Input.ptrs.set(e.pointerId,{type:'none'});qsUse(qi);vib(10);return;}}
+    if(G.scene==='mine'&&G.dim===2){const ai=lilAbHit(x,y);if(ai>=0){Input.ptrs.set(e.pointerId,{type:'abil',i:ai});lilAbPress(ai);vib(12);return;}}
     if(inBtn(getJumpBtn(),x,y)){
       Input.jumpPressed=true;
       Input.jumpPtr=e.pointerId;
@@ -293,6 +294,7 @@ function pointerUp(e){
       if(rec.type==='jump'&&Input.jumpPtr===e.pointerId)Input.jumpPtr=null;
       if(rec.type==='place'&&Input.placePtr===e.pointerId)Input.placePtr=null;
       if(rec.type==='shoot'&&Input.shootPtr===e.pointerId)Input.shootPtr=null;
+      if(rec.type==='abil')lilAbRelease(rec.i);
       if(rec.type==='items'&&Input.itemsPtr===e.pointerId){Input.itemsPtr=null;wheelRelease(rec,e.type==='pointercancel');}
       if(rec.type==='laim'&&G.scene==='lobby'){
         if(!rec.aim&&performance.now()-rec.t>260)setLobbyAim(screenToWorldLobby(rec.sx,rec.sy).x);
@@ -329,6 +331,7 @@ canvas.addEventListener('lostpointercapture',e=>{
       if(rec.type==='jump'&&Input.jumpPtr===e.pointerId)Input.jumpPtr=null;
       if(rec.type==='place'&&Input.placePtr===e.pointerId)Input.placePtr=null;
       if(rec.type==='shoot'&&Input.shootPtr===e.pointerId)Input.shootPtr=null;
+      if(rec.type==='abil')lilAbRelease(rec.i);
       if(rec.type==='items'&&Input.itemsPtr===e.pointerId){Input.itemsPtr=null;wheelClose();}
       if(rec.type==='dig'&&Input.digPtr===e.pointerId){
         Input.digActive=false;Input.digPtr=null;Input.digTX=-1;Input.digTY=-1;
@@ -350,6 +353,7 @@ window.addEventListener('keydown',e=>{
   if(e.code==='Space'){Input.jumpPressed=true;e.preventDefault();}
   if(e.code==='KeyF'&&G.scene==='mine'){usePlace();}
   if(e.code==='KeyG'&&G.scene==='mine'){useShoot(false);}
+  if((e.code==='KeyQ'||e.code==='KeyE')&&!e.repeat&&G.scene==='mine'&&G.dim===2&&!UI.modal&&!G.paused){lilAbPress(e.code==='KeyQ'?0:1);}
   if(/^Digit[1-4]$/.test(e.code)&&G.scene==='mine'&&!UI.modal&&!G.paused){qsUse(+e.code.slice(5)-1);}
   if(false){fireGrapple();}
   if(e.code==='Escape'){if(G.scene!=='menu'&&!UI.modal)togglePause();}
@@ -358,4 +362,4 @@ window.addEventListener('keydown',e=>{
   if(settings.cheatsUnlocked && e.code==='KeyK' && G.scene==='mine'){mobs.length=0;UI.toast('Все мобы убиты');}
   if(settings.cheatsUnlocked && e.code==='KeyM' && G.scene!=='menu'){player.money+=100000;UI.toast('+100 000');}
 });
-window.addEventListener('keyup',e=>{Input.keys[e.code]=false;});
+window.addEventListener('keyup',e=>{Input.keys[e.code]=false;if((e.code==='KeyQ'||e.code==='KeyE')&&G.dim===2&&G.scene==='mine')lilAbRelease(e.code==='KeyQ'?0:1);});

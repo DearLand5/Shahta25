@@ -15,11 +15,12 @@ const SAN_RATE=[0.22,0.3,0.38,0.46,0.55,0.64,0.75];      /* потеря Рас�
 const SAN_TRUE=[40,44,47,51,54,57,60];                   /* какую руду даёт истинная жила биома */
 let veilT=0;                                             /* сглаженная доля Истины для рисования */
 const VEIL={msg50:false,msg20:false,hurtT:0,whT:4,last:100};
-function veilTarget(){if(G.dim!==2||G.scene!=='mine')return 0;const s=player.sanity==null?100:player.sanity;return clamp((62-s)/50,0,1);}
+function veilTarget(){if(G.dim!==2||G.scene!=='mine')return 0;if(LAB.eyeT>0)return 1;const s=player.sanity==null?100:player.sanity;return clamp((62-s)/50,0,1);}
 function sanityRate(){
   const d=Math.max(0,player.y)/TILE,b=clamp(biomeAt(d)-10,0,6);
   if(d<12)return 6;
   if(cheats.god)return 10;
+  if(LAB.eyeT>0)return 0;
   const tx=Math.floor(player.x/TILE),ty=Math.floor((player.y-20)/TILE);
   /* фонари-якоря: рядом с ними Рассудок восстанавливается */
   for(const a of anchorList()){if(Math.abs(a.x-tx)<=5&&Math.abs(a.y-1-ty)<=4)return 5;}
