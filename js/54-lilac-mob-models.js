@@ -117,16 +117,16 @@ const LM_MODEL={
   lbunny(g,m,FY,t,T,st,k){
     const cr=st==='crouch'?k:0,air=!m.onGround,str=air?clamp(-m.vy/400,-0.4,0.5):0,br=Math.sin(t*3.1+m.phase*5);
     /* анимация: дыхание, поза в прыжке (am — задние лапы назад, передние вперёд), подёргивания */
-    const bth=lmBreath(t,m.phase,2.6),am=m.air||0,fg=lmFidget(t,m.phase,3.6),fg2=lmFidget(t+1.7,m.phase,5.2),
-      sn=lmFidget(t+0.6,m.phase,2.4)*Math.sin(t*34),tw=T?lmTwitch(t,m.phase,0.9):0;
-    g.save();g.translate(0,FY);g.scale(1-str*0.15+cr*0.08-bth*0.012,1+str*0.2-cr*0.18+bth*0.03);g.rotate(-am*clamp(-m.vy/500,-0.25,0.3));g.translate(0,-FY);
+    const bth=lmBreath(t,m.phase,2.6),am=m.air||0,fg=lmFidget(t,m.phase,2.8),fg2=lmFidget(t+1.7,m.phase,3.4),
+      sn=(0.35+lmFidget(t+0.6,m.phase,2.0))*Math.sin(t*34),tw=T?lmTwitch(t,m.phase,0.9):0;
+    g.save();g.translate(0,FY);g.scale(1-str*0.15+cr*0.08-bth*0.02,1+str*0.2-cr*0.18+bth*0.05);g.rotate(-am*clamp(-m.vy/500,-0.25,0.3));g.translate(0,-FY);
     if(!T){
       const C='#d6bcf2',CL='#f2e6ff',CD='#a684d0',CP='#ffb4d2';
       /* хвост-помпон (позади тела) */
       const tx=Math.sin(t*16)*0.7*fg2-am*1.2,ty=-Math.abs(Math.sin(t*16))*0.5*fg2-am*1.5;lmFluff(g,-14.2+tx,FY-10.5+ty,3.8,3.6,7,0.28,1);mobPath(g,'#e8d4fc',-14.5+tx,FY-11+ty,4);
       /* дальняя задняя лапа и дальнее ухо — темнее */
       g.save();g.translate(-3.5-am*3.5,FY-1.7-am*1.6);g.rotate(am*0.45);mobBlob(g,0,0,5.2,1.9,shadeHex(C,-0.22));g.restore();
-      g.save();g.translate(4.6,FY-20.5);g.rotate(-0.62+Math.sin(t*2.3)*0.05-cr*0.35-am*0.45+fg2*0.25);
+      g.save();g.translate(4.6,FY-20.5);g.rotate(-0.62+Math.sin(t*2.3+m.phase*3)*0.12-cr*0.35-am*0.45+fg2*0.3);
       g.beginPath();g.moveTo(-2.2,0);g.bezierCurveTo(-3.4,-6,-2.2,-11.5,0,-12.2);g.bezierCurveTo(2.2,-11.5,3.2,-6,2.2,0);g.closePath();mobPath(g,shadeHex(C,-0.26),0,-6,7);
       g.fillStyle=shadeHex(CP,-0.3);g.beginPath();g.ellipse(0.1,-6,1.1,4.6,0,0,TAU);g.fill();g.restore();
       /* тело: груша с шерстяным краем */
@@ -157,13 +157,13 @@ const LM_MODEL={
       g.strokeStyle=shadeHex(C,-0.35);g.lineWidth=0.45;for(const x of [6.6,7.5]){g.beginPath();g.moveTo(x,FY-2.6);g.lineTo(x+0.2,FY-0.6);g.stroke();}
       g.restore();
       /* голова */
-      const hb=Math.sin(t*1.7)*0.3+bth*0.25,hr=Math.sin(t*0.9+m.phase*4)*0.05+fg*0.08;
+      const hb=Math.sin(t*1.7)*0.45+bth*0.4,hr=Math.sin(t*0.9+m.phase*4)*0.08+fg*0.1;
       g.save();g.translate(0,hb);g.translate(6,FY-12);g.rotate(hr);g.translate(-6,-FY+12);
       lmFluff(g,8.4,FY-15.2,7.4,6.6,12,0.1,3.3);mobPath(g,shadeHex(C,0.05),7,FY-18,8);
       /* щека-пух */
       lmFluff(g,11.3,FY-12,3.6,2.8,6,0.2,8.1,0,-0.6,3.4);g.closePath();mobPath(g,CL,10.5,FY-13,4,true);
       /* ближнее ухо: изгиб, розовая середина, складка */
-      g.save();g.translate(6.8,FY-20.4);g.rotate(-0.18+Math.sin(t*2.1+1)*0.06-cr*0.5-am*0.5+fg*0.35*Math.sin(t*20));
+      g.save();g.translate(6.8,FY-20.4);g.rotate(-0.18+Math.sin(t*2.1+1+m.phase*3)*0.12-cr*0.5-am*0.5+fg*0.4*Math.sin(t*20));
       g.beginPath();g.moveTo(-2.6,0.6);g.bezierCurveTo(-4,-6.4,-2.6,-12.6,0.2,-13.4);g.bezierCurveTo(3,-12.8,3.8,-6.4,2.6,0.6);g.closePath();mobPath(g,shadeHex(C,0.04),-0.6,-8,8);
       const eg=g.createLinearGradient(0,-12,0,0);eg.addColorStop(0,'#ffd0e4');eg.addColorStop(1,'#f08ab4');
       g.fillStyle=eg;g.beginPath();g.moveTo(-1.2,-0.4);g.bezierCurveTo(-2.2,-5.6,-1.4,-10.6,0.3,-11.2);g.bezierCurveTo(1.9,-10.6,2.2,-5.6,1.4,-0.4);g.closePath();g.fill();
