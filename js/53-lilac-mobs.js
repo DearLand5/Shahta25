@@ -462,30 +462,8 @@ function lilMobFx(g){
 }
 /* шея и язык рисуются в мире: они длиннее рамки обводки модели */
 function lilLongPart(g,m,time){
-  const id=m.def.id,e=m.ext,T=m.tf;
-  if(id==='lfrog'){const x0=m.x+m.facing*12,y0=m.y-m.h*0.55,x1=x0+m.nx2*e,y1=y0+m.ny2*e;
-    g.strokeStyle=T?'#a04a5a':'#e07090';g.lineWidth=5;g.lineCap='round';g.beginPath();g.moveTo(x0,y0);g.quadraticCurveTo((x0+x1)/2,(y0+y1)/2-6*(1-e),x1,y1);g.stroke();
-    g.strokeStyle=T?'#c87080':'#ffa0b8';g.lineWidth=1.6;g.beginPath();g.moveTo(x0,y0-1);g.quadraticCurveTo((x0+x1)/2,(y0+y1)/2-7*(1-e),x1,y1-1);g.stroke();
-    if(T){/* на конце — ладонь */
-      g.save();g.translate(x1,y1);g.rotate(Math.atan2(m.ny2,m.nx2));g.fillStyle='#d8a0a0';g.beginPath();g.ellipse(4,0,6,4.6,0,0,TAU);g.fill();
-      for(let f=0;f<4;f++){g.save();g.rotate(-0.6+f*0.4);g.fillRect(6,-1,7,2.2);g.restore();}g.restore();}
-    else{g.fillStyle='#ff6aa0';g.beginPath();g.arc(x1,y1,5,0,TAU);g.fill();}
-    return;}
-  const x0=id==='ljack'?m.x:m.x+m.facing*10,y0=id==='ljack'?m.y-m.h*0.9:m.y-m.h*0.7,x1=x0+m.nx2*e,y1=y0+m.ny2*e,len=Math.hypot(x1-x0,y1-y0),n=Math.max(4,Math.floor(len/7));
-  const a=Math.atan2(y1-y0,x1-x0);
-  if(id==='ljack'){lmToysJackNeck(g,m,time);  /* шея-пружина и голова — в 66 */
-  }else{
-    /* шея лебедя */
-    g.strokeStyle=T?'#e0b0b0':'#f4f8fa';g.lineWidth=7;g.lineCap='round';g.beginPath();g.moveTo(x0,y0);g.quadraticCurveTo((x0+x1)/2,(y0+y1)/2-18*(1-e),x1,y1);g.stroke();
-    g.strokeStyle=T?'#a06a6a':'#c8d4dc';g.lineWidth=2;g.beginPath();g.moveTo(x0,y0+2.4);g.quadraticCurveTo((x0+x1)/2,(y0+y1)/2-16*(1-e),x1,y1+2.4);g.stroke();
-    g.save();g.translate(x1,y1);g.scale(m.facing,1);g.rotate(Math.atan2(m.ny2,Math.abs(m.nx2)));
-    if(T){g.fillStyle='#e0b0b0';g.beginPath();g.ellipse(2,0,9,7,0,0,TAU);g.fill();g.fillStyle='#4a0a14';g.beginPath();g.moveTo(4,-1);g.lineTo(16,-6);g.lineTo(16,6);g.closePath();g.fill();
-      g.fillStyle='#fff6ea';for(let t=0;t<4;t++){g.beginPath();g.moveTo(6+t*2.6,-1.5-t*1.2);g.lineTo(7.3+t*2.6,1.5-t*0.6);g.lineTo(8.6+t*2.6,-2.4-t*1.2);g.fill();}
-      g.fillStyle='#ff2a3a';g.beginPath();g.arc(0,-3,1.6,0,TAU);g.fill();}
-    else{g.fillStyle='#f4f8fa';g.beginPath();g.ellipse(2,0,7,5.4,0,0,TAU);g.fill();g.fillStyle='#ff9a3a';g.beginPath();g.moveTo(7,-2);g.lineTo(16,0.6);g.lineTo(7,2.6);g.closePath();g.fill();
-      g.fillStyle='#1a1a20';g.beginPath();g.moveTo(5,-3);g.lineTo(9,-2);g.lineTo(7,1);g.closePath();g.fill();g.fillStyle='#1a1a20';g.beginPath();g.arc(1.4,-1.6,1.2,0,TAU);g.fill();}
-    g.restore();
-  }
+  const id=m.def.id;   /* рисунки шеи и языка — в файлах моделей биомов (66, 68) */
+  if(id==='lfrog')lmMirrorFrogLong(g,m,time);else if(id==='lswan')lmMirrorSwanLong(g,m,time);else if(id==='ljack')lmToysJackNeck(g,m,time);
 }
 /* снаряды Лиловых небес */
 function lilDrawProj(g,p){
