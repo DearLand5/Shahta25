@@ -24,7 +24,7 @@ LM_MODEL.lbee=function(g,m,FY,t,T,st,k,wv,ph){
   const bob=Math.sin(t*3+ph),br=Math.sin(t*2.4+ph*2),ff=m.facing||1;
   let aim=0;
   if(m.ax!==undefined&&(dash||wind>0)){const dx=Math.abs(dash&&m.dvx!==undefined?m.dvx:(m.ax-m.x)),dy=dash&&m.dvy!==undefined?m.dvy:(m.ay-(m.y-m.h*0.5));aim=clamp(Math.atan2(dy,dx||1e-3),-0.9,0.9);}
-  const curl=dash?0.8:wind,rot=dash?aim*0.8+0.12:(-wind*0.3+aim*wind*0.3)+bob*0.05;
+  const curl=dash?0.8:wind,rot=dash?aim*0.8+0.12:(-wind*0.3+aim*wind*0.3)+bob*0.05+(m.mk||0)*0.1;/* в полёте клонится вперёд */
   g.save();g.translate(-wind*2.2,bob*0.6);g.rotate(rot);
   const bl=(Math.sin(m.anim*1.1+ph*7)>0.985)?0.12:1;
   if(!T){
@@ -42,12 +42,12 @@ LM_MODEL.lbee=function(g,m,FY,t,T,st,k,wv,ph){
     mobGlow(g,2,0,17,'#ffc040',0.3);
     wing(true);
     /* дальняя усик-антенна */
-    const sw=Math.sin(t*2.6+ph);
+    const sw=Math.sin(t*2.6+ph)-(m.mk||0)*1.4;
     g.strokeStyle=shadeHex(BR,-0.2);g.lineWidth=0.6;g.lineCap='round';g.beginPath();g.moveTo(9.6,-9);g.quadraticCurveTo(10.6,-13.4,14.6+sw*0.8,-14.4);g.stroke();
     mobBlob(g,14.7+sw*0.8,-14.5,1.1,1.1,shadeHex('#e0a020',-0.3),0,true);
     /* ножки: три пары, дальние темнее */
     const legs=(far)=>{for(const [hx,fx,fy] of [[-0.6,-3.4,12.2],[2.6,2.4,12.6],[5.4,7.2,12]]){
-      const sy=Math.sin(t*5+hx+ph)*0.5;
+      const sy=Math.sin(t*5+hx+ph)*0.5-(m.mk||0)*1.6;/* на лету ножки отстают назад */
       lmLeg(g,hx+(far?1.4:0),6.2,fx+(far?1.4:0)+sy,fy-(far?0.8:0),3.4,3.4,true,1.05,far?'#2a180a':'#4a2c12');
       if(!far&&hx<0){mobBlob(g,fx+sy+0.1,fy-3.3,1.3,1.7,'#f0a828',0.3,true);}}};
     legs(true);
@@ -152,7 +152,7 @@ LM_MODEL.lbee=function(g,m,FY,t,T,st,k,wv,ph){
     lmLimb(g,3.6,5,9.4+wind*2.4,9.4-wind*2,3.4,3.4,false,3.2,2.2,shadeHex(FL,-0.38));
     lmHoneyHand(g,9.6+wind*2.4,9.8-wind*2,0.3,1.55,shadeHex(FL,-0.38),0.6+wind*0.5);
     /* усик-антенна дальняя */
-    const sw=Math.sin(t*2.6+ph);
+    const sw=Math.sin(t*2.6+ph)-(m.mk||0)*1.4;
     g.strokeStyle='#150c06';g.lineWidth=0.5;g.lineCap='round';g.beginPath();g.moveTo(10.4,-9);g.quadraticCurveTo(10.6,-13.8,14.6+sw*0.8,-15);g.stroke();
     g.beginPath();g.arc(14.8+sw*0.8,-15.2,1.05,0,TAU);mobPath(g,'#cfc4b4',14.8,-15,1.1,true);g.fillStyle=BLB;g.beginPath();g.arc(15.1+sw*0.8,-15.2,0.5,0,TAU);g.fill();
     /* брюшко: треснувший хитин, полосы грязно-золотые и чёрные */
@@ -294,10 +294,23 @@ function lmHoneyArm(g,x0,y0,cx,cy,x1,y1,w0,w1,col){
 }
 
 LM_MODEL.lslime=function(g,m,FY,t,T,st,k,wv,ph){
-  const b=Math.sin(t*4+ph),air=!m.onGround,sq=air?clamp(-m.vy/300,-0.3,0.3):0,sp=st==='spit'?k:0;
-  const w1=Math.sin(t*2.6+ph),w2=Math.sin(t*1.9+ph*2.3),bl=(Math.sin(m.anim*1.1+ph*7)>0.985)?0.12:1;
-  g.save();g.translate(0,FY);g.scale(1+b*0.04-sq*0.15+sp*0.07,1-b*0.04+sq*0.2-sp*0.08);
+  const sp=st==='spit'?k:0,mk=m.mk||0,air=m.air||0;
+  /* прыжок: растяжение по плавному m.air (без щелчка при отрыве), после посадки — шлёпок, затухающий упругими колебаниями */
+  const sq=clamp(-(m.vy||0)/300,-0.3,0.3)*air;
+  if(air>0.3)m.lmAt=t;
+  const dtl=(m.lmAt!==undefined&&air<=0.3)?t-m.lmAt:9,land=(dtl>=0&&dtl<0.7)?Math.exp(-dtl*6)*Math.cos(dtl*17)*0.16:0;
+  const b=Math.sin(t*4+ph),b2=Math.sin(t*2.3+ph*1.7),w1=Math.sin(t*2.6+ph),w2=Math.sin(t*1.9+ph*2.3),bl=(Math.sin(m.anim*1.1+ph*7)>0.985)?0.12:1;
+  /* ползёт волной: тело то вытягивается вперёд, то стягивается; вершина тянется с запозданием (наклон от основания) */
+  const ga=lmGait(m,32),roll=Math.sin(ga)*mk,rol2=Math.cos(ga)*mk;
+  const tw=T?lmTwitch(t,ph,0.55):0;
+  const lean=rol2*0.1+b2*0.04+Math.sin(t*1.3+ph)*0.04-sp*0.14+sq*0.2+tw*0.05;
+  g.save();g.translate(0,FY);
+  g.transform(1+b*0.05+b2*0.03+roll*0.07-sq*0.15+sp*0.07+land+tw*0.04,0,-lean,1-b*0.05-b2*0.03-roll*0.07+sq*0.2-sp*0.08-land*1.2,0,0);
   g.rotate(-sp*0.05);
+  /* следы: комочки мёда остаются позади на земле (стоят на месте, пока слизень ползёт) */
+  if(mk>0.08){for(let i=0;i<3;i++){const u=((m.gd||0)*0.9/26+i/3)%1,al=Math.sin(u*Math.PI)*mk;
+    g.fillStyle=T?'rgba(58,26,6,'+al+')':'rgba(224,146,14,'+al+')';g.strokeStyle=T?'rgba(26,10,2,'+al*0.8+')':'rgba(122,60,6,'+al*0.8+')';g.lineWidth=0.4;
+    g.beginPath();g.ellipse(-17-u*26,0.9,2.8*(1-u*0.4),0.9,0,0,TAU);g.fill();g.stroke();}}
   if(!T){
     const H='#ffb02c';
     /* лужица-подставка: тёмный мёд с блеском и каплями */
@@ -321,14 +334,17 @@ LM_MODEL.lslime=function(g,m,FY,t,T,st,k,wv,ph){
     g.strokeStyle='rgba(255,240,170,.4)';g.lineWidth=0.5;g.lineCap='round';g.beginPath();g.moveTo(-12,-5);g.bezierCurveTo(-8,-9,-7,-14,-3,-17);g.moveTo(9,-6);g.bezierCurveTo(8,-11,6,-14,5,-17);g.stroke();
     g.strokeStyle='rgba(150,70,0,.28)';g.beginPath();g.moveTo(12,-3);g.bezierCurveTo(9,-6,4,-5,1,-7.6);g.stroke();
     /* пузырьки и сотовый осколок */
-    for(const [x,y,r,sp2] of [[-8.4,-7.6+Math.sin(t*1.4)*0.7,1.5,0],[6.2,-16.4+Math.sin(t*1.7+1)*0.7,0.95,1],[-2.4,-17.6+Math.sin(t*1.5+2)*0.6,0.75,2],[10.6,-6.2+Math.sin(t*1.3+3)*0.6,1.2,3],[-12.6,-3.6,0.8,4]]){
+    for(const [x0,y0,r,sp2] of [[-8.4,-7.6,1.5,0],[6.2,-16.4,0.95,1],[-2.4,-17.6,0.75,2],[10.6,-6.2,1.2,3],[-12.6,-3.6,0.8,4]]){
+      /* пузырёк всплывает по телу, чуть качаясь, у вершины гаснет и рождается снова у дна */
+      const f=(t*0.11+sp2*0.21+ph*0.1)%1,x=x0*(1-f*0.7)+Math.sin(t*1.3+sp2*2)*1.1,y=-2.4-f*19,fa=Math.sin(f*Math.PI);g.globalAlpha=Math.min(1,fa*1.6);
       g.fillStyle='rgba(255,246,200,.28)';g.beginPath();g.arc(x,y,r,0,TAU);g.fill();g.strokeStyle='rgba(255,255,240,.75)';g.lineWidth=0.35;g.stroke();
       g.fillStyle='rgba(255,255,255,.9)';g.beginPath();g.arc(x-r*0.35,y-r*0.35,r*0.28,0,TAU);g.fill();}
+    g.globalAlpha=1;
     g.save();g.translate(-6.4,-13.6);g.rotate(0.3);g.fillStyle='rgba(255,236,150,.22)';g.strokeStyle='rgba(150,80,10,.45)';g.lineWidth=0.4;g.beginPath();for(let i=0;i<6;i++){const a=i/6*TAU;g.lineTo(Math.cos(a)*2.2,Math.sin(a)*2.2);}g.closePath();g.fill();g.stroke();g.restore();
     g.fillStyle='rgba(120,60,0,.35)';for(const [x,y] of [[-4.6,-6.2],[1.6,-4.4],[8,-9.4],[-10,-10.4],[3.6,-18.4]]){g.beginPath();g.arc(x,y,0.45,0,TAU);g.fill();}
     g.restore();
     /* лицо */
-    const lx=(m.lookX||0)*0.5,ly=(m.lookY||0)*0.4;
+    const gl=lmFidget(t,ph,6.5),lx=(m.lookX||0)*0.5+gl*Math.sin(ph*9)*0.9,ly=(m.lookY||0)*0.4-gl*0.25;/* изредка оглядывается */
     const eye=(ex,ey,r)=>{
       g.fillStyle='#3a1a00';g.beginPath();g.ellipse(ex,ey,r*0.92,r*1.08*bl,0,0,TAU);g.fill();
       if(bl>0.5){const ig=g.createRadialGradient(ex+lx,ey+ly+r*0.4,0.2,ex+lx,ey+ly,r*1.02);ig.addColorStop(0,'#c8761c');ig.addColorStop(0.55,'#6a3008');ig.addColorStop(1,'#1c0a00');
@@ -350,7 +366,8 @@ LM_MODEL.lslime=function(g,m,FY,t,T,st,k,wv,ph){
     lmHoneySpark(g,-9.6,-16.6,2.6+Math.sin(t*4)*0.4,'#fffbe8',0.95);lmHoneySpark(g,11.2,-11.8,1.5,'#fffbe8',0.8);
     g.strokeStyle='rgba(255,255,255,.5)';g.lineWidth=0.9;g.beginPath();g.moveTo(11,-13);g.quadraticCurveTo(13.6,-10.6,13.8,-6.6);g.stroke();
     /* тянущаяся нить по боку */
-    g.fillStyle='#f09a14';g.beginPath();g.moveTo(14.4,-1.8);g.quadraticCurveTo(15.6,2,15.2,4.6);g.quadraticCurveTo(14.6,5.6,14,4.6);g.quadraticCurveTo(14,2,13.6,-0.8);g.closePath();g.fill();g.strokeStyle='#7a3c06';g.lineWidth=0.5;g.stroke();
+    const th=Math.sin(t*1.9+ph)*0.6+roll*0.5,ty=4.6+Math.sin(t*1.2+ph)*0.8;
+    g.fillStyle='#f09a14';g.beginPath();g.moveTo(14.4,-1.8);g.quadraticCurveTo(15.6+th*0.5,2,15.2+th,ty);g.quadraticCurveTo(14.6+th,ty+1,14+th,ty);g.quadraticCurveTo(14+th*0.5,2,13.6,-0.8);g.closePath();g.fill();g.strokeStyle='#7a3c06';g.lineWidth=0.5;g.stroke();
     /* глоток мёда во рту при плевке */
     if(sp>0.1){const gx=15.5+sp*3,gy=-8.6,gr=1.6+sp*2.8;
       g.strokeStyle='#e08a10';g.lineWidth=1.4*(1-sp*0.5)+0.4;g.beginPath();g.moveTo(11,-7.6);g.quadraticCurveTo(13.4,-8.2,gx-gr*0.6,gy);g.stroke();
@@ -358,7 +375,7 @@ LM_MODEL.lslime=function(g,m,FY,t,T,st,k,wv,ph){
     lmRim(g,q=>{q.strokeStyle='rgba(255,250,210,.5)';q.lineWidth=0.9;q.lineCap='round';q.beginPath();q.moveTo(-15.6,-3);q.bezierCurveTo(-16.8,-8,-10.4,-15.4,-4.6,-21.2);q.stroke();});
   }else{
     /* ИСТИНА: тёмный мёд-могильник — под плёнкой тонут лица и тянутся руки */
-    const pulse=Math.sin(t*2.2+ph)*0.5,bump=Math.sin(t*3.1+ph)*0.4;
+    const pulse=Math.sin(t*2.2+ph)*0.5,bump=Math.sin(t*3.1+ph)*0.4+tw*0.8;/* изнутри толкаются: плёнка вздувается */
     /* лужа и остатки: осколок крыла, череп наполовину в мёде */
     g.beginPath();g.ellipse(0,0.6,19.6+sp*1.4,3.2,0,0,TAU);g.fillStyle='#3a1a06';g.fill();g.strokeStyle='#1a0a02';g.lineWidth=0.9;g.stroke();
     g.fillStyle='rgba(255,190,80,.28)';g.beginPath();g.ellipse(-5,0.1,12,1,0,0,TAU);g.fill();
@@ -366,9 +383,9 @@ LM_MODEL.lslime=function(g,m,FY,t,T,st,k,wv,ph){
     /* череп в луже */
     g.save();g.translate(-16,0.4);g.beginPath();g.ellipse(0,-1.5,2.3,2,0,Math.PI,TAU);g.lineTo(2.1,0.5);g.lineTo(-2.1,0.5);g.closePath();mobPath(g,'#d8c8a0',0,-1.4,2.4);g.fillStyle='#1a0a02';g.beginPath();g.ellipse(-0.9,-1.4,0.55,0.7,0,0,TAU);g.ellipse(0.9,-1.4,0.55,0.7,0,0,TAU);g.fill();g.fillRect(-0.9,-0.2,1.8,0.7);g.restore();
     /* дальняя рука: выбирается из мёда, тянется вверх-влево */
-    {const ra=Math.sin(t*1.6+ph),ex=-12+ra*0.8-sp*1.2,ey=-24.6+sp*3+pulse*0.4;
+    {const ra=Math.sin(t*1.6+ph)+Math.sin(t*2.7+ph*2)*0.4,ex=-12+ra*1.9-sp*1.2-roll*1.6,ey=-24.6+sp*3+pulse*0.4+Math.cos(t*1.3+ph)*0.8-Math.max(0,-roll)*1.4;
       const h=lmHoneyArm(g,-8.4,-13.8,-14.4+ra*0.6,-17,ex,ey,3.2,2.6,'#b8884a');
-      lmHoneyHand(g,h[0]+Math.cos(h[2])*1.2,h[1]+Math.sin(h[2])*1.2,h[2],2.1,'#c8985a',1.2+Math.sin(t*2.2+ph)*0.15,'#4a2808');
+      lmHoneyHand(g,h[0]+Math.cos(h[2])*1.2,h[1]+Math.sin(h[2])*1.2,h[2],2.1,'#c8985a',1.2+Math.sin(t*2.2+ph)*0.25+lmTwitch(t,ph+0.5,1.3)*0.5,'#4a2808');
       g.beginPath();g.ellipse(-8.4,-13.8,3.4,2.4,-0.6,0,TAU);g.fillStyle='rgba(150,84,14,.9)';g.fill();g.strokeStyle='rgba(255,214,130,.8)';g.lineWidth=0.7;g.beginPath();g.ellipse(-8.4,-13.8,3.4,2.4,-0.6,Math.PI*1.1,Math.PI*1.9);g.stroke();
       g.strokeStyle='#d88a14';g.lineWidth=1;g.lineCap='round';g.beginPath();g.moveTo(-10.4,-14.4);g.quadraticCurveTo(-11.4,-12,-11,-9);g.stroke();
       lmHoneyDrop(g,-11,-7.4+Math.sin(t*2+ph)*0.5,0.7,'#e89a1c',true);}
@@ -381,7 +398,7 @@ LM_MODEL.lslime=function(g,m,FY,t,T,st,k,wv,ph){
     g.save();body();g.clip();
     /* глубина: тёмные утопленники и светлая муть позади */
     g.fillStyle='rgba(255,170,60,.22)';g.beginPath();g.ellipse(1,-9,14,7,0,0,TAU);g.fill();
-    const fc=(arr)=>{for(const [x,y,s,r,dp,mo,gl] of arr)lmHoneyFace(g,x+Math.sin(t*0.9+x)*0.4,y+Math.sin(t*1.1+y*0.7)*0.4,s,r+Math.sin(t*0.8+x*2)*0.05,dp,mo,gl);};
+    const fc=(arr)=>{for(const [x,y,s,r,dp,mo,gl] of arr)lmHoneyFace(g,x+Math.sin(t*0.9+x)*0.8,y+Math.sin(t*1.1+y*0.7)*0.8,s*(1+Math.sin(t*1.7+x)*0.03),r+Math.sin(t*0.8+x*2)*0.12+lmTwitch(t,x*0.1,0.5)*0.15,dp,mo,gl);};
     fc([[-12.4,-6,3.6,-0.4,1,2],[12.4,-5.2,3.4,0.5,1,0],[2.6,-14.6,3.4,0.1,1,1],[-3.6,-3.6,3,-0.2,1,0]]);
     g.fillStyle='rgba(150,76,10,.42)';g.fillRect(-22,-26,44,30);
     /* глубокая рука-тень */
@@ -390,7 +407,8 @@ LM_MODEL.lslime=function(g,m,FY,t,T,st,k,wv,ph){
     g.fillStyle='rgba(176,92,12,.26)';g.fillRect(-22,-26,44,30);
     /* ладони давят изнутри: плёнка натянута на пальцах */
     for(const [x,y,r2] of [[-4,-15.6,-0.5],[11.4,-12.4,0.5],[-13,-9.6,-0.9]]){
-      g.save();g.translate(x,y);g.rotate(r2+Math.sin(t*1.7+x)*0.06);
+      const pr=Math.max(0,Math.sin(t*1.1+x*0.9));/* ладонь то давит на плёнку, то отпускает */
+      g.save();g.translate(x+pr*0.5,y-pr*1.2);g.rotate(r2+Math.sin(t*1.7+x)*0.16);g.scale(1+pr*0.1,1+pr*0.1);
       g.fillStyle='rgba(205,155,90,.82)';g.beginPath();g.ellipse(0,0,1.9,2.3,0,0,TAU);g.fill();
       g.fillStyle='rgba(60,30,8,.6)';for(let i=0;i<4;i++){g.beginPath();g.ellipse((i-1.5)*1.05,-2.7-(i%3?0.2:-0.4),0.46,1.2,0,0,TAU);g.fill();}
       g.fillStyle='rgba(225,184,118,.82)';for(let i=0;i<4;i++){g.beginPath();g.ellipse((i-1.5)*1.05-0.1,-2.8-(i%3?0.2:-0.4),0.36,1.05,0,0,TAU);g.fill();}
@@ -411,15 +429,15 @@ LM_MODEL.lslime=function(g,m,FY,t,T,st,k,wv,ph){
     g.fillStyle='rgba(255,244,210,.85)';g.beginPath();g.ellipse(-12.2,-14,0.9,0.55,-0.6,0,TAU);g.ellipse(4.4,-19.4,0.8,0.5,-0.3,0,TAU);g.fill();
     g.restore();
     /* ближняя рука тянется вперёд к добыче (при плевке убирается) */
-    {const ex=19.4-sp*5,ey=-15.6+sp*2+Math.sin(t*1.8+ph)*0.6;
+    {const ex=19.4-sp*5+Math.sin(ga)*2.6*mk+Math.sin(t*1.8+ph)*0.9,ey=-15.6+sp*2+Math.sin(t*1.8+ph)*1.4-Math.max(0,Math.cos(ga))*1.8*mk;
       const h=lmHoneyArm(g,11.2,-12.4,16,-13.6-sp,ex,ey,2.8,2.4,'#c8985a');
-      lmHoneyHand(g,h[0]+Math.cos(h[2])*1.1,h[1]+Math.sin(h[2])*1.1,h[2],2.1,'#d8a868',1.1+Math.sin(t*2.6)*0.2,'#4a2808');
+      lmHoneyHand(g,h[0]+Math.cos(h[2])*1.1,h[1]+Math.sin(h[2])*1.1,h[2],2.1,'#d8a868',1.1+Math.sin(t*2.6)*0.3+lmTwitch(t,ph,1.1)*0.5,'#4a2808');
       g.beginPath();g.ellipse(11.2,-12.4,3.4,2.4,0.4,0,TAU);g.fillStyle='rgba(138,74,14,.92)';g.fill();g.strokeStyle='rgba(255,214,130,.8)';g.lineWidth=0.7;g.beginPath();g.ellipse(11.2,-12.4,3.4,2.4,0.4,Math.PI*1.1,Math.PI*1.9);g.stroke();
       g.strokeStyle='#d88a14';g.lineWidth=0.9;g.lineCap='round';g.beginPath();g.moveTo(15.8,-11);g.quadraticCurveTo(16.2,-8,15.8,-5.4+Math.sin(t*2.4)*0.5);g.stroke();}
     /* пузыри на самой плёнке */
     for(const [x,y,r] of [[-14.6,-8.6,1.2],[13.4,-14.4,1.1],[16.6,-4.6,0.9]]){g.beginPath();g.arc(x,y,r,0,TAU);g.fillStyle='rgba(215,140,40,.7)';g.fill();g.strokeStyle='rgba(30,12,2,.9)';g.lineWidth=0.5;g.stroke();g.fillStyle='rgba(255,240,190,.85)';g.beginPath();g.arc(x-r*0.3,y-r*0.3,r*0.3,0,TAU);g.fill();}
     /* свисающие нити и капли с краёв */
-    g.strokeStyle='#8a4a0c';g.lineWidth=1.1;g.lineCap='round';for(const [x,y,l] of [[-16.4,-2.6,3.4],[14.6,-1,4.2],[9,1.4,2.6]]){g.beginPath();g.moveTo(x,y);g.quadraticCurveTo(x+0.4,y+l*0.6,x+0.2,y+l+Math.sin(t*2+x)*0.4);g.stroke();}
+    g.strokeStyle='#8a4a0c';g.lineWidth=1.1;g.lineCap='round';for(const [x,y,l] of [[-16.4,-2.6,3.4],[14.6,-1,4.2],[9,1.4,2.6]]){g.beginPath();g.moveTo(x,y);g.quadraticCurveTo(x+0.4+Math.sin(t*1.5+x)*0.5,y+l*0.6,x+0.2+Math.sin(t*1.5+x)*0.9,y+l+Math.sin(t*2+x)*0.9);g.stroke();}
     /* плевок: из пасти тянется нить к комку с крохотным лицом внутри */
     if(sp>0.1){const gx=14+sp*4,gy=-4.6,gr=1.8+sp*2.6;
       g.strokeStyle='#8a4a0c';g.lineWidth=1.6*(1-sp*0.5)+0.4;g.beginPath();g.moveTo(10.6,-4.2);g.quadraticCurveTo(12.6,-4.4,gx-gr*0.7,gy);g.stroke();
@@ -471,8 +489,13 @@ LM_MODEL.lwaxknight=function(g,m,FY,t,T,st,k,wv,ph){
   const tp=th?clamp(m.st/0.09,0,1):0,ext=th?sm(tp):sm(rec),coil=st==='windup'?sm(clamp(k,0,1)):th?1-sm(tp):0,wu=coil;
   const br=Math.sin(t*2.2+ph),fl=Math.sin(t*14+ph),fl2=Math.sin(t*9.3+ph*2),fl3=Math.sin(t*21+ph*3);
   const trem=st==='windup'&&k>0.6?Math.sin(t*46)*0.35*(k-0.6)/0.4:0;/* дрожь натянутого замаха */
-  const lx=-coil*9+ext*12+trem,bl=(Math.sin(m.anim*1.1+ph*7)>0.985)?0.2:1;
-  const cr=coil*2.8+ext*1.4,sx=-coil*2.4+ext*4.5,rot=-coil*0.2+ext*0.17;
+  /* ход: тело подскакивает на шагах (lmBob), чуть клонится вперёд; копьё и щит качаются навстречу шагу; в покое — дыхание и редкий осмотр */
+  const mk=m.mk||0,ga=lmGait(m,19),gs=Math.sin(ga)*mk,gc=Math.cos(ga)*mk;
+  const calm=1-Math.max(coil,ext),fid=lmFidget(t,ph,5.2)*calm,tw=T?lmTwitch(t,ph,0.6)*calm:0,tw2=T?lmTwitch(t,ph+0.4,0.9)*calm:0;
+  const bre=(Math.sin(t*2.8+ph)+Math.sin(t*4.1+ph*1.7)*0.3)/1.3;/* неровное дыхание */
+  const lx=-coil*9+ext*12+trem+gs*1.6-fid*0.8+tw*0.8+Math.sin(t*1.1+ph)*0.7*calm,bl=(Math.sin(m.anim*1.1+ph*7)>0.985)?0.2:1;
+  const sw=Math.sin(t*1.3+ph*2)*1.0*calm+gc*0.5,tsw=-gs*1.0+Math.sin(t*2.1+ph)*0.6*calm;/* sw — копьё, tsw — подол качается навстречу шагу *//* покачивание копья вверх-вниз */
+  const cr=coil*2.8+ext*1.4-Math.abs(gc)*1.0+bre*0.2,sx=-coil*2.4+ext*4.5+mk*1.1+Math.sin(t*0.7+ph)*0.8*calm,rot=-coil*0.2+ext*0.17+mk*0.06+bre*0.012+Math.sin(t*1.7+ph*1.3)*0.03*calm;
   lmHoneyDK=1+(T?wu*0.45:0);
   /* палитра: золото лат и воск */
   const AG=T?'#b8922e':'#f2c458',AGL=T?'#e0bc58':'#ffe9a0',AGD=T?'#5a4214':'#b8862a';
@@ -484,7 +507,7 @@ LM_MODEL.lwaxknight=function(g,m,FY,t,T,st,k,wv,ph){
     g.fillStyle='#b8a470';for(const [x,y,r] of [[10,1.4,1.2],[-12,1.6,1],[4,2,0.8]]){g.beginPath();g.arc(x,y,r,0,TAU);g.fill();g.strokeStyle='#3a2e14';g.lineWidth=0.4;g.stroke();}}
   /* ---- ноги ---- */
   const leg=(ox,far)=>{
-    const s=lmStep(m,far?Math.PI:0,3.2),fx=ox+s[0]*0.55+(far?-0.6-coil*3.8-ext*2.4:0.8+coil*3.4+ext*6.5),fy=-0.8+s[1];
+    const s=lmFoot(m,far?Math.PI:0,19,2.6),fx=ox+s[0]*calm+(far?-0.6-coil*3.8-ext*2.4:0.8+coil*3.4+ext*6.5),fy=-0.8+s[1]*(0.3+0.7*calm);
     const c=far?-0.28:0,hx=ox+sx*0.8,hy=-11.5+cr,[kx,ky,ex,ey]=lmHoneyIK(hx,hy,fx,fy-1.2,5.4,5.4,false);
     if(T){
       /* гнилая нога: серое мясо, оголённая кость, обломки лат */
@@ -513,7 +536,7 @@ LM_MODEL.lwaxknight=function(g,m,FY,t,T,st,k,wv,ph){
   /* верх тела: приседает и изгибается в пояснице вокруг бёдер */
   g.save();g.translate(sx,cr);g.translate(0,-12);g.rotate(rot);g.translate(0,12);
   /* ---- копьё и дальняя рука ---- */
-  g.save();g.translate(lx+10.4,-18.4);g.rotate(-coil*0.12+ext*0.03);g.translate(-10.4,0);
+  g.save();g.translate(lx+10.4,-18.4+sw);g.rotate(-coil*0.12+ext*0.03+sw*0.025+tw2*0.05);g.translate(-10.4,0);
   /* древко: медовое дерево с волокном */
   g.beginPath();g.moveTo(-8.6,-1);g.lineTo(14.4,-0.9);g.lineTo(14.4,0.9);g.lineTo(-8.6,1);g.closePath();mobPath(g,T?'#6a4a20':'#b8842c',3,-1,9);
   g.strokeStyle='rgba(60,30,6,.45)';g.lineWidth=0.3;g.beginPath();g.moveTo(-7,-0.2);g.lineTo(13,-0.3);g.moveTo(-5,0.5);g.lineTo(9,0.4);g.stroke();
@@ -540,7 +563,7 @@ LM_MODEL.lwaxknight=function(g,m,FY,t,T,st,k,wv,ph){
   }
   g.restore();
   /* дальняя рука: наплечник, предплечье, кулак на древке */
-  {const sx=-3.4,sy=-24.4,fx=lx+10.4,fy=-18.4,[ex,ey]=lmHoneyIK(sx,sy,fx,fy,8.4,8.4,true);
+  {const sx=-3.4,sy=-24.4,fx=lx+10.4,fy=-18.4+sw,[ex,ey]=lmHoneyIK(sx,sy,fx,fy,8.4,8.4,true);
     const ac=T?'#6a6a52':shadeHex(AG,-0.3);
     if(T){const r=lmLimb(g,sx,sy,fx,fy,8.4,8.4,true,3.4,2.4,'#5a5a4a');g.strokeStyle='#b8ae92';g.lineWidth=0.9;g.lineCap='round';g.beginPath();g.moveTo(sx,sy);g.lineTo(r[2],r[3]);g.lineTo(fx-0.6,fy);g.stroke();
       g.fillStyle='#d8cdb0';g.beginPath();g.arc(r[2],r[3],1.1,0,TAU);g.fill();lmHoneySeg(g,sx+0.4,sy+0.6,r[2]-0.4,r[3]-0.4,4.2,3.6,shadeHex(AG,-0.3),null);}
@@ -549,11 +572,13 @@ LM_MODEL.lwaxknight=function(g,m,FY,t,T,st,k,wv,ph){
     g.beginPath();g.ellipse(fx+0.4,fy,2.5,2.1,0,0,TAU);mobPath(g,T?'#c8c0a4':shadeHex(AG,-0.18),fx,fy-0.6,2.5);
     g.strokeStyle=T?'rgba(40,30,16,.7)':'rgba(100,60,6,.6)';g.lineWidth=0.35;for(const q of [-0.7,0.1,0.9]){g.beginPath();g.moveTo(fx-0.2+q*0.2,fy-1.9);g.lineTo(fx+q*0.4-0.2,fy+1.9);g.stroke();}}
   /* ---- торс ---- */
-  const bob=br*0.3;
+  const bob=bre*0.6;
   g.save();g.translate(0,bob*0.5);
+  /* дыхание: грудь чуть раздувается от пояса */
+  g.translate(0,-13);g.scale(1+0.02*bre,1+0.04*bre);g.translate(0,13);
   /* набедренные пластины-юбка */
-  if(T){g.beginPath();g.moveTo(-6,-13);g.lineTo(6.8,-13);g.lineTo(6.2,-9.4);g.lineTo(4.4,-8);g.lineTo(3.6,-9.6);g.lineTo(1.4,-7.6);g.lineTo(-1,-9.6);g.lineTo(-3.4,-8);g.lineTo(-6.2,-10);g.closePath();mobPath(g,shadeHex(AG,-0.1),0,-11,7);}
-  else{for(let i=0;i<4;i++){const x=-5.6+i*3.5;g.beginPath();g.moveTo(x,-13.4);g.lineTo(x+3.7,-13.4);g.lineTo(x+3.3,-8.4+(i%2)*0.5);g.quadraticCurveTo(x+1.8,-7.4,x+0.3,-8.4+(i%2)*0.5);g.closePath();mobPath(g,i%2?shadeHex(AG,-0.08):AG,x+1.4,-11,3.6);}}
+  if(T){g.beginPath();g.moveTo(-6,-13);g.lineTo(6.8,-13);g.lineTo(6.2+tsw,-9.4);g.lineTo(4.4+tsw,-8);g.lineTo(3.6+tsw,-9.6);g.lineTo(1.4+tsw,-7.6);g.lineTo(-1+tsw,-9.6);g.lineTo(-3.4+tsw,-8);g.lineTo(-6.2+tsw,-10);g.closePath();mobPath(g,shadeHex(AG,-0.1),0,-11,7);}
+  else{for(let i=0;i<4;i++){const x=-5.6+i*3.5;g.beginPath();g.moveTo(x,-13.4);g.lineTo(x+3.7,-13.4);g.lineTo(x+3.3+tsw,-8.4+(i%2)*0.5);g.quadraticCurveTo(x+1.8+tsw,-7.4,x+0.3+tsw,-8.4+(i%2)*0.5);g.closePath();mobPath(g,i%2?shadeHex(AG,-0.08):AG,x+1.4,-11,3.6);}}
   /* нагрудник */
   g.beginPath();g.moveTo(-6.8,-26);g.quadraticCurveTo(-8,-19,-6,-13);g.lineTo(6.2,-13);g.quadraticCurveTo(8.2,-19,7.6,-26);g.quadraticCurveTo(0.4,-28.6,-6.8,-26);g.closePath();
   mobPath(g,AG,-2,-21,11);
@@ -582,12 +607,13 @@ LM_MODEL.lwaxknight=function(g,m,FY,t,T,st,k,wv,ph){
   g.beginPath();g.moveTo(-7,-15);g.lineTo(7.2,-15);g.lineTo(7,-12.8);g.lineTo(-6.8,-12.8);g.closePath();mobPath(g,T?'#4a3418':'#8a5a22',0,-14,7);
   g.fillStyle=T?'#6a5018':AGL;lmHoneyHex(g,2.6,-13.9,1.7,0.52);g.fill();g.strokeStyle='#3a2408';g.lineWidth=0.4;g.stroke();
   /* восковая накидка-табард по центру */
-  g.beginPath();g.moveTo(-1.2,-13);g.lineTo(5.4,-13);g.lineTo(5.2,-8.6);g.quadraticCurveTo(2,-7,-0.8,-8.8);g.closePath();lmHoneyWaxFill(g,-1.2,5.4,'#fffaf0','#ffecb8',T?'#c8aa58':'#e8b868','#8a6420');
+  g.beginPath();g.moveTo(-1.2,-13);g.lineTo(5.4,-13);g.lineTo(5.2+tsw*1.3,-8.6);g.quadraticCurveTo(2+tsw*1.3,-7+Math.abs(tsw)*0.3,-0.8+tsw*1.3,-8.8);g.closePath();lmHoneyWaxFill(g,-1.2,5.4,'#fffaf0','#ffecb8',T?'#c8aa58':'#e8b868','#8a6420');
   g.strokeStyle='rgba(150,110,40,.4)';g.lineWidth=0.35;g.beginPath();g.moveTo(1.6,-12.6);g.lineTo(1.8,-8.4);g.moveTo(3.6,-12.6);g.lineTo(3.8,-8.4);g.stroke();
   if(!T){lmHoneyDrips(g,[[-0.2,-9.4,1.6,0.5],[4.4,-9,2.2,0.55]],WX,'rgba(255,255,255,.6)');}
   g.restore();
   /* ---- голова: свеча ---- */
-  g.save();g.translate(0,bob+(T?-2:0));
+  const hr=Math.sin(t*0.6+ph)*0.035*calm+fid*Math.sin(ph*5)*0.14+Math.sin(t*2.3+ph)*0.025*calm+tw*0.13+mk*0.03-gs*0.012;/* голова поворачивается, оглядывается */
+  g.save();g.translate(0,bob+(T?-2:0));g.translate(0,-27);g.rotate(hr);g.translate(0,27);
   const hx0=0.3;
   if(!T){
     /* корпус свечи */
@@ -624,7 +650,7 @@ LM_MODEL.lwaxknight=function(g,m,FY,t,T,st,k,wv,ph){
     if(wu>0.05){mobGlow(g,4.2,-33.2,3.6+wu*2,'#ff3a1a',0.55*wu);mobGlow(g,0.2,-33,3+wu*1.6,'#ff3a1a',0.4*wu);}
     /* нос-провал, рот: отвисшая челюсть с гнилыми зубами */
     g.fillStyle='#2a1208';g.beginPath();g.moveTo(2.2,-31.4);g.lineTo(1.4,-29.8);g.lineTo(3,-29.8);g.closePath();g.fill();
-    const jw=1.4+wu*2.8+Math.max(0,br)*0.3;
+    const jw=1.4+wu*2.8+Math.max(0,br)*0.3+Math.abs(tw2)*1.5+Math.max(0,Math.sin(t*1.3+ph*3))*0.35;
     g.fillStyle='#120504';g.beginPath();g.moveTo(-0.6,-29.6);g.lineTo(5.4,-29.8);g.lineTo(4.8,-29.2+jw);g.quadraticCurveTo(2.2,-27.6+jw*1.1,-0.2,-29.0+jw);g.closePath();g.fill();
     if(wu>0.05){g.fillStyle='rgba(255,64,26,'+(0.65*wu)+')';g.beginPath();g.ellipse(2.4,-28.4+jw*0.62,2.3,jw*0.42+0.2,0,0,TAU);g.fill();}
     g.fillStyle='#b8a878';for(let i=0;i<5;i++){g.beginPath();g.moveTo(-0.2+i*1.2,-29.7);g.lineTo(0.3+i*1.2,-28.4-(i%2)*0.4);g.lineTo(0.8+i*1.2,-29.7);g.fill();}
@@ -664,7 +690,7 @@ LM_MODEL.lwaxknight=function(g,m,FY,t,T,st,k,wv,ph){
   else if(melt){lmHoneyDrips(g,[[-4.2,-23.4,5,0.8],[3,-23,3.4,0.7]],WX,'rgba(255,255,255,.7)');}
   g.restore();
   /* ---- щит: сотовая эмблема ---- */
-  g.save();g.translate(6.8+coil*2.2-ext*3.6,-18.4+bob*0.4-coil*3.4+ext*1.5);g.rotate(-coil*0.12+ext*0.2);g.scale(1+coil*0.1,1+coil*0.07);
+  g.save();g.translate(6.8+coil*2.2-ext*3.6-gs*0.5+tw2*0.4,-18.4+bob*0.4-coil*3.4+ext*1.5+gc*0.6);g.rotate(-coil*0.12+ext*0.2-gs*0.05+tw2*0.1);g.scale(1+coil*0.1,1+coil*0.07);
   g.beginPath();g.ellipse(0,0,5.2,8.8,0,0,TAU);mobPath(g,T?'#8a6a24':'#f0bc48',-0.8,-1.5,9);
   g.save();g.clip();
   g.beginPath();g.ellipse(0,0,3.8,7.2,0,0,TAU);g.fillStyle=T?'#6a5018':'#d8a032';g.fill();g.strokeStyle=T?'rgba(20,14,4,.6)':'rgba(120,76,10,.7)';g.lineWidth=0.5;g.stroke();
@@ -681,15 +707,15 @@ LM_MODEL.lwaxknight=function(g,m,FY,t,T,st,k,wv,ph){
   g.strokeStyle='rgba(255,244,190,.75)';g.lineWidth=0.7;g.beginPath();g.ellipse(-0.5,-0.5,4.7,8.2,0,Math.PI*1.1,Math.PI*1.6);g.stroke();
   if(T){
     /* костлявые пальцы вцепились в верхний край */
-    g.lineCap='round';for(let i=0;i<4;i++){const px=-3.4+i*1.5,py=-7.6+Math.abs(i-1.5)*0.7;g.strokeStyle='#2a2010';g.lineWidth=1.3;g.beginPath();g.moveTo(px,py-2.8);g.lineTo(px+0.3,py+0.4);g.stroke();g.strokeStyle='#d8cdb0';g.lineWidth=0.7;g.stroke();
+    g.lineCap='round';for(let i=0;i<4;i++){const px=-3.4+i*1.5,py=-7.6+Math.abs(i-1.5)*0.7-Math.abs(lmTwitch(t,ph+i*0.27,1.5))*0.9;g.strokeStyle='#2a2010';g.lineWidth=1.3;g.beginPath();g.moveTo(px,py-2.8);g.lineTo(px+0.3,py+0.4);g.stroke();g.strokeStyle='#d8cdb0';g.lineWidth=0.7;g.stroke();
       g.fillStyle='#e8dcc0';g.beginPath();g.arc(px+0.1,py-1.2,0.5,0,TAU);g.fill();}
     lmHoneyDrips(g,[[-3,7.6,3.6,0.7],[2.4,8.2,5.2,0.8]],WX,'rgba(255,250,224,.6)');
   }
   g.restore();
   /* ---- пламя свечи (Иллюзия) и свет ---- */
   if(!T){
-    const f=1+fl*0.1+fl3*0.06+wu*0.5,sk=fl2*0.6+wu*0.4;
-    g.save();g.translate(0.2,-40.8);
+    const f=1+fl*0.1+fl3*0.06+wu*0.5+mk*0.08,sk=fl2*0.6+wu*0.4-mk*0.9+gs*0.25-hr*3;/* на ходу пламя отклоняется назад */
+    g.save();g.translate(0.2+hr*14,-40.8+bob);
     g.beginPath();g.moveTo(-3,0);g.bezierCurveTo(-3.6,-3,-1.2+sk*0.4,-6*f,sk,-9.4*f);g.bezierCurveTo(1.6+sk*0.4,-6*f,3.6,-3,3,0);g.quadraticCurveTo(0,1.6,-3,0);g.closePath();
     const gr=g.createLinearGradient(0,0,0,-9*f);gr.addColorStop(0,'#ff9a20');gr.addColorStop(0.55,'#ffb838');gr.addColorStop(1,'#ffd870');g.fillStyle=gr;g.fill();g.strokeStyle='#e8601a';g.lineWidth=0.5;g.stroke();
     g.beginPath();g.moveTo(-1.4,-0.2);g.bezierCurveTo(-1.7,-2,-0.6,-4*f,sk*0.5,-5.6*f);g.bezierCurveTo(1,-4*f,1.7,-2,1.4,-0.2);g.closePath();g.fillStyle=wu>0.3?'#ffffff':'#fff4b8';g.fill();
