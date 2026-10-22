@@ -151,7 +151,7 @@ const LM_AI={
       LMR[0]=m.onGround?0:nx*1.2;
       if(dist<150&&dist>50&&m.cd<=0&&m.onGround&&Math.abs(dy)<60){lmGo(m,'crouch');}
       else if(dist<40&&m.atkCd<=0){m.atkCd=1;m.atkT=0.24;lmMelee(m,0.7,null,160,-120);}
-    }else{if(m.onGround&&m.timer<=0&&Math.random()<0.4){m.vy=-240;}lmWander(m,0.5);}
+    }else{lmWander(m,0.5);if(m.onGround){if(Math.abs(LMR[0])>0.05){m.hopT=(m.hopT||0)-dt;if(m.hopT<=0){m.vy=-220;m.hopT=rnd(0.3,0.6);}}LMR[0]=0;}else LMR[0]=(m.hx||0)*0.9;}
   },
   lbutterfly(m,d,dt,dx,dy,dist,nx,ny,ag,seen){
     const px=player.x,py=player.y-player.h*0.5;
@@ -329,7 +329,7 @@ const LM_AI={
     if(ag){lmFaceX(m,dx);if(m.onGround&&m.timer<=0&&dist>90){m.vy=-360;m.timer=rnd(0.8,1.3);}LMR[0]=m.onGround?0:nx*1.4;
       if(dist<220&&dist>60&&m.cd<=0&&seen&&m.onGround)lmGo(m,'puff');
       else if(dist<40&&m.atkCd<=0){m.atkCd=1;m.atkT=0.24;lmMelee(m,0.7,null,160,-100);}}
-    else{if(m.onGround&&m.timer<=0&&Math.random()<0.3){m.vy=-260;m.timer=rnd(1,2);}lmWander(m,0.3);}
+    else{lmWander(m,0.3);if(m.onGround){if(Math.abs(LMR[0])>0.05){m.hopT=(m.hopT||0)-dt;if(m.hopT<=0){m.vy=-250;m.hopT=rnd(0.5,0.9);}}LMR[0]=0;}else LMR[0]=(m.hx||0)*0.8;}
   },
   lsheep(m,d,dt,dx,dy,dist,nx,ny,ag){
     /* прыгает дугой через шахтёра и считает */
@@ -388,6 +388,7 @@ function lmOnHit(m){
   else if(k==='p'){m.fleeT=3.5;}
 }
 /* мирное поведение: бродит, порхает, убегает от шахтёра после удара */
+const LM_HOP={lbunny:200,lfrog:230};   /* сила прыжка прыгунов при спокойной прогулке */
 function lmCalmAI(m,def,dt,dx){
   if(m.state!=='idle'){m.state='idle';m.tele=0;m.ax=undefined;m.ext=0;m.st=0;}
   m.dashT=0;
@@ -396,12 +397,14 @@ function lmCalmAI(m,def,dt,dx){
   if(m.wT<=0){m.wT=rnd(1.5,3.5);m.wDir=Math.random()<0.35?0:(Math.random()<0.5?-1:1);m.wY=rnd(-0.3,0.3);}
   if(m.vx!==undefined&&Math.abs(m.vx)<4&&m.wDir&&m.wT<rnd(0,3)&&!def.fly)m.wDir=-m.wDir;
   LMR[0]=(m.wDir||0)*0.3;
+  /* прыгуны и в покое ходят прыжками */
+  if(LM_HOP[def.id]&&m.wDir&&m.onGround){m.hopT=(m.hopT||0)-dt;if(m.hopT<=0){m.vy=-LM_HOP[def.id];m.hopT=rnd(0.35,0.7);}LMR[0]=m.wDir*0.55;}else if(LM_HOP[def.id]&&m.onGround)LMR[0]=0;
   if(def.fly){const hy=m.homeY===undefined?(m.homeY=m.y):m.homeY;LMR[1]=clamp((hy-m.y)/60,-0.5,0.5)+m.wY*0.5+Math.sin(G.time*1.7+m.phase)*0.15;}
   if(m.wDir)m.facing=m.wDir;
 }
 function lilMobAI(m,def,dt,dx,dy,dist,nx,ny,aggro,seen){
   LMR[0]=0;LMR[1]=0;LMR[2]=false;
-  lmForm(m);
+  lmForm(m);lmAnimTick(m,dt);
   if(m.dmgMul===undefined)m.dmgMul=0;
   if(lmCalm(m)){lmCalmAI(m,def,dt,dx);return LMR;}
   m.homeY=undefined;
