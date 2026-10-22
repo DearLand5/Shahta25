@@ -236,30 +236,39 @@ function lmRosaryHoundSkull(g,m,t,jaw,cr,ph){
   lmRosaryVine(g,[[-4.6,-1.4],[-2.4,-3.4],[0.8,-4.8],[4.6,-4.2]],0.9,'#4a5a24',0.9,4,'#6a5a30');
 }
 LM_MODEL.lrosehound=function(g,m,FY,t,T,st,k,wv,ph){
-  const lp=st==='leap',run=Math.abs(m.vx)>8&&!lp,phs=m.anim*15;
-  const cr=lmRosaryE(m,'cr',st==='crouch'?k:0,t,14);
+  const lp=st==='leap',mk=m.mk||0,gait=lmGait(m,32);
+  const cr=lmRosaryE(m,'cr',st==='crouch'?k:0,t,14),lpE=lmRosaryE(m,'lp',lp?1:0,t,16);
   const bite=m.atkT>0?Math.sin((1-m.atkT/0.24)*Math.PI):0;
-  const br=Math.sin(t*2.6+ph*5),rage=clamp(cr+(lp?1:0)+bite,0,1);
-  const bob=run?-Math.abs(Math.sin(phs))*1.1:0,tilt=lp?(m.vy<0?-0.2:0.17):cr*0.15,oy=bob+cr*1.5-5;
-  const jaw=0.16+cr*0.7+(lp?0.5:0)+bite*0.55+Math.max(0,br)*0.05;
+  const br=Math.sin(t*2.6+ph*5),bw=0.5+0.5*br,rage=clamp(cr+lpE+bite,0,1);
+  /* жесты: нюх, оглядывание, дёрг уха и хвоста; в Истине — рывки */
+  const sniff=lmFidget(t,ph+0.21,5.5)*(1-mk)*(1-cr),look=lmFidget(t,ph+0.6,7.3)*(1-mk)*(1-cr);
+  const earA=lmFidget(t,ph+0.4,2.9),earB=lmFidget(t,ph+0.8,3.7),wag=lmFidget(t,ph+0.1,2.6)*(1-cr);
+  const tw=T?lmTwitch(t,ph,0.8):0,tw2=T?lmTwitch(t+3,ph+1,0.47):0;
+  const bob=lmBob(m,32,1.3),tilt=cr*0.15+Math.sin(t*0.9+ph*3)*0.014+lpE*clamp(m.vy*0.0007,-0.2,0.17)+Math.sin(gait)*0.03*mk*(1-lpE),oy=bob+cr*1.5-5-bw*0.35;
+  const jaw=0.16+cr*0.7+lpE*0.5+bite*0.55+Math.max(0,br)*0.05+Math.abs(tw)*0.35;
   const PV=[-8,-12],cs=Math.cos(tilt),sn=Math.sin(tilt);
   const Wp=(x,y)=>{const dx=x-PV[0],dy=y-PV[1];return [PV[0]+dx*cs-dy*sn,PV[1]+dx*sn+dy*cs+oy];};
-  /* ступни в мире: стойка, бег, прыжок, присед */
-  const ft=(bx,off,str,fl,fc)=>lp?fl:cr>0.2?[bx+(fc||0)*cr,0]:run?[bx+Math.sin(phs+off)*str,-Math.max(0,Math.cos(phs+off))*3.2]:[bx,0];
-  const F={nf:ft(7.4,0,5,[21,-5],4),ff:ft(10,0.6,5,[23.5,-7.5],4.5),nh:ft(-7.4,Math.PI,5,[-19,-6],0),fh:ft(-10.4,Math.PI+0.6,5,[-21.5,-3.6],0)};
+  /* ступни в мире: стойка, бег по пройденному пути (без скольжения), прыжок, присед — всё плавно перетекает */
+  const ft=(bx,off,fl,fc)=>{const p=gait+off,b=[bx+Math.sin(p)*6.5*mk,-Math.max(0,Math.cos(p))*3.4*mk],c=[bx+(fc||0)*cr,0],a=cr>0.01?[lerp(b[0],c[0],clamp(cr*3,0,1)),lerp(b[1],c[1],clamp(cr*3,0,1))]:b;return [lerp(a[0],fl[0],lpE),lerp(a[1],fl[1],lpE)];};
+  const F={nf:ft(7.4,0,[21,-5],4),ff:ft(10,0.6,[23.5,-7.5],4.5),nh:ft(-7.4,Math.PI,[-19,-6],0),fh:ft(-10.4,Math.PI+0.6,[-21.5,-3.6],0)};
+  /* Истина: стоя — скребёт передней лапой и подёргивает ею */
+  if(T){const idl=(1-mk)*(1-cr)*(1-lpE);F.ff[0]+=tw2*1.6*idl;F.ff[1]-=Math.abs(tw2)*2.2*idl;F.fh[1]-=Math.max(0,Math.sin(t*1.7+ph*4)-0.93)*30*idl;}
   const hip={nf:Wp(7.2,-12),ff:Wp(9,-12.4),nh:Wp(-7.6,-12),fh:Wp(-9.8,-12.4)};
+  /* голова: нюхает, оглядывается, на бегу покачивается в такт шагам */
+  const hdy=sniff*1.8+Math.sin(gait*2+1)*0.5*mk+tw*0.6,hdr=-0.04+Math.sin(t*1.3+ph*2)*0.04+rage*0.12+lpE*-0.1+sniff*0.14-look*0.12+Math.sin(gait)*0.04*mk+tw*0.16;
+  const sw1=Math.sin(t*3.1+ph*2)+Math.sin(t*4.7+ph),bsc=1+0.075*bw*(T?1.2:1);
   g.save();g.translate(0,FY);g.scale(0.9,0.9);
   if(!T){
     const LC='#3d8c44',LD='#235a2e',LL='#6cc25a',LH='#a8e27c',PAL=[LD,'#2e7438',LC,'#56ad4e',LL,'#88d46a'];
     const RR='#f2405e',leaf=(x,y,a,L)=>lmRosaryLeaf(g,x,y,a,L,L*0.3,'#1f5a2a','#2e7a38');
-    const grp=(fn)=>{g.save();g.translate(PV[0],PV[1]+oy);g.rotate(tilt);g.translate(-PV[0],-PV[1]);fn();g.restore();};
+    const grp=(fn)=>{g.save();g.translate(PV[0],PV[1]+oy);g.rotate(tilt);g.scale(1+0.012*bw,bsc);g.translate(-PV[0],-PV[1]);fn();g.restore();};
     mobGlow(g,0,-14,24,'#7aff8a',0.16);
     const cF=shadeHex(LC,-0.3);
     lmRosaryHoundLeg(g,hip.ff[0],hip.ff[1],F.ff[0],F.ff[1],false,cF,3);
     lmRosaryHoundLeg(g,hip.fh[0],hip.fh[1],F.fh[0],F.fh[1],true,cF,4);
     grp(()=>{
       /* хвост-завиток с метёлкой листьев и розой */
-      const sx=Math.sin(t*(run?10:3.6)+ph)*1.6;
+      const sx=Math.sin(t*3.6+ph)*(2.6+mk*0.8)+wag*Math.sin(t*15+ph)*3+Math.sin(gait*2+0.8)*1.1*mk;
       lmRosaryVine(g,[[-10,-15],[-14.4,-16.4],[-17.4,-20.4],[-16.4+sx*0.6,-24.6],[-14.6+sx,-26.8]],2.5,'#2f7a38',0);
       lmRosaryLeafEdge(g,-14.8+sx,-26.8,3.6,3.4,9,5,3.4,LD);
       lmFluff(g,-14.8+sx,-26.8,3.6,3.4,9,0.14,6);mobPath(g,LL,-15.6+sx,-27.6,4);
@@ -282,9 +291,9 @@ LM_MODEL.lrosehound=function(g,m,FY,t,T,st,k,wv,ph){
       lmRosaryLeafEdge(g,9.6,-18,7,9,8,25,2.6,LL,LH,Math.PI*1.2,Math.PI*1.7);
       /* ошейник из роз под головой */
       g.save();g.translate(0,Math.sin(t*1.9+ph)*0.25);
-      g.save();g.translate(14.8-cr*0.4,-23+cr*0.4);g.rotate(-0.04+rage*0.1+(run?Math.sin(phs*2)*0.03:0));
+      g.save();g.translate(14.8-cr*0.4,-23+cr*0.4+hdy);g.rotate(hdr);
       /* дальнее ухо */
-      g.save();g.translate(-4,-3);g.rotate(0.5+Math.sin(t*2.2+ph)*0.05+rage*0.4);
+      g.save();g.translate(-4,-3);g.rotate(0.5+Math.sin(t*2.2+ph)*0.1+rage*0.4-earA*0.5+Math.sin(gait*2+0.4)*0.16*mk+lpE*0.2);
       lmFluff(g,0,2.4,2.8,4.2,9,0.12,5);mobPath(g,shadeHex(LC,-0.32),0,1,4.8);g.restore();
       /* голова-ком */
       lmFluff(g,0,0,6.4,5.8,13,0.08,3.3);mobPath(g,shadeHex(LC,0.06),-1.6,-3,7.4);
@@ -300,8 +309,8 @@ LM_MODEL.lrosehound=function(g,m,FY,t,T,st,k,wv,ph){
       g.save();g.clip();lmRosaryLeafField(g,7.2,2.2,5,3.2,12,29,[LC,LL,LH,LH],1.5);g.restore();
       if(jaw>0.3)lmTeeth(g,3.8,3.8,10,5,1.4,'#fff2d8');
       /* нос */
-      g.beginPath();g.moveTo(10.8,0.4);g.quadraticCurveTo(13.2,0,13,1.8);g.quadraticCurveTo(12.2,3.2,10.6,2.7);g.closePath();mobPath(g,'#241a22',11.8,1.2,2.2);
-      g.fillStyle='rgba(255,255,255,.75)';g.beginPath();g.ellipse(11.8,0.7,0.7,0.35,-0.4,0,TAU);g.fill();
+      g.save();g.translate(Math.sin(t*24)*0.25*sniff,0);g.beginPath();g.moveTo(10.8,0.4);g.quadraticCurveTo(13.2,0,13,1.8);g.quadraticCurveTo(12.2,3.2,10.6,2.7);g.closePath();mobPath(g,'#241a22',11.8,1.2,2.2);
+      g.fillStyle='rgba(255,255,255,.75)';g.beginPath();g.ellipse(11.8,0.7,0.7,0.35,-0.4,0,TAU);g.fill();g.restore();
       if(jaw<0.45){g.strokeStyle='#143a1e';g.lineWidth=0.55;g.lineCap='round';g.beginPath();g.moveTo(10.8,3);g.quadraticCurveTo(7.8,5.2,4.2,4.3);g.quadraticCurveTo(3.4,4.1,3,3.2);g.stroke();}
       /* глаз с бликом и бровью-листиком */
       const bl=(Math.sin(m.anim*1.1+ph*7)>0.985)?0.15:1,lx=(m.lookX||0)*0.4,ly=(m.lookY||0)*0.3,ez=1-rage*0.25;
@@ -313,7 +322,7 @@ LM_MODEL.lrosehound=function(g,m,FY,t,T,st,k,wv,ph){
       g.strokeStyle='#0e2a14';g.lineWidth=0.7;g.beginPath();g.ellipse(3.4,-0.8,2.3,2.5*bl*ez,0.1,Math.PI*1.1,Math.PI*1.95);g.stroke();
       lmRosaryLeaf(g,1.4,-3.8+rage*0.9,-0.15+rage*0.5,4,0.95,'#1f5a2a','#2e7a38');
       /* ближнее ухо — висящий куст: темнее головы, чтобы читалось отдельно */
-      g.save();g.translate(-3.8,-2.8);g.rotate(0.1+Math.sin(t*2.2+ph+1)*0.06+rage*0.5+(run?0.25:0));
+      g.save();g.translate(-3.8,-2.8);g.rotate(0.1+Math.sin(t*2.2+ph+1)*0.12+rage*0.5+mk*0.25-earB*0.45+Math.sin(gait*2+1.2)*0.18*mk+lpE*0.2);
       lmFluff(g,0,3.2,2.3,4.1,9,0.1,15);mobPath(g,shadeHex(LC,-0.18),-0.8,0.4,4.6);
       g.save();g.clip();lmRosaryLeafField(g,0,3.2,2.3,4.1,10,31,[LD,'#2a6a34',LC,'#56ad4e'],1.7);
       g.fillStyle='rgba(6,30,14,.35)';g.beginPath();g.ellipse(0.8,4.2,1.4,2.8,0,0,TAU);g.fill();g.restore();
@@ -349,9 +358,9 @@ LM_MODEL.lrosehound=function(g,m,FY,t,T,st,k,wv,ph){
     const cB='#d6c8a8';
     lmRosaryBoneLeg(g,hip.ff[0],hip.ff[1],F.ff[0],F.ff[1],false,cB,1,true);
     lmRosaryBoneLeg(g,hip.fh[0],hip.fh[1],F.fh[0],F.fh[1],true,cB,2,true);
-    g.save();g.translate(PV[0],PV[1]+oy);g.rotate(tilt);g.translate(-PV[0],-PV[1]);
+    g.save();g.translate(PV[0],PV[1]+oy);g.rotate(tilt);g.scale(1+0.012*bw,bsc);g.translate(-PV[0],-PV[1]);
     /* хвост-плеть из колючей лозы */
-    {const pts=[];for(let i=0;i<7;i++){pts.push([-12.4-i*2.3+Math.sin(t*3+i*0.8+ph)*i*0.22,-16.4-i*1.9-i*i*0.1+Math.sin(t*3.4+i*0.7+ph)*i*0.5]);}
+    {const pts=[];for(let i=0;i<7;i++){pts.push([-12.4-i*2.3+(Math.sin(t*3+i*0.8+ph)*i*0.22+tw2*i*0.5)*(1+mk*0.6)+wag*Math.sin(t*13+i*0.7)*i*0.3,-16.4-i*1.9-i*i*0.1+(Math.sin(t*3.4+i*0.7+ph)*i*0.5+sw1*i*0.12)*(1+mk*0.5)]);}
      lmRosaryVine(g,pts,1.9,'#4a3a22',1.8,1,'#8a7a5a');
      const e=pts[6];lmRosaryRose(g,e[0]-0.6,e[1]-1.2,1.8,'#6a1224',1);}
     /* полость груди: тёмное сухое мясо */
@@ -414,7 +423,7 @@ LM_MODEL.lrosehound=function(g,m,FY,t,T,st,k,wv,ph){
     for(let i=0;i<5;i++){const a=i/4,x=7.4+a*5.4,y=-19-a*3.8;g.beginPath();g.ellipse(x,y,1.5-a*0.2,1.2,0.5,0,TAU);lmRosaryBP(g,BN,x-0.3,y-0.4,1.6);}
     g.strokeStyle='#8a1a2c';g.lineWidth=0.7;g.beginPath();g.moveTo(8,-17.6);g.quadraticCurveTo(10.6,-18.4,13,-19);g.stroke();
     /* череп */
-    g.save();g.translate(14.6-cr*0.4,-22.8+cr*0.6);g.rotate(-0.04+rage*0.12+(lp?-0.1:0));
+    g.save();g.translate(14.6-cr*0.4,-22.8+cr*0.6+hdy);g.rotate(hdr);
     g.scale(0.84,0.84);lmRosaryHoundSkull(g,m,t,jaw,rage,ph);
     g.restore();
     lmRim(g,q=>{q.strokeStyle='rgba(255,245,220,.35)';q.lineWidth=0.8;q.beginPath();q.moveTo(-12,-16);q.bezierCurveTo(-10,-21,-4,-22,2,-21.8);q.stroke();});
@@ -477,12 +486,17 @@ function lmRosaryBoot(g,x,y,c,T,far){
   if(T){g.fillStyle='rgba(50,70,30,.7)';g.beginPath();g.ellipse(x+1,y-0.5,4,1,0,0,TAU);g.fill();}
 }
 LM_MODEL.lgardener=function(g,m,FY,t,T,st,k,wv,ph){
-  const walk=Math.abs(m.vx)>6,sp=m.anim*13,br=Math.sin(t*2.6+ph*5);
+  const mk=m.mk||0,gait=lmGait(m,22),br=Math.sin(t*2.6+ph*5),bw=0.5+0.5*br;
   const sn=lmRosaryE(m,'sn',st==='snipw'?k:0,t,14),th=lmRosaryE(m,'th',st==='throw'?k:0,t,14);
-  const bob=walk?-Math.abs(Math.sin(sp))*0.5:0,lean=(T?0.1:0.02)+sn*0.09-th*0.1+br*0.004;
+  /* жесты: оглядывается, щёлкает ножницами; в Истине — рывки головы и ноги */
+  const lookG=lmFidget(t,ph+0.3,6.2)*(1-mk)*(1-sn)*(1-th),snipG=lmFidget(t,ph+0.7,4.4)*(1-sn)*(1-th);
+  const tw=T?lmTwitch(t,ph,0.75):0,tw2=T?lmTwitch(t+2,ph+1,0.5):0;
+  const bob=lmBob(m,22,0.9)-bw*0.25,lean=(T?0.1:0.02)+mk*0.04+sn*0.09-th*0.1+br*0.004+Math.sin(gait)*0.012*mk;
   g.save();g.translate(0,FY);g.scale(0.92,0.92);
-  const step=(off)=>walk?[Math.sin(sp+off)*3.4,-Math.max(0,Math.cos(sp+off))*2.4]:[0,0];
-  const sF=step(Math.PI),sN=step(0);
+  /* шаги по пройденному пути: Истина хромает — вторая нога шагает с другим размахом */
+  const step=(off,lm)=>{const p=gait+off,a=T?lm:1;return [Math.sin(p)*4*mk*a,-Math.max(0,Math.cos(p))*(T?3.2:2.8)*mk*a];};
+  const sF=step(Math.PI+(T?0.5:0),0.8),sN=step(0,1.15);
+  if(T){const idl=1-mk;sF[0]+=tw2*1.2*idl;sF[1]-=Math.abs(tw2)*1.6*idl;}
   const HP=[0,-14+bob];
   /* ----- палитра ----- */
   const SK=T?'#c9c4b6':'#f6cfaa',SKD=T?'#8a8678':'#d49a76',
@@ -491,7 +505,7 @@ LM_MODEL.lgardener=function(g,m,FY,t,T,st,k,wv,ph){
         BT=T?'#3a2a1c':'#7a4a28';
   /* ----- ноги: штаны-комбинезон и ботинки ----- */
   const leg=(hx,s,col,far)=>{
-    const ax=hx+s[0],ay=-5.6+s[1],ik=[ax,ay,hx+s[0]*0.45+0.5,(HP[1]+ay)/2];
+    const ax=hx+s[0],ay=-5.6+s[1],ik=[ax,ay,hx+s[0]*0.45+0.5-s[1]*0.7,(HP[1]+ay)/2+s[1]*0.15];
     lmRosaryTube(g,hx,HP[1]+0.4,ax,ay,5.8,4.8,col,{bg:1.04});
     /* отворот штанины */
     lmRosaryTube(g,ik[0]-0.4,ik[1]-1.6,ik[0]-0.1,ik[1]+0.3,4.8,4.8,shadeHex(col,far?0.04:0.16),{line:shadeHex(col,-0.7)});
@@ -503,9 +517,9 @@ LM_MODEL.lgardener=function(g,m,FY,t,T,st,k,wv,ph){
   leg(-2.8,sF,shadeHex(OV,-0.3),true);
   leg(2.4,sN,OV,false);
   /* ----- корпус и голова (наклон вокруг пояса) ----- */
-  const grp=(fn)=>{g.save();g.translate(HP[0],HP[1]);g.rotate(lean);g.translate(-HP[0],-HP[1]);fn();g.restore();};
+  const grp=(fn)=>{g.save();g.translate(HP[0],HP[1]);g.rotate(lean);g.scale(1+0.01*bw,1+0.03*bw);g.translate(-HP[0],-HP[1]);fn();g.restore();};
   /* ножницы: руки держат их перед собой */
-  const sx=11.5-th*1.5,sy=-18.4-sn*4+th*2.6,sAng=-0.06-sn*0.7+th*1.15,op=0.1+sn*0.52+(T?0.04:0);
+  const sx=11.5-th*1.5+Math.sin(gait+0.6)*0.7*mk,sy=-18.4-sn*4+th*2.6+Math.sin(gait*2)*0.5*mk+br*0.2,sAng=-0.06-sn*0.7+th*1.15+Math.sin(gait)*0.05*mk+tw*0.12,op=0.1+sn*0.52+(T?0.04:0)+snipG*(0.14+0.16*Math.abs(Math.sin(t*20)));
   const hx=sx-5.2*Math.cos(sAng),hy=sy-5.2*Math.sin(sAng);
   grp(()=>{
     /* Истина: колючие лозы растут из спины и висят за плащом */
@@ -520,7 +534,7 @@ LM_MODEL.lgardener=function(g,m,FY,t,T,st,k,wv,ph){
      lmRosaryTube(g,ik[2],ik[3],ik[0],ik[1],3.2,2.6,T?shadeHex(SH,-0.25):shadeHex(SK,-0.25),{});
      g.beginPath();g.ellipse(ik[0],ik[1],1.6,1.4,0,0,TAU);mobPath(g,shadeHex(T?'#b8b4a6':SK,-0.25),ik[0],ik[1],1.6);}
     /* плащ-мантия в Истине позади корпуса: рваный подол */
-    if(T){g.beginPath();g.moveTo(-6.4,-27);g.lineTo(-7,-18);g.lineTo(-8,-11);g.lineTo(-6,-9);g.lineTo(-5.2,-12.6);g.lineTo(-3.6,-9.6);g.lineTo(-1.6,-13);g.lineTo(0,-10);g.lineTo(3.4,-14.4);g.lineTo(6,-18);g.lineTo(6.6,-27);g.closePath();
+    if(T){const hw=Math.sin(t*2.3+ph*2)*0.7+Math.sin(gait)*1.1*mk;g.beginPath();g.moveTo(-6.4,-27);g.lineTo(-7,-18);g.lineTo(-8+hw,-11);g.lineTo(-6+hw*1.2,-9);g.lineTo(-5.2+hw*0.6,-12.6);g.lineTo(-3.6+hw,-9.6);g.lineTo(-1.6+hw*0.8,-13);g.lineTo(0+hw*0.5,-10);g.lineTo(3.4+hw*0.4,-14.4);g.lineTo(6,-18);g.lineTo(6.6,-27);g.closePath();
       mobPath(g,'#26262c',0,-20,10);}
     /* ----- туловище: рубашка ----- */
     g.beginPath();g.moveTo(-5.6,-14.2);g.lineTo(-6.2,-26.4);g.quadraticCurveTo(-4.2,-29,0.4,-29.2);g.quadraticCurveTo(5,-29,6.2,-26);g.lineTo(6.8,-18.4);g.quadraticCurveTo(7.4,-15,5.6,-14);g.closePath();
@@ -555,9 +569,9 @@ LM_MODEL.lgardener=function(g,m,FY,t,T,st,k,wv,ph){
     g.strokeStyle=shadeHex(SH,-0.6);g.lineWidth=0.4;g.stroke();
   });
   /* ----- голова ----- */
-  const hy2=bob+br*0.15-sn*0.6-th*0.5-1.4;
+  const hy2=bob+br*0.15-sn*0.6-th*0.5-1.4+tw*0.5;
   grp(()=>{
-    g.save();g.translate(0,hy2);
+    g.save();g.translate(0,hy2);g.translate(0,-30);g.rotate(lookG*0.1*(T?-1.2:1)+tw*0.14+Math.sin(gait)*0.03*mk+Math.sin(t*1.1+ph*3)*0.02);g.translate(0,30);
     if(!T){
       /* белые волосы сзади под шляпой */
       lmFluff(g,-2.6,-32,2.6,3.2,8,0.16,3);mobPath(g,'#ece8e4',-3,-33,3.4,true);
@@ -727,8 +741,12 @@ function lmRosaryHand(g,x,y,ang,c,len,T,spread){
 }
 LM_MODEL.lfairy=function(g,m,FY,t,T,st,k,wv,ph){
   const sp=lmRosaryE(m,'sp',st==='spin'?k:0,t,12),fl=Math.sin(t*14+ph),sl=Math.sin(t*2.4+ph*3),sw=Math.sin(t*3+ph);
-  const tilt=-0.08+sw*0.04+sp*Math.sin(t*20)*0.08;
-  g.save();g.scale(0.86,0.86);g.rotate(tilt);
+  const mk=m.mk||0,fwd=clamp((m.vx||0)*(m.facing||1)/Math.max(1,m.def.spd),-1,1)*mk,bw=0.5+0.5*Math.sin(t*2.4+ph*5);
+  /* движение: наклон по ходу, покачивание в такт взмахам крыльев, дыхание */
+  const tilt=-0.08+sw*0.04+sp*Math.sin(t*20)*0.08+fwd*0.16;
+  const tw=T?lmTwitch(t,ph,0.8):0,tw2=T?lmTwitch(t+2,ph+1,0.55):0,jawE=T?lmFidget(t,ph+0.2,3.3):0;
+  const bobY=Math.sin(t*3.1+ph*2)*1.3+Math.sin(t*14+ph+0.6)*0.45*(1+mk*0.5);
+  g.save();g.translate(0,bobY);g.scale(0.86*(1+0.012*bw),0.86*(1+0.03*bw));g.rotate(tilt);
   if(!T){
     const SK='#f6b8c6',SKD='#e8a6b8',PK='#ff8aac',PKD='#d8467a',PKL='#ffb4cc';
     mobGlow(g,0,-2,22,'#ff9ac4',0.28+sp*0.3);
@@ -737,22 +755,22 @@ LM_MODEL.lfairy=function(g,m,FY,t,T,st,k,wv,ph){
     /* ближние крылья */
     g.save();g.translate(-1.8,-6);lmRosaryWing(g,-2.35,16.5,fl,false,false,t,1);lmRosaryWing(g,2.75,10.5,fl*0.8,false,false,t,2);g.restore();
     /* дальняя рука и нога — темнее */
-    {const hx=-7.6-sp*1,hy=1-sp*18,ik=lmRosaryIK(-0.6,-6.2,hx,hy,5,5.2,true);
+    {const hx=-7.6-sp*1+Math.sin(t*2.1+ph)*0.9-fwd*1.4,hy=1-sp*18+Math.sin(t*2.7+ph+1)*0.8+Math.abs(fwd)*0.8,ik=lmRosaryIK(-0.6,-6.2,hx,hy,5,5.2,true);
      lmRosaryTube(g,-0.6,-6.2,ik[2],ik[3],2,1.6,shadeHex(SK,-0.14),{});lmRosaryTube(g,ik[2],ik[3],ik[0],ik[1],1.6,1.2,shadeHex(SK,-0.14),{});
      lmRosaryHand(g,ik[0],ik[1],Math.atan2(ik[1]-ik[3],ik[0]-ik[2]),shadeHex(SK,-0.14),2.4,false);}
-    {const kx=4.2+sp*2,ky=9.4,fx=3+sp*3,fy=16.6;
+    {const kx=4.2+sp*2-fwd*1.2,ky=9.4,fx=3+sp*3-fwd*3+Math.sin(t*2.5+ph+2)*0.9,fy=16.6;
      lmRosaryTube(g,-0.6,4.4,kx,ky,2.4,1.7,shadeHex(SK,-0.14),{});lmRosaryTube(g,kx,ky,fx,fy,1.7,1.1,shadeHex(SK,-0.14),{});
      /* пуанта */
      g.beginPath();g.moveTo(fx-0.9,fy-1.2);g.quadraticCurveTo(fx,fy-1.8,fx+0.9,fy-1.2);g.quadraticCurveTo(fx+1,fy+1.6,fx+0.2,fy+2.4);g.quadraticCurveTo(fx-0.8,fy+1.6,fx-0.9,fy-1.2);g.closePath();mobPath(g,shadeHex(PK,-0.2),fx,fy,2,true);}
     /* юбка: задний ряд лепестков, потом ноги, потом передний ряд */
     const fan=0.55+sp*0.95;
-    for(let i=0;i<6;i++){const a=Math.PI/2+(i-2.5)*0.4*(1+sp*1.2)+Math.sin(t*3+i)*0.07;lmRosaryPetal(g,0,3,a,10.4+((i*7)%3)*0.7,3.6,i%2?'#e85c86':'#d8467a','#a82a58',0.2);}
+    for(let i=0;i<6;i++){const a=Math.PI/2+(i-2.5)*0.4*(1+sp*1.2)+Math.sin(t*3+i)*0.07*(1+mk*1.5)+fwd*0.22+Math.sin(t*14+i*1.7+ph)*0.02;lmRosaryPetal(g,0,3,a,10.4+((i*7)%3)*0.7,3.6,i%2?'#e85c86':'#d8467a','#a82a58',0.2);}
     /* ближняя нога выглядывает из-под юбки */
-    {const kx=0.8,ky=10.6,fx=-1.8,fy=19.6;
+    {const kx=0.8-fwd*0.8,ky=10.6,fx=-1.8-fwd*2.6+Math.sin(t*2.6+ph+1)*0.9,fy=19.6;
      lmRosaryTube(g,0.6,4.6,kx,ky,2.5,1.8,SK,{});lmRosaryTube(g,kx,ky,fx,fy,1.8,1.1,SK,{});
      g.beginPath();g.moveTo(fx-1,fy-1.4);g.quadraticCurveTo(fx,fy-2,fx+1,fy-1.4);g.quadraticCurveTo(fx+0.9,fy+1.6,fx-0.2,fy+2.6);g.quadraticCurveTo(fx-1.1,fy+1.6,fx-1,fy-1.4);g.closePath();mobPath(g,PK,fx,fy,2,true);
      g.strokeStyle='#ffd8e4';g.lineWidth=0.35;g.beginPath();g.moveTo(kx-0.4,ky+3);g.quadraticCurveTo(kx-1.2,ky+5,fx+0.2,fy-1);g.stroke();}
-    for(let i=0;i<5;i++){const a=Math.PI/2+(i-2)*0.52*(1+sp*1.1)+0.22+Math.sin(t*3+i*1.3)*0.08;lmRosaryPetal(g,0.2,3,a,9.2+((i*5)%3)*0.7,3.8,i%2?PKL:PK,'#c8386a',0.5);}
+    for(let i=0;i<5;i++){const a=Math.PI/2+(i-2)*0.52*(1+sp*1.1)+0.22+Math.sin(t*3+i*1.3)*0.08*(1+mk*1.5)+fwd*0.2;lmRosaryPetal(g,0.2,3,a,9.2+((i*5)%3)*0.7,3.8,i%2?PKL:PK,'#c8386a',0.5);}
     /* лиф: лепестки, обнимающие грудь, пояс-лента */
     g.beginPath();g.moveTo(-3,-6.8);g.bezierCurveTo(-3.8,-3.6,-2,-1.2,-2.6,3.6);g.lineTo(2.6,3.6);g.bezierCurveTo(2.2,-1.2,3.8,-3.6,3.2,-6.8);g.quadraticCurveTo(0.2,-8,-3,-6.8);g.closePath();mobPath(g,PK,-0.6,-3,6.5);
     g.save();g.clip();g.fillStyle='rgba(170,30,90,.22)';g.beginPath();g.ellipse(2.6,0,2.2,5,0,0,TAU);g.fill();g.restore();
@@ -762,9 +780,9 @@ LM_MODEL.lfairy=function(g,m,FY,t,T,st,k,wv,ph){
     /* шея */
     lmRosaryTube(g,0.4,-6.8,0.8,-9.4,2,1.8,SK,{});
     /* голова */
-    g.save();g.translate(1.2,-13+sl*0.2);g.rotate(0.1+sl*0.03);g.scale(1.14,1.14);
+    g.save();g.translate(1.2,-13+sl*0.2);g.rotate(0.1+sl*0.03-fwd*0.08+lmFidget(t,ph+0.5,5.2)*0.1);g.scale(1.14,1.14);
     /* волосы позади */
-    lmFluff(g,-1.6,0.6,3.4,4.4,9,0.14,3);mobPath(g,'#d0366a',-2,-1.6,4.4,true);
+    {const hs=Math.sin(t*3+ph+1)*0.35-fwd*0.9;lmFluff(g,-1.6+hs,0.6,3.4,4.4,9,0.14,3);mobPath(g,'#d0366a',-2+hs,-1.6,4.4,true);}
     g.strokeStyle='rgba(255,150,190,.5)';g.lineWidth=0.35;g.beginPath();g.moveTo(-2.8,-2.6);g.quadraticCurveTo(-3.6,1,-2.4,4);g.stroke();
     /* лицо */
     g.beginPath();g.moveTo(-2.2,-2.8);g.quadraticCurveTo(-3.2,0.6,-1,3.2);g.quadraticCurveTo(1.4,4.8,3.4,3.4);g.quadraticCurveTo(4.6,2.4,4.6,0.6);g.quadraticCurveTo(5.6,0.2,5.4,-0.6);g.quadraticCurveTo(4.8,-1.4,4.4,-2.6);g.quadraticCurveTo(1.6,-4.6,-2.2,-2.8);g.closePath();
@@ -787,7 +805,7 @@ LM_MODEL.lfairy=function(g,m,FY,t,T,st,k,wv,ph){
     for(const [x,y,r] of [[-3.8,-6.4,1.1],[2.8,-7.8,0.9]]){g.fillStyle='rgba(255,200,220,.85)';g.beginPath();g.arc(x,y,r,0,TAU);g.fill();}
     g.restore();
     /* ближняя рука: изящно вперёд-вверх, манжета-лепесток на плече */
-    {const hx=11-sp*3,hy=-11.6-sp*5,ik=lmRosaryIK(1.8,-6.2,hx,hy,5.4,5.6,false);
+    {const hx=11-sp*3-fwd*1.6+Math.sin(t*1.9+ph+1)*0.7,hy=-11.6-sp*5+Math.sin(t*2.4+ph+2)*0.9+Math.abs(fwd)*0.6,ik=lmRosaryIK(1.8,-6.2,hx,hy,5.4,5.6,false);
      lmRosaryTube(g,1.8,-6.2,ik[2],ik[3],2.1,1.7,SK,{});lmRosaryTube(g,ik[2],ik[3],ik[0],ik[1],1.7,1.3,SK,{});
      lmRosaryHand(g,ik[0],ik[1],Math.atan2(ik[1]-ik[3],ik[0]-ik[2]),SK,2.8,false);
      lmRosaryPetal(g,1.2,-7,-0.6,4.4,2.2,PKL,false,0.4);}
@@ -808,23 +826,23 @@ LM_MODEL.lfairy=function(g,m,FY,t,T,st,k,wv,ph){
     g.save();g.translate(-1.2,-6.2);lmRosaryWing(g,-1.9,14,-fl*0.5-sp*0.4,true,true,t,1);lmRosaryWing(g,2.4,9,-fl*0.4,true,true,t,2);g.restore();
     g.save();g.translate(-1.8,-6);lmRosaryWing(g,-2.35,16,fl*0.6-sp*0.3,true,false,t,2);lmRosaryWing(g,2.75,10,fl*0.5,true,false,t,1);g.restore();
     /* дальние конечности: болтаются */
-    const sway2=Math.sin(t*1.9+ph)*0.8;
-    {const hx=-3.4-sp*5+sway2,hy=9.6-sp*17,ik=lmRosaryIK(-0.6,-6.2,hx,hy,5.6,6,true);
+    const sway2=Math.sin(t*1.9+ph)*1.1+Math.sin(t*0.9+ph*3)*0.8-fwd*1.6;
+    {const hx=-3.4-sp*5+sway2+tw2*1.2,hy=9.6-sp*17-Math.abs(tw2)*1.6,ik=lmRosaryIK(-0.6,-6.2,hx,hy,5.6,6,true);
      lmRosaryTube(g,-0.6,-6.2,ik[2],ik[3],2,1.5,shadeHex(SK,-0.2),{});lmRosaryTube(g,ik[2],ik[3],ik[0],ik[1],1.4,1,shadeHex(SK,-0.2),{});
-     lmRosaryHand(g,ik[0],ik[1],Math.atan2(ik[1]-ik[3],ik[0]-ik[2]),shadeHex(SK,-0.2),3.8,true,0.3);}
-    {const kx=-2.6,ky=9.2,fx=1.2+sway2*0.4,fy=16.6;
+     lmRosaryHand(g,ik[0],ik[1],Math.atan2(ik[1]-ik[3],ik[0]-ik[2]),shadeHex(SK,-0.2),3.8,true,0.3+Math.abs(tw2)*0.4);}
+    {const kx=-2.6-fwd*0.6,ky=9.2,fx=1.2+sway2*0.4-fwd*1.5,fy=16.6;
      lmRosaryTube(g,-0.6,4.4,kx,ky,2.6,1.8,shadeHex(SK,-0.2),{});lmRosaryTube(g,kx,ky,fx,fy,1.8,1,shadeHex(SK,-0.2),{});
      g.strokeStyle=shadeHex(BN,-0.3);g.lineWidth=0.5;g.lineCap='round';for(let q=-1;q<=1;q++){g.beginPath();g.moveTo(fx,fy);g.lineTo(fx+q*0.7,fy+3.2);g.stroke();}}
     /* гнилая юбка: обрывки чёрных лепестков */
-    for(let i=0;i<6;i++){const a=Math.PI/2+(i-2.5)*0.44*(1+sp*0.8)+Math.sin(t*2.4+i)*0.09;
+    for(let i=0;i<6;i++){const a=Math.PI/2+(i-2.5)*0.44*(1+sp*0.8)+Math.sin(t*2.4+i)*0.09*(1+mk)+fwd*0.2;
       g.save();g.translate(0,3);g.rotate(a);g.beginPath();const L=7.4+((i*7)%4)*0.7,w=2.7;g.moveTo(0,0);g.bezierCurveTo(L*0.2,-w,L*0.7,-w,L*0.86,-w*0.3);g.lineTo(L,w*0.2);g.lineTo(L*0.82,w*0.5);g.lineTo(L*0.9,w);g.lineTo(L*0.6,w*0.8);g.bezierCurveTo(L*0.3,w*0.9,L*0.1,w*0.4,0,0);g.closePath();
       mobPath(g,i%2?'#3a2a34':'#2a1e28',L*0.4,-w*0.3,L*0.6);g.strokeStyle='rgba(150,60,80,.45)';g.lineWidth=0.3;g.beginPath();g.moveTo(1,0);g.lineTo(L*0.8,0);g.stroke();g.restore();}
     /* ближняя нога */
-    {const kx=1.4,ky=10.6,fx=0.2+sway2*0.5,fy=19.6;
+    {const kx=1.4-fwd*0.6,ky=10.6,fx=0.2+sway2*0.5-fwd*1.8,fy=19.6;
      lmRosaryTube(g,0.6,4.6,kx,ky,2.8,2,SK,{});lmRosaryTube(g,kx,ky,fx,fy,2,1.2,SK,{});
      g.strokeStyle=BN;g.lineWidth=0.5;g.lineCap='round';for(let q=-1;q<=1;q++){g.beginPath();g.moveTo(fx,fy);g.lineTo(fx+q*0.8,fy+3.6);g.stroke();}
      lmRosaryVine(g,[[kx-0.2,ky-1],[kx+1,ky+2],[kx-0.6,ky+4.4],[fx+0.6,fy-2.6]],0.6,VN,1.1,4,VNL);}
-    for(let i=0;i<4;i++){const a=Math.PI/2+(i-1.5)*0.52*(1+sp*0.8)+0.2+Math.sin(t*2.6+i*1.3)*0.1;
+    for(let i=0;i<4;i++){const a=Math.PI/2+(i-1.5)*0.52*(1+sp*0.8)+0.2+Math.sin(t*2.6+i*1.3)*0.1*(1+mk)+fwd*0.2;
       g.save();g.translate(0.2,3);g.rotate(a);const L=6.6+((i*5)%3)*0.7,w=2.9;g.beginPath();g.moveTo(0,0);g.bezierCurveTo(L*0.2,-w,L*0.7,-w*0.9,L*0.8,-w*0.4);g.lineTo(L,w*0.1);g.lineTo(L*0.76,w*0.4);g.lineTo(L*0.84,w*0.9);g.bezierCurveTo(L*0.5,w*1.1,L*0.2,w*0.6,0,0);g.closePath();
       mobPath(g,i%2?'#4a3440':'#3a2a34',L*0.4,-w*0.3,L*0.6);g.restore();}
     /* торс: рёбра через рваный лиф, вокруг — лоза */
@@ -842,7 +860,7 @@ LM_MODEL.lfairy=function(g,m,FY,t,T,st,k,wv,ph){
     for(let i=0;i<3;i++){g.beginPath();g.ellipse(0.4+i*0.9,-7.6-i*1.2,1.1,0.9,0.3,0,TAU);lmRosaryBP(g,BN,0.2+i*0.9,-7.9-i*1.2,1.2);}
     lmRosaryVine(g,[[-1.2,-8.2],[1.8,-7.4],[2.8,-9.4]],0.7,VN,1,5,VNL);
     /* голова: череп, свёрнутый набок, челюсть отвисла */
-    g.save();g.translate(3.8+jerk,-11.4-sp*1);g.rotate(0.6*slump-0.55*sp+Math.sin(t*1.6+ph)*0.05);g.scale(1.22,1.22);
+    g.save();g.translate(3.8+jerk+tw*0.8,-11.4-sp*1-Math.abs(tw)*0.5);g.rotate(0.6*slump-0.55*sp+Math.sin(t*1.6+ph)*0.05+tw*0.3+Math.sin(t*0.8+ph*2)*0.06-fwd*0.08);g.scale(1.22,1.22);
     /* спутанные волосы позади */
     for(let i=0;i<7;i++){g.strokeStyle=i%2?'#2a1822':'#1a0e14';g.lineWidth=0.7;g.lineCap='round';const ox=-2.6+i*0.3,wob=Math.sin(t*2+i)*0.5;g.beginPath();g.moveTo(ox,-2.4+i*0.4);g.quadraticCurveTo(ox-3-i*0.3+wob,2+i*0.6,ox-2.2+wob*1.5,6+i*0.8);g.stroke();}
     g.beginPath();g.moveTo(-3.6,0.4);g.bezierCurveTo(-4,-3.4,-1.4,-5.4,1.4,-5.2);g.bezierCurveTo(4.4,-5,5.2,-2.4,4.8,0.2);g.lineTo(3.4,1.8);g.bezierCurveTo(1.6,2.6,-1.4,2.6,-3.6,0.4);g.closePath();lmRosaryBP(g,BN,0.6,-2.4,5.4);
@@ -860,7 +878,7 @@ LM_MODEL.lfairy=function(g,m,FY,t,T,st,k,wv,ph){
     lmRosaryDrip(g,3,-0.2,t,ph*2,3.4,0.9);
     /* нос-провал и вся пасть: челюсть отвисает */
     g.fillStyle='#10060a';g.beginPath();g.moveTo(1.4,0.5);g.lineTo(2.1,2);g.lineTo(0.8,2);g.closePath();g.fill();
-    const jw=0.5+sp*0.7+Math.max(0,sl)*0.1;
+    const jw=0.5+sp*0.7+Math.max(0,sl)*0.1+jawE*(0.12+0.2*Math.abs(Math.sin(t*17)))+Math.abs(tw)*0.3;
     g.save();g.translate(-0.4,2.2);g.rotate(jw*0.6);
     g.beginPath();g.moveTo(-1,0);g.lineTo(5,0.2);g.quadraticCurveTo(5.4,1.8,3.6,2.6);g.lineTo(-0.6,2.2);g.closePath();lmRosaryBP(g,'#cfc3a6',2,1.2,3.4);
     g.fillStyle='#2a0610';g.beginPath();g.moveTo(-0.6,0.2);g.lineTo(4.8,0.3);g.lineTo(4,1);g.lineTo(-0.2,0.9);g.closePath();g.fill();
@@ -873,10 +891,10 @@ LM_MODEL.lfairy=function(g,m,FY,t,T,st,k,wv,ph){
     lmRosaryDrip(g,-1.6,-3.4,t,ph*4,2.4,0.8);
     g.restore();
     /* ближняя рука болтается; кисть с длинными пальцами */
-    {const hx=4+sp*5+Math.sin(t*1.9+ph+1)*0.8,hy=9.4-sp*17,ik=lmRosaryIK(1.8,-6.2,hx,hy,5.8,6.2,false);
+    {const hx=4+sp*5+Math.sin(t*1.9+ph+1)*1.2+Math.sin(t*1.1+ph*2)*0.8-fwd*1.4+tw*1.4,hy=9.4-sp*17-Math.abs(tw)*1.4,ik=lmRosaryIK(1.8,-6.2,hx,hy,5.8,6.2,false);
      lmRosaryTube(g,1.8,-6.2,ik[2],ik[3],2.2,1.6,SK,{});lmRosaryTube(g,ik[2],ik[3],ik[0],ik[1],1.5,1.1,SK,{});
      lmRosaryVine(g,[[ik[2]-0.4,ik[3]-1],[ik[2]+1.2,ik[3]+0.8],[ik[0]-0.8,ik[1]-2]],0.6,VN,1,6,VNL);
-     lmRosaryHand(g,ik[0],ik[1],Math.atan2(ik[1]-ik[3],ik[0]-ik[2]),SK,4,true,0.3);
+     lmRosaryHand(g,ik[0],ik[1],Math.atan2(ik[1]-ik[3],ik[0]-ik[2]),SK,4,true,0.3+Math.abs(tw)*0.45);
      lmRosaryRose(g,ik[2]+0.2,ik[3]-0.4,1.2,RD,1);}
     /* осыпающиеся тёмные лепестки */
     {const n=5+Math.round(sp*4);for(let i=0;i<n;i++){const a=t*(0.8+sp*6)+i*TAU/n+ph,r=13+sp*7,x=Math.cos(a)*r,y=Math.sin(a)*r*0.7-1;
