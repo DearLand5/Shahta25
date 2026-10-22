@@ -367,7 +367,7 @@ function drawPlayerSprite(g,x,y,st,anim,facing,opts){
 /* ---------- обводка моделей (стиль «мультяшный контур»): модель рисуется в черновик,
    затем под неё кладётся тёмный силуэт со смещениями; свечения откладываются и
    накладываются поверх, чтобы не получить грязную обводку вокруг ореолов ---------- */
-const OL={cv:null,g:null,scv:null,sg:null,active:false,defer:[],w:0,h:0,tint:null};
+const OL={cv:null,g:null,scv:null,sg:null,active:false,defer:[],grab:null,w:0,h:0,tint:null};
 function olReady(){
   if(OL.cv)return true;
   try{OL.cv=document.createElement('canvas');OL.cv.width=OL.cv.height=256;OL.g=OL.cv.getContext('2d');
@@ -431,6 +431,7 @@ function withOutline(g,cx,cy,rx,ry,col,th,fn){
   for(const [ox,oy] of offs)g.drawImage(OL.scv,0,0,w,h,x0+ox*d,y0+oy*d,w,h);
   g.drawImage(OL.cv,0,0,w,h,x0,y0,w,h);
   const ga=g.globalAlpha;
+  if(OL.grab){for(const q of OL.defer)OL.grab.push({m:q.m,fn:q.fn,a:q.a,x0,y0});OL.defer.length=0;}   /* кэш кадров мобов: свечения рисуются каждый кадр (lmOutline в 54) */
   for(const q of OL.defer){g.setTransform(q.m.a,q.m.b,q.m.c,q.m.d,q.m.e+x0,q.m.f+y0);g.globalAlpha=ga*q.a;g.globalCompositeOperation='lighter';try{q.fn(g);}catch(e){}g.globalCompositeOperation='source-over';}
   OL.defer.length=0;
   g.restore();
@@ -647,7 +648,8 @@ function drawMobSprite0(g,m,t){
   const OR=(def.lm||def.id==='lmimic')?Math.max(m.w,m.h)*(LM_OR[def.id]||1.2)+8:Math.max(m.w,m.h)*1.3+16,dark=def.dim===1||(def.boss&&false);
   const olTh=-1.2;
   OL.shade={h:m.h,top:dark?0.1:0.16,bot:def.fly?0.26:0.36};
-  withOutline(g,0,-m.h*0.5,OR,OR,dark?'rgba(5,2,4,.96)':'rgba(24,15,10,.92)',olTh,(g)=>{
+  if(def.lm){LMC.m=m;LMC.hurt=hurtSave;}
+  (def.lm?lmOutline:withOutline)(g,0,-m.h*0.5,OR,OR,dark?'rgba(5,2,4,.96)':'rgba(24,15,10,.92)',olTh,(g)=>{
   if(OL.active&&g===OL.g){if(hurtSave>0)OL.tint='rgba(255,250,245,'+(0.25+0.55*clamp(hurtSave/0.24,0,1))+')';else if(m.deathK!==undefined)OL.tint=deathTint(m);}
   g.save();
   g.translate(0,ty);

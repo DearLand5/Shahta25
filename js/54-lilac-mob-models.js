@@ -54,6 +54,39 @@ function lmLimb(g,hx,hy,fx,fy,l1,l2,back,w0,w1,col){
   return [ex,ey,kx,ky];
 }
 
+/* кэш кадров: модели Лиловых небес подробные и дорогие, поэтому модель с обводкой перерисовывается
+   LMC.fps раз в секунду (вразнобой) в свой холст моба (m._lc), а в остальных кадрах кладётся готовая картинка —
+   место на экране считается каждый кадр, движение остаётся плавным. Свечения (OL.defer) — каждый кадр.
+   Без кэша: удар (вспышка), смерть, появление. */
+const LMC={m:null,hurt:0,fps:15,ft:-1,n:0};
+function lmOutline(g,cx,cy,rx,ry,col,th,fn){
+  const m=LMC.m,hu=LMC.hurt;LMC.m=null;LMC.hurt=0;
+  if(!m||hu>0||m.deathK!==undefined||(m.age!==undefined&&m.age<0.35)||OL.active||!g.getTransform)return withOutline(g,cx,cy,rx,ry,col,th,fn);
+  const M=g.getTransform(),sc=Math.max(Math.hypot(M.a,M.b),Math.hypot(M.c,M.d))||1,tol=0.06*sc;
+  const dx=M.c*cy+M.e,dy=M.d*cy+M.f;                 /* середина моба на экране */
+  const pd=Math.abs(th)*sc+5,W=2*Math.ceil(Math.abs(M.a)*rx+Math.abs(M.c)*ry+pd),H=2*Math.ceil(Math.abs(M.b)*rx+Math.abs(M.d)*ry+pd);
+  let c=m._lc;
+  const fits=c&&c.W>=W&&c.H>=H&&c.W*c.H<=W*H*1.5+64;
+  const same=fits&&c.tf===m.tf&&c.st===m.state&&G.time>=c.t&&
+    Math.sign(c.a)===Math.sign(M.a)&&Math.abs(c.a-M.a)<=tol&&Math.abs(c.b-M.b)<=tol&&Math.abs(c.d-M.d)<=tol;
+  /* устаревшую картинку обновляем не больше одной за кадр (кроме сильно устаревших) — без рывков от многих мобов */
+  if(LMC.ft!==G.time){LMC.ft=G.time;LMC.n=0;}
+  const age=same?G.time-c.t:1e9,fresh=same&&(age<1/LMC.fps||(LMC.n>=1&&age<0.25));
+  if(!fresh)LMC.n++;
+  if(!fresh){
+    if(!fits){const cv=document.createElement('canvas');cv.width=W;cv.height=H;c=m._lc={cv,g:cv.getContext('2d'),W,H,fx:[]};}
+    const C=c.g;
+    C.setTransform(1,0,0,1,0,0);C.globalAlpha=1;C.globalCompositeOperation='source-over';C.clearRect(0,0,c.W,c.H);
+    C.setTransform(M.a,M.b,M.c,M.d,c.W/2+dx-Math.round(dx)-M.c*cy,c.H/2+dy-Math.round(dy)-M.d*cy);
+    c.fx.length=0;OL.grab=c.fx;try{withOutline(C,cx,cy,rx,ry,col,th,fn);}finally{OL.grab=null;}
+    c.t=G.time-Math.random()*0.4/LMC.fps;c.tf=m.tf;c.st=m.state;c.a=M.a;c.b=M.b;c.d=M.d;   /* разброс: мобы не перерисовываются в одном кадре */
+  }else OL.shade=null;
+  const ox=Math.round(dx)-c.W/2,oy=Math.round(dy)-c.H/2,ga=g.globalAlpha;   /* картинка из кэша ложится с точностью до полпикселя */
+  g.save();g.setTransform(1,0,0,1,0,0);g.drawImage(c.cv,ox,oy);
+  for(const q of c.fx){g.setTransform(q.m.a,q.m.b,q.m.c,q.m.d,q.m.e+q.x0+ox,q.m.f+q.y0+oy);g.globalAlpha=ga*q.a;g.globalCompositeOperation='lighter';try{q.fn(g);}catch(e){}}
+  g.restore();
+}
+
 function lilMobModel(g,m,FY,t){
   const d=m.def,T=!!m.tf,st=m.state,k=m.tele||0,wv=m.anim*13,ph=m.phase||0;
   const fn=LM_MODEL[d.id];if(fn)fn(g,m,FY,t,T,st,k,wv,ph);
@@ -217,82 +250,4 @@ const LM_MODEL={
     }
     g.restore();
   },
-  lsheep(g,m,FY,t,T,st,k){
-    const air=!m.onGround,leg=T?7:3.6;
-    /* ноги: в Истине — длинные и тонкие */
-    for(const [x,far] of [[-7,1],[-3,0],[5,1],[8,0]]){g.strokeStyle=far?(T?'#6a5a5a':'#3a2a3a'):(T?'#8a7a7a':'#4a3a4a');g.lineWidth=T?1.2:2.2;g.lineCap='round';
-      const kx=air?(x<0?-2:2):0;g.beginPath();g.moveTo(x,FY-leg-4);g.lineTo(x+kx,FY-(air?leg*0.5:0));g.stroke();}
-    const by=FY-leg-8+(air?-1:0);
-    /* шерсть-облако */
-    const wool=T?'#d8ccc4':'#f8f4fc';
-    for(const [x,y,r] of [[-9,0,5.4],[-3,-3,6.4],[4,-2,6],[8,1,4.6],[-6,3,5],[2,3,5.4]])mobBlob(g,x,by+y,r,r*0.92,wool,0,true);
-    g.strokeStyle=T?'rgba(80,60,60,.5)':'rgba(180,170,200,.5)';g.lineWidth=0.6;for(let i=0;i<8;i++){g.beginPath();g.arc(-9+i*2.6,by-1+Math.sin(i*1.7)*3,1.4,0,Math.PI*1.4);g.stroke();}
-    if(T){/* в шерсти — глаза */
-      for(const [x,y] of [[-8,-2],[-3,-5],[2,-4],[6,0],[-5,2],[1,2],[-1,-1]]){const bl=Math.sin(t*3+x*2+y)>0.9?0.2:1;g.fillStyle='#f4ece4';g.beginPath();g.ellipse(x,by+y,1.6,1.1*bl,0,0,TAU);g.fill();
-        if(bl>0.5){g.fillStyle='#3a1a1a';g.beginPath();g.arc(x+(m.lookX||0)*0.5,by+y,0.6,0,TAU);g.fill();}}}
-    /* голова */
-    g.save();g.translate(11,by-2);
-    g.beginPath();g.ellipse(0,0,4,3.4,0.2,0,TAU);mobPath(g,T?'#8a7a74':'#4a3a4a',0,0,4);
-    g.fillStyle=T?'#8a7a74':'#4a3a4a';g.beginPath();g.ellipse(-2.4,-2.6,2,1,-0.6,0,TAU);g.fill();
-    if(!T){g.strokeStyle='#f4eefa';g.lineWidth=0.7;g.beginPath();g.arc(1,-0.6,1,3.4,6);g.stroke();g.fillStyle='rgba(255,150,180,.6)';g.beginPath();g.arc(2,1.2,0.8,0,TAU);g.fill();}
-    else{g.fillStyle='#f4ece4';g.beginPath();g.arc(1,-0.6,1.3,0,TAU);g.fill();g.fillStyle='#2a0a0a';g.beginPath();g.arc(1.3,-0.6,0.6,0,TAU);g.fill();}
-    mobBlob(g,-2,-3.4,2.6,2,wool,0,true);
-    g.restore();
-  },
-  lsandman(g,m,FY,t,T,st,k){
-    const thr=st==='throw'?k:0,bob=Math.sin(t*1.8+m.phase)*1.5;
-    g.save();g.translate(0,bob);
-    if(!T){
-      /* сонный старичок в колпаке, в мантии со звёздами */
-      g.beginPath();g.moveTo(-7,14);g.quadraticCurveTo(-8,0,-4,-8);g.lineTo(5,-8);g.quadraticCurveTo(8,0,8,14);g.quadraticCurveTo(0,17,-7,14);g.closePath();mobPath(g,'#9a8ad8',0,3,12);
-      g.fillStyle='#ffe890';for(const [x,y] of [[-3,2],[3,7],[0,11],[4,-2]]){g.beginPath();for(let i=0;i<10;i++){const a=i/10*TAU-Math.PI/2,r=i%2?0.6:1.4;g.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r);}g.closePath();g.fill();}
-      g.beginPath();g.arc(1,-12,5,0,TAU);mobPath(g,'#ffe0c8',1,-12,5);
-      g.fillStyle='#f4f4f4';g.beginPath();g.moveTo(-3,-10);g.quadraticCurveTo(1,2,6,-10);g.quadraticCurveTo(1,-7,-3,-10);g.fill();
-      g.strokeStyle='#5a3a2a';g.lineWidth=0.7;g.beginPath();g.arc(0.6,-13,1,0.3,Math.PI-0.3);g.arc(3.6,-13,1,0.3,Math.PI-0.3);g.stroke();
-      g.fillStyle='rgba(255,150,150,.5)';g.beginPath();g.arc(4.4,-11,1,0,TAU);g.fill();
-      /* колпак */
-      g.beginPath();g.moveTo(-4,-15);g.quadraticCurveTo(0,-20,6,-15);g.quadraticCurveTo(-2,-22,-10,-14+Math.sin(t*2)*1.4);g.quadraticCurveTo(-6,-15,-4,-15);g.closePath();mobPath(g,'#c8c0f0',0,-17,7);
-      g.strokeStyle='#8a80c8';g.lineWidth=1;for(let i=0;i<3;i++){g.beginPath();g.moveTo(-2-i*2.6,-17+i*0.3);g.lineTo(-1-i*2.6,-15.4+i*0.3);g.stroke();}
-      g.fillStyle='#fff';g.beginPath();g.arc(-10,-14+Math.sin(t*2)*1.4,1.8,0,TAU);g.fill();
-    }else{
-      /* Истина: высокая худая фигура, из пустых глаз сыплется песок */
-      g.fillStyle='#6a6070';g.beginPath();g.moveTo(-6,16);g.lineTo(-4,-6);g.lineTo(4,-6);g.lineTo(7,16);g.lineTo(3,13);g.lineTo(0,17);g.lineTo(-3,13);g.closePath();g.fill();
-      g.strokeStyle='#3a3040';g.lineWidth=0.6;for(let i=0;i<4;i++){g.beginPath();g.moveTo(-3+i*2,-4);g.lineTo(-4+i*3,15);g.stroke();}
-      g.beginPath();g.ellipse(1,-13,4,5.6,0,0,TAU);mobPath(g,'#d8d0c0',1,-13,5);
-      g.fillStyle='#0a0606';g.beginPath();g.ellipse(-0.6,-13.6,1.2,1.8,0,0,TAU);g.ellipse(3,-13.6,1.2,1.8,0,0,TAU);g.fill();g.beginPath();g.ellipse(1.2,-9.6,1.4,2.2,0,0,TAU);g.fill();
-      g.fillStyle='rgba(232,216,160,.85)';for(let i=0;i<6;i++){const y=-12+((t*14+i*2.4)%14);g.fillRect(-0.9+Math.sin(i)*0.3,y,0.8,0.8);g.fillRect(2.7+Math.cos(i)*0.3,y+1,0.8,0.8);}
-    }
-    /* рука с горстью песка и мешок */
-    g.strokeStyle=T?'#d8d0c0':'#9a8ad8';g.lineWidth=2;g.lineCap='round';g.beginPath();g.moveTo(4,-4);g.lineTo(9+thr*3,-2-thr*6);g.stroke();
-    if(thr>0.2){mobGlow(g,10+thr*3,-3-thr*6,6,'#f4e6b0',0.6*thr);g.fillStyle='#f4e6b0';for(let i=0;i<4;i++)g.fillRect(9+thr*3+Math.sin(t*20+i)*1.4,-4-thr*6+Math.cos(t*16+i)*1.4,0.9,0.9);}
-    g.beginPath();g.ellipse(-7,6,4,5,0.2,0,TAU);mobPath(g,T?'#7a6a5a':'#c8a878',-7,6,5);g.strokeStyle=T?'#4a3a2a':'#8a6a40';g.lineWidth=0.8;g.beginPath();g.moveTo(-9,1.6);g.lineTo(-5,1.4);g.stroke();
-    if(!T&&Math.random()<0.1)spawnPart(m.x-m.facing*6,m.y+4,rnd(-6,6),20,1,'#f4e6b0',1.4,40);
-    g.restore();
-  },
-  lnightmare(g,m,FY,t,T,st,k){
-    const truth=veilT>0.45,roar=st==='roar'?k:0,ch=st==='charge';
-    if(!truth){
-      /* Иллюзия: еле видная дрожь воздуха с двумя огоньками */
-      g.globalAlpha*=0.6;g.fillStyle='rgba(220,210,255,.25)';g.beginPath();g.moveTo(-8,8);g.quadraticCurveTo(-10,-8,0,-12);g.quadraticCurveTo(10,-8,8,8);g.quadraticCurveTo(4,4,2,10);g.quadraticCurveTo(-2,4,-8,8);g.fill();
-      g.fillStyle='rgba(255,255,255,.8)';g.beginPath();g.ellipse(-2,-4,1,1.6,0,0,TAU);g.ellipse(3,-4,1,1.6,0,0,TAU);g.fill();return;}
-    /* Истина: тень-зверь, сгорбленный, с множеством глаз и когтями */
-    g.save();g.translate(0,ch?-2:0);g.rotate(ch?0.1:roar*-0.08);
-    const sw=Math.sin(t*3+m.phase);
-    for(const [hx,fx,far] of [[-8,-14,1],[6,10+roar*3,1],[-6,-11,0],[8,14+roar*4,0]]){lmLeg(g,hx,2,fx+(ch?6:0),FY-1,7,8,hx<0,far?3:3.6,far?'#0a0612':'#1a1028','#e8dcc8');}
-    g.beginPath();g.moveTo(-16,4);g.quadraticCurveTo(-18,-12,-4,-15);g.quadraticCurveTo(10,-17,14,-6);g.quadraticCurveTo(15,4,6,7);g.quadraticCurveTo(-8,9,-16,4);g.closePath();mobPath(g,'#1a1028',0,-4,16);
-    /* дымные клочья */
-    g.fillStyle='rgba(20,10,30,.7)';for(let i=0;i<5;i++){const a=t*2+i*1.3;g.beginPath();g.arc(-12+i*5+Math.sin(a)*2,-14-Math.abs(Math.cos(a))*4,2.6,0,TAU);g.fill();}
-    /* глаза по всему телу */
-    for(const [x,y,r] of [[-10,-6,1.4],[-5,-10,1.6],[0,-12,1.3],[-3,-4,1.2],[5,-8,1.4],[-8,0,1.1],[2,-2,1]]){const bl=Math.sin(t*2.4+x+y)>0.94?0.2:1;
-      lmRim(g,(g)=>{softGlow(g,x,y,r*3,'#ffb030',0.6*bl);});g.fillStyle='#ffc040';g.beginPath();g.ellipse(x,y,r,r*0.8*bl,0,0,TAU);g.fill();if(bl>0.5){g.fillStyle='#2a0a00';g.beginPath();g.ellipse(x+(m.lookX||0)*0.4,y,r*0.3,r*0.7,0,0,TAU);g.fill();}}
-    /* голова и пасть */
-    g.save();g.translate(14,-6+roar*-2);
-    g.beginPath();g.ellipse(0,0,7,6,0.1,0,TAU);mobPath(g,'#140a20',0,0,7);
-    g.fillStyle='#3a0a10';g.beginPath();g.moveTo(-1,1);g.quadraticCurveTo(6,2+roar*6,10,1);g.quadraticCurveTo(6,6+roar*6,-1,4+roar*3);g.closePath();g.fill();
-    lmTeeth(g,0,1.4,9.6,6,1.8,'#f4ead6');lmTeeth(g,0,4+roar*3,8.4,5,1.6,'#f4ead6',false);
-    for(const [x,y] of [[1,-3],[4.4,-3.6]]){lmRim(g,(g)=>{softGlow(g,x,y,5,'#ffb030',0.8);});g.fillStyle='#ffd060';g.beginPath();g.ellipse(x,y,1.4,1,0,0,TAU);g.fill();}
-    g.restore();
-    g.restore();
-    if(roar>0)mobGlow(g,14,-6,12+roar*14,'#ff3a2a',0.5*roar);
-  }
 };
