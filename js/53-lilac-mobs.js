@@ -473,12 +473,7 @@ function lilLongPart(g,m,time){
     return;}
   const x0=id==='ljack'?m.x:m.x+m.facing*10,y0=id==='ljack'?m.y-m.h*0.9:m.y-m.h*0.7,x1=x0+m.nx2*e,y1=y0+m.ny2*e,len=Math.hypot(x1-x0,y1-y0),n=Math.max(4,Math.floor(len/7));
   const a=Math.atan2(y1-y0,x1-x0);
-  if(id==='ljack'){
-    /* пружина или (в Истине) полосатая шея-червь */
-    for(let i=0;i<=n;i++){const f=i/n,x=x0+(x1-x0)*f+Math.sin(f*Math.PI)*Math.cos(a+Math.PI/2)*8,y=y0+(y1-y0)*f+Math.sin(f*Math.PI)*Math.sin(a+Math.PI/2)*8;
-      if(T){g.fillStyle=i%2?'#7a4ab0':'#5ab88a';g.beginPath();g.arc(x,y,7-f*1.5,0,TAU);g.fill();}
-      else{g.strokeStyle=i%2?'#c8ccd8':'#8a8e98';g.lineWidth=2.2;g.beginPath();g.ellipse(x,y,7,3,a+Math.PI/2,0,TAU);g.stroke();}}
-    lilClownHead(g,x1,y1,m,time);
+  if(id==='ljack'){lmToysJackNeck(g,m,time);  /* шея-пружина и голова — в 66 */
   }else{
     /* шея лебедя */
     g.strokeStyle=T?'#e0b0b0':'#f4f8fa';g.lineWidth=7;g.lineCap='round';g.beginPath();g.moveTo(x0,y0);g.quadraticCurveTo((x0+x1)/2,(y0+y1)/2-18*(1-e),x1,y1);g.stroke();
@@ -491,18 +486,6 @@ function lilLongPart(g,m,time){
       g.fillStyle='#1a1a20';g.beginPath();g.moveTo(5,-3);g.lineTo(9,-2);g.lineTo(7,1);g.closePath();g.fill();g.fillStyle='#1a1a20';g.beginPath();g.arc(1.4,-1.6,1.2,0,TAU);g.fill();}
     g.restore();
   }
-}
-/* голова клоуна (на пружине — в мире, в коробке — в модели) */
-function lilClownHead(g,x,y,m,time){
-  const T=m.tf;g.save();g.translate(x,y);g.scale(m.facing,1);
-  g.fillStyle=T?'#4ab880':'#ff6a3a';for(const sd of [-1,1]){g.beginPath();g.arc(sd*9,-2,6,0,TAU);g.fill();}
-  const c=['#fff6f0','#f4e6dc','#c8b0a8'];g.fillStyle=c[2];g.beginPath();g.arc(0,0,10,0,TAU);g.fill();g.fillStyle=c[1];g.beginPath();g.arc(-0.6,-0.6,9.2,0,TAU);g.fill();g.fillStyle=c[0];g.beginPath();g.arc(-3,-3.6,3.4,0,TAU);g.fill();
-  g.fillStyle='#8a4ab8';g.beginPath();g.moveTo(-6,-8);g.lineTo(6,-8);g.lineTo(1,-20);g.closePath();g.fill();g.fillStyle='#ffd040';g.beginPath();g.arc(1,-20,2.2,0,TAU);g.fill();
-  g.fillStyle='#e02a3a';g.beginPath();g.arc(3.6,1,2.6,0,TAU);g.fill();
-  if(T){g.fillStyle='#2a0a10';g.beginPath();g.moveTo(-7,3);g.quadraticCurveTo(1,13,9,3);g.quadraticCurveTo(1,7,-7,3);g.fill();g.fillStyle='#fff6ea';for(let t=0;t<6;t++){g.beginPath();g.moveTo(-6+t*2.6,4+Math.sin(t)*0.5);g.lineTo(-4.7+t*2.6,7.4);g.lineTo(-3.4+t*2.6,4.4);g.fill();}
-    g.fillStyle='#ffd040';g.beginPath();g.arc(-2,-3,1.6,0,TAU);g.arc(5,-3,1.6,0,TAU);g.fill();}
-  else{g.strokeStyle='#e02a3a';g.lineWidth=1.6;g.beginPath();g.arc(1,4,5,0.2,Math.PI-0.2);g.stroke();g.fillStyle='#2a2440';g.beginPath();g.arc(-2,-3,1.4,0,TAU);g.arc(5,-3,1.4,0,TAU);g.fill();}
-  g.restore();
 }
 /* снаряды Лиловых небес */
 function lilDrawProj(g,p){
