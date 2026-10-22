@@ -856,7 +856,8 @@ const UI={
       <div class="row" style="width:min(94vw,540px)">
         <button class="btn" id="mAll" style="flex:1" ${keys.length?'':'disabled'}>💰 Продать всю руду (${fmt(total)})</button>
       </div>
-      ${hell&&keys.some(k=>!ORES[k].dim)?`<div class="row" style="width:min(94vw,540px)"><button class="btn alt" id="mEarth" style="flex:1">🌍 Продать только руду Земли</button></div>`:''}
+      ${hell&&G.dim===2&&keys.some(k=>ORES[k].dim===2)?`<div class="row" style="width:min(94vw,540px)"><button class="btn alt" id="mEarth" style="flex:1">🌸 Продать только руду Лиловых небес</button></div>`:''}
+      ${hell&&G.dim!==2&&keys.some(k=>!ORES[k].dim)?`<div class="row" style="width:min(94vw,540px)"><button class="btn alt" id="mEarth" style="flex:1">🌍 Продать только руду Земли</button></div>`:''}
       <button class="btn alt" id="mBack">Выйти</button>
     `);
     wireQty(d,(key,v)=>{const kind=key[1],id=key.slice(2);const sum=kind==='o'?preview(id,v):previewM(id,v);
@@ -864,7 +865,7 @@ const UI={
       if(a)a.textContent=v;if(b)b.innerHTML=fmt(sum)+' <i class="mi coin inl"></i>';if(c)c.textContent=v>1?' · ≈'+fmt(Math.round(sum/v))+'/шт':'';});
     d.querySelector('#mAll').onclick=()=>{let g=0,n=0;for(const k of keys){n+=player.inv[k]||0;g+=sellN(k,player.inv[k]||0);}
       if(!g){UI.toast('Нечего продавать');return;}SFX.sell();SFX.coin();vib(20);UI.toast('Продано '+n+' шт за '+fmt(g)+' 💰');statAdd('earned',g);saveGame();UI.market();};
-    if(d.querySelector('#mEarth'))d.querySelector('#mEarth').onclick=()=>{let g=0;for(const k of keys)if(!ORES[k].dim)g+=sellN(k,player.inv[k]);SFX.coin();UI.toast('+'+fmt(g)+' 💰');statAdd('earned',g);saveGame();UI.market();};
+    if(d.querySelector('#mEarth'))d.querySelector('#mEarth').onclick=()=>{let g=0;for(const k of keys)if(G.dim===2?ORES[k].dim===2:!ORES[k].dim)g+=sellN(k,player.inv[k]);SFX.coin();UI.toast('+'+fmt(g)+' 💰');statAdd('earned',g);saveGame();UI.market();};
     d.querySelectorAll('[data-sellq]').forEach(b=>{b.onclick=()=>{const [kind,id,key]=b.getAttribute('data-sellq').split(':');
       const have=kind==='o'?(player.inv[id]||0):((player.mats||{})[id]||0),n=Math.min(have,qtyVal(key,have));if(n<=0)return;
       let g;if(kind==='o')g=sellN(id,n);else{g=sellMat(id,n);player.money+=g;}

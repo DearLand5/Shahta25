@@ -40,7 +40,7 @@ if(!MAT_KINDS.some(k=>k[0]==='herb'))MAT_KINDS.push(['herb','🌿 Травы']);
 
 const LB_BREWS=[
   {id:'lbheal',n:'Медовый отвар',     ic:'🍯',c:'#ffd27a',r:{lhclover:3},           out:2,txt:'Сразу лечит 40% здоровья.'},
-  {id:'lbdig', n:'Пыльцевый эликсир', ic:'🌼',c:'#fff08a',r:{lhpollen:2,lhclover:1},out:1,txt:'Копаешь на 35% быстрее 90 секунд.',buf:'dig',t:90},
+  {id:'lbdig', n:'Пыльцевой эликсир', ic:'🌼',c:'#fff08a',r:{lhpollen:2,lhclover:1},out:1,txt:'Копаешь на 35% быстрее 90 секунд.',buf:'dig',t:90},
   {id:'lbstr', n:'Шиповый эликсир',   ic:'🌹',c:'#ff6a8a',r:{lhthorn:2,lhpollen:1}, out:1,txt:'Урон по мобам +25% на 90 секунд.',buf:'str',t:90},
   {id:'lbeth', n:'Сонный эликсир',    ic:'💤',c:'#9ae8d0',r:{lhmint:2,lhiris:1},    out:1,txt:'Эфир сразу полон и 60 секунд копится вдвое быстрее.',buf:'eth',t:60},
   {id:'lbsan', n:'Ирисовый настой',   ic:'💠',c:'#a8c8ff',r:{lhiris:2,lhmint:1},    out:1,txt:'120 секунд Рассудок тает вдвое медленнее.',buf:'san',t:120},

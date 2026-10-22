@@ -115,7 +115,7 @@ const ORES=[
  {id:36,dim:1,name:'Звезда преисподней',rar:6,dmin:1300,dmax:99999,hp:900,price:90000,tier:10,color:'#fff0a0',glow:'#ffffff',vein:0.925},
  /* Лиловые небеса: sh — рисунок самородка (drawLilacOre в 47-lilac-art) */
  {id:37,dim:2,name:'Росяной кварц'      ,rar:0,dmin:4   ,dmax:290  ,hp:820 ,price:60000  ,tier:10,color:'#bfe6ff',glow:'#ffffff',vein:0.815,sh:'drop'},
- {id:38,dim:2,name:'Пыльцевый янтарь'   ,rar:1,dmin:30  ,dmax:300  ,hp:900 ,price:85000  ,tier:10,color:'#ffcf40',glow:'#fff4b0',vein:0.835,sh:'pollen'},
+ {id:38,dim:2,name:'Пыльцевой янтарь'   ,rar:1,dmin:30  ,dmax:300  ,hp:900 ,price:85000  ,tier:10,color:'#ffcf40',glow:'#fff4b0',vein:0.835,sh:'pollen'},
  {id:39,dim:2,name:'Лепестковый родонит',rar:2,dmin:120 ,dmax:320  ,hp:1000,price:130000 ,tier:11,color:'#ff86c4',glow:'#ffd8ee',vein:0.855,sh:'petal'},
  {id:40,dim:2,name:'Сонный жемчуг'      ,rar:3,dmin:180 ,dmax:330  ,hp:1100,price:190000 ,tier:11,color:'#ece2fa',glow:'#ffffff',vein:0.875,sh:'pearl'},
  {id:41,dim:2,name:'Небесный хрусталь'  ,rar:0,dmin:250 ,dmax:580  ,hp:980 ,price:110000 ,tier:11,color:'#96d4ff',glow:'#e8f8ff',vein:0.820,sh:'shard'},

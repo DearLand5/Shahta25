@@ -14,8 +14,8 @@ function lilNight(){const t=lilClock();if(t<240)return 0;if(t<270)return (t-240)
 function lilSetNight(on){G.lilShift=(on?295:60)-((Date.now()/1000)%LIL_DAY);}
 
 /* ---------- материалы: слитки и эссенции ---------- */
-[[37,'Росяной слиток'],[38,'Пыльцевый слиток'],[39,'Родонитовый слиток'],[40,'Жемчужный слиток'],
- [41,'Хрустальный слиток'],[42,'Берилловый слиток'],[43,'Опалитовый слиток'],[44,'Слиток рассвета'],
+[[37,'Росяной слиток'],[38,'Пыльцевой слиток'],[39,'Родонитовый слиток'],[40,'Жемчужный слиток'],
+ [41,'Хрустальный слиток'],[42,'Берилловый слиток'],[43,'Опалитовый слиток'],[44,'Слёзный слиток'],
  [45,'Цитриновый слиток'],[46,'Топазовый слиток'],[47,'Слиток пчелиного золота'],
  [48,'Фарфоровый слиток'],[49,'Агатовый слиток'],[50,'Латунитовый слиток'],[51,'Слиток стеклянного глаза'],
  [52,'Гранатовый слиток'],[53,'Бутонитовый слиток'],[54,'Слиток розовой крови'],
@@ -132,20 +132,30 @@ const LIL_FOLK=[['Лиза Пряникова','её'],['Тимоша Зефир
   ['Миша Карамелькин','его'],['Нюта Сонина','её'],['Рома Колокольчиков','его'],['Поля Розова','её'],['Гриша Ватрушкин','его'],['Даша Ленточкина','её'],['Федя Леденцов','его']];
 function lilFem(c){const f=LIL_FOLK.find(q=>q[0]===c.who);return !!f&&f[1]==='её';}
 function lilBiomeOf(d){return BIOMES[10+(d<250?0:d<550?1:d<850?2:d<1150?3:d<1450?4:d<1750?5:6)].n;}
+/* житель, которого ещё нет на доске (если заняты все — любой) */
+function lilPickFolk(){const L=(player.lcontracts&&player.lcontracts.list)||[],fr=LIL_FOLK.filter(q=>!L.some(c=>c.who===q[0]));const a=fr.length?fr:LIL_FOLK;return a[Math.floor(Math.random()*a.length)];}
+/* лицо на плакате у каждого жителя своё и постоянное */
+function lilFolkFace(nm){let h=7;for(let i=0;i<nm.length;i++)h=(h*31+nm.charCodeAt(i))%1000003;return h;}
 function makeLContract(){
-  const deep=Math.max(player.prog.lilacDepth||0,40),r=Math.random(),f=LIL_FOLK[Math.floor(Math.random()*LIL_FOLK.length)];
+  const deep=Math.max(player.prog.lilacDepth||0,40),r=Math.random(),f=lilPickFolk();
   const pool=ORES.filter(o=>o&&o.dim===2&&o.tier<=Math.max(10,player.pickLvl)&&o.dmin<=deep+80);
   const o=pool[Math.floor(Math.random()*pool.length)]||ORES[37];
-  const face=Math.floor(Math.random()*1e6),where=lilBiomeOf(Math.min(2100,deep+Math.random()*200));
+  const face=lilFolkFace(f[0]),where=lilBiomeOf(Math.min(2100,deep+Math.random()*200));
   if(r<0.5){const n=8+Math.floor(Math.random()*14);
     return {type:'ore',target:o.id,need:n,have:0,who:f[0],face,where,title:'Добыть: '+o.name+' ×'+n,ask:'Родные просят руду, что '+f[1]+' успокаивала',rc:Math.round(orePrice(o.id)*n*0.7/1000)*1000,rs:6+Math.floor(n/2)};}
   if(r<0.8){const n=3+Math.floor(Math.random()*6),id='i'+o.id;
     return {type:'give',target:id,need:n,have:0,who:f[0],face,where,title:'Принести: '+MATS[id].n+' ×'+n,ask:'Из слитков отольют колокольчик, чтобы '+f[1]+' позвать',rc:Math.round(matValue(id)*n*1.6/1000)*1000,rs:8+n*2};}
-  const marks=[250,550,850,1150,1450,1750,2100];const tgt=marks.find(m=>m>deep)||2190;
+  const marks=[250,550,850,1150,1450,1750,2100,2190],tgt=marks.find(m=>m>(player.prog.lilacDepth||0));
+  if(!tgt){const n=3+Math.floor(Math.random()*6),id='i'+o.id;
+    return {type:'give',target:id,need:n,have:0,who:f[0],face,where,title:'Принести: '+MATS[id].n+' ×'+n,ask:'Из слитков отольют колокольчик, чтобы '+f[1]+' позвать',rc:Math.round(matValue(id)*n*1.6/1000)*1000,rs:8+n*2};}
   return {type:'depth',target:0,need:tgt,have:Math.floor(player.prog.lilacDepth||0),who:f[0],face,where:lilBiomeOf(tgt-1),title:'Спуститься до '+tgt+' м',ask:'Кто-то должен заглянуть туда, куда '+f[1]+' звали голоса',rc:Math.round(tgt*1400/1000)*1000,rs:Math.round(tgt/10)};
 }
 function ensureLContracts(){
   if(!player.lcontracts||!Array.isArray(player.lcontracts.list))player.lcontracts={list:[],done:0};
+  /* глубинные заказы из старых сейвов: уже достигнутые — выполнены, недостижимые (глубже дна) — заменяются */
+  const rec=Math.floor(player.prog.lilacDepth||0),Ls=player.lcontracts.list;
+  for(let i=0;i<Ls.length;i++){const c=Ls[i];if(!c||c.type!=='depth'||c.ready)continue;
+    if(rec>=c.need){c.have=c.need;c.ready=true;}else if(c.need>=LIL_FLOOR){Ls.splice(i,1);i--;}}
   while(player.lcontracts.list.length<3)player.lcontracts.list.push(makeLContract());
 }
 function lcontractEvent(type,id,n){
@@ -166,6 +176,7 @@ function lilFaceSvg(seed,night){
     <ellipse cx="27" cy="30" rx="13" ry="15" fill="${skin}"/><path d="M13 28 q2 -17 14 -17 q12 0 14 17 q-3 -9 -14 -10 q-11 1 -14 10z" fill="${hair}"/>${eyes}${mouth}
     ${h(3)<0.5?`<circle cx="18" cy="33" r="2.4" fill="#ff9ab0" opacity=".45"/><circle cx="36" cy="33" r="2.4" fill="#ff9ab0" opacity=".45"/>`:''}</svg>`;
 }
+function lilSnyRew(c){return Math.max(1,Math.round((c.rs||0)/8));}
 UI.lboard=function(){
   ensureLContracts();
   const L=player.lcontracts.list,night=lilNight()>0.5;
@@ -181,8 +192,8 @@ UI.lboard=function(){
         <div class="ds">В последний раз видели: ${c.where}. ${c.ask}.</div>
         <div class="ds" style="margin-top:3px"><b>${c.type==='ore'?'⛏':c.type==='give'?'▰':'⬇️'} ${c.title}</b> · ${Math.min(c.have,c.need)} / ${c.need}</div>
         <div style="height:5px;border-radius:3px;background:rgba(60,30,10,.18);margin:4px 0;overflow:hidden"><div style="height:100%;width:${Math.round(100*Math.min(1,c.have/c.need))}%;background:${c.ready?'#3a9a5a':'#b0306a'}"></div></div>
-        <div class="row" style="justify-content:space-between;align-items:center;gap:6px"><span class="ds">Награда: <b>${fmt(c.rc)} 💰</b> + <b>${c.rs} 👻</b></span>
-        ${c.ready?`<button class="btn small" data-claim="${i}">Отдать</button>`:`<button class="btn small alt" data-swap="${i}" ${(player.souls||0)>=5?'':'disabled'}>↻ 5 👻</button>`}</div>
+        <div class="row" style="justify-content:space-between;align-items:center;gap:6px"><span class="ds">Награда: <b>${fmt(c.rc)} 💰</b> + <b>${lilSnyRew(c)} 🌙</b></span>
+        ${c.ready?`<button class="btn small" data-claim="${i}">Отдать</button>`:`<button class="btn small alt" data-swap="${i}" ${snyN()>=1?'':'disabled'}>↻ 1 🌙</button>`}</div>
       </div>`).join('')}
     </div>
     <button class="btn" id="lbBook">📖 Книга деревни</button>
@@ -190,10 +201,10 @@ UI.lboard=function(){
   d.querySelectorAll('[data-claim]').forEach(b=>b.onclick=()=>{
     const i=+b.getAttribute('data-claim'),c=L[i];if(!c||!c.ready)return;
     if(c.type==='give'){if(matN(c.target)<c.need){UI.toast('Не хватает слитков');return;}player.mats[c.target]-=c.need;if(player.mats[c.target]<=0)delete player.mats[c.target];}
-    player.money+=c.rc;player.souls=(player.souls||0)+c.rs;player.lcontracts.done++;
-    L.splice(i,1);ensureLContracts();SFX.coin();SFX.buy();vib(30);UI.toast('Спасибо! +'+fmt(c.rc)+' 💰, +'+c.rs+' 👻');saveGame();UI.lboard();
+    player.money+=c.rc;snyAdd(lilSnyRew(c));player.lcontracts.done++;
+    L.splice(i,1);ensureLContracts();SFX.coin();SFX.buy();vib(30);UI.toast('Спасибо! +'+fmt(c.rc)+' 💰, +'+lilSnyRew(c)+' 🌙');saveGame();UI.lboard();
   });
-  d.querySelectorAll('[data-swap]').forEach(b=>b.onclick=()=>{const i=+b.getAttribute('data-swap');if((player.souls||0)<5)return;player.souls-=5;L[i]=makeLContract();SFX.ui();saveGame();UI.lboard();});
+  d.querySelectorAll('[data-swap]').forEach(b=>b.onclick=()=>{const i=+b.getAttribute('data-swap');if(!snySpend(1)){UI.toast('Не хватает Снов');return;}L[i]=makeLContract();SFX.ui();saveGame();UI.lboard();});
   d.querySelector('#lbBack').onclick=()=>{SFX.uiBack();UI.close();};
   d.querySelector('#lbBook').onclick=()=>{SFX.ui();UI.lbook();};
 };
@@ -322,6 +333,6 @@ UI.lforge=function(tab){UI.hforge(tab||(UI._hgTab==='gear'||!UI._hgTab?'upg':UI.
 const LIL_SKIN={
   hforge:(h)=>h.replace(/class="card hell/g,'class="card lilac').replace('⚒ Кузница Ада','☀ Кузница Зари')
     .replace(/из сплавов и компонентов Печи/g,'из сплавов и компонентов').replace('</h3>','</h3><p class="tiny" style="margin-bottom:8px;color:#e0c0ff">Мастера Зари ещё куют снаряжение XI–XV для Лиловых небес. Пока здесь можно прокачаться и сделать предметы.</p>'),
-  market:(h)=>h.replace(/class="card hell/g,'class="card lilac').replace('👻 Рынок душ','🌸 Цветочная ярмарка').replace(/Скупщики Ада/g,'Торговцы ярмарки').replace(/переплавь руду в Печи/g,'перегони руду в Перегонном кубе').replace(/переплавлять руду в Печи/g,'перегонять руду в Перегонном кубе')
+  market:(h)=>h.replace(/class="card hell/g,'class="card lilac').replace('👻 Рынок душ','🌸 Цветочная ярмарка').replace(/Скупщики Ада/g,'Торговцы ярмарки').replace(/переплавь руду в Печи/g,'перегони руду в Перегонном кубе').replace(/переплавлять руду в Печи/g,'перегонять руду в Перегонном кубе').replace(/Ценнее переплавить руду в Печи\./g,'Ценнее перегнать руду в Перегонном кубе.')
 };
 function lilacSkinHtml(cls,html){const f=LIL_SKIN[cls];return f?f(html):html;}

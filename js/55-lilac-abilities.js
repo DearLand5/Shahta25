@@ -23,7 +23,7 @@ const AB_DEFS=[
     lvTxt:['4 с, держит 25% здоровья','5 с, 32%','6 с, 40%','7 с, 48%','8 с, 56%'],
     mut:[['Отталкивание','Купол выталкивает врагов наружу'],['Целебный купол','Внутри лечит 3% здоровья в секунду']]},
   {id:'lullaby',name:'Колыбельная',ess:'eToy',m0:2500000,s0:30,
-    txt:'Усыпляет существ вокруг. Боссов только замедляет. Удар будит спящего.',
+    txt:'Усыпляет существ вокруг. Удар будит спящего.',
     cost:[45,45,45,45,45],cd:[18,17,16,15,14],
     lvTxt:['радиус 5 клеток, сон 3 с','5,5 клетки, 3,5 с','6 клеток, 4 с','7 клеток, 5 с','8 клеток, 6 с'],
     mut:[['Глубокий сон','Спящие получают двойной урон от первого удара'],['Сон-кошмар','Спящие теряют 4% здоровья в секунду']]},
@@ -44,7 +44,7 @@ function abP(){if(!player.prog)player.prog={};const p=player.prog.ab||(player.pr
 function abLv(id){return abP().lv[id]|0;}
 function abMut(id){return abP().mut[id]||null;}
 /* цена: уровень 1 — открыть, дальше — улучшения */
-function abPrice(id){const d=AB_BY[id],L=abLv(id);if(L>=5)return null;const k=Math.pow(1.9,L);return {money:Math.round(d.m0*k),ess:d.ess,essN:2+L,souls:Math.round(d.s0*(1+L*0.6))};}
+function abPrice(id){const d=AB_BY[id],L=abLv(id);if(L>=5)return null;const k=Math.pow(1.9,L);return {money:Math.round(d.m0*k),ess:d.ess,essN:2+L,sny:Math.max(1,Math.round(d.s0*(1+L*0.6)/5))};}
 /* состояние в шахте */
 const LAB={eth:AB_ETHER,cd:{},sh:null,dome:null,eyeT:0,eyeMax:0,phase:0,rifts:[],marks:[],markI:0,press:{},flash:0};
 function abOn(){return G.dim===2&&G.scene==='mine'&&!G.bossCut;}
@@ -345,8 +345,8 @@ UI.lhall=function(){
   const cards=AB_DEFS.map(d=>{const L=abLv(d.id),pr=abPrice(d.id),M=abMut(d.id);
     const pips=[1,2,3,4,5].map(k=>`<span class="abPip ${k<=L?'on':''}"></span>`).join('');
     let act='';
-    if(pr){const can=player.money>=pr.money&&hasEss(pr.ess,pr.essN)&&(player.souls||0)>=pr.souls;
-      act=`<div class="tiny" style="margin:4px 0">${L?'Улучшить':'Открыть'}: <b>${fmt(pr.money)} 💰</b> · ${pr.essN}× ${essName(pr.ess)} (${matN(pr.ess)}) · ${pr.souls} 👻</div>
+    if(pr){const can=player.money>=pr.money&&hasEss(pr.ess,pr.essN)&&snyN()>=pr.sny;
+      act=`<div class="tiny" style="margin:4px 0">${L?'Улучшить':'Открыть'}: <b>${fmt(pr.money)} 💰</b> · ${pr.essN}× ${essName(pr.ess)} (${matN(pr.ess)}) · ${pr.sny} 🌙 (есть ${snyN()})</div>
         <button class="btn small" data-up="${d.id}" ${can?'':'disabled'}>${L?'Улучшить до '+(L+1):'Открыть'}</button>`;}
     else if(!M){act=`<div class="tiny" style="margin:4px 0">Выбери мутацию:</div>`+d.mut.map((q,i)=>`<button class="btn small alt" data-mut="${d.id}:${i?'b':'a'}" title="${q[1]}">${q[0]}</button><div class="tiny">${q[1]}</div>`).join('');}
     else{const q=d.mut[M==='a'?0:1];act=`<div class="tiny" style="margin:4px 0">Мутация: <b>${q[0]}</b> — ${q[1]}</div>`;}
@@ -363,8 +363,8 @@ UI.lhall=function(){
     </div>
     <button class="btn alt" id="lhBack">Выйти</button>`);
   d.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>{const id=b.getAttribute('data-up'),pr=abPrice(id);if(!pr)return;
-    if(player.money<pr.money||matN(pr.ess)<pr.essN||(player.souls||0)<pr.souls){UI.toast('Не хватает');return;}
-    player.money-=pr.money;player.mats[pr.ess]-=pr.essN;if(player.mats[pr.ess]<=0)delete player.mats[pr.ess];player.souls-=pr.souls;
+    if(player.money<pr.money||matN(pr.ess)<pr.essN||snyN()<pr.sny){UI.toast('Не хватает');return;}
+    player.money-=pr.money;player.mats[pr.ess]-=pr.essN;if(player.mats[pr.ess]<=0)delete player.mats[pr.ess];snySpend(pr.sny);
     const P=abP();P.lv[id]=(P.lv[id]|0)+1;if(P.lv[id]===1){if(!P.slot[0])P.slot[0]=id;else if(!P.slot[1])P.slot[1]=id;}
     SFX.buy();AU.bell(1047,1,0.08,0,{ratio:2.01,index:0.8,rev:0.6});UI.toast(AB_BY[id].name+': уровень '+P.lv[id]);saveGame();UI.lhall();});
   d.querySelectorAll('[data-mut]').forEach(b=>b.onclick=()=>{const [id,m]=b.getAttribute('data-mut').split(':');abP().mut[id]=m;SFX.buy();UI.toast('Мутация выбрана: '+AB_BY[id].mut[m==='a'?0:1][0]);saveGame();UI.lhall();});
