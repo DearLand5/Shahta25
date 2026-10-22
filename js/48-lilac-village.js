@@ -91,10 +91,6 @@ UI.lstill=function(tab){
       <div style="height:5px;border-radius:3px;background:rgba(255,255,255,.08);margin-top:4px;overflow:hidden"><div data-qbar="${i}" style="height:100%;width:${act?Math.round(100*j.t/r.time):0}%;background:${act?'#c88aff':'#555'}"></div></div>
       <div class="tiny">${act?'перегоняется':'ждёт'} · осталось ~${Math.ceil((j.n*r.time-j.t)/sp)} с</div></div>
       <button class="btn small alt" data-cancel="${i}" style="padding:6px 9px">✕</button></div>`;}).join(''):'<p class="tiny" style="padding:4px 2px">Очередь пуста. Куб работает и пока ты в шахте.</p>';
-  const U=LSTILL_UPG[F.lvl|0];
-  const upHtml=U?`<div class="item" style="flex-wrap:wrap"><div class="txt"><div class="nm">Улучшить куб · ур. ${(F.lvl|0)+1}</div>
-      <div class="ds">скорость ×${FURN_SPEED[F.lvl|0]} → ×${FURN_SPEED[(F.lvl|0)+1]}, змеевиков ${lines} → ${FURN_LINES[(F.lvl|0)+1]}</div><div class="cost">${costChips(U)}</div></div>
-      <button class="btn small" id="lsUp" ${canPay(U)?'':'disabled'}>Улучшить</button></div>`:'<p class="tiny">Куб улучшен до предела.</p>';
   const mats=Object.keys(player.mats||{}).filter(k=>matN(k)>0&&MATS[k]&&(MATS[k].kind==='ess'||(MATS[k].kind==='ingot'&&MATS[k].tier>=10&&+k.slice(1)>=37)));
   const matsHtml=mats.length?mats.map(k=>`<span style="border-left:3px solid ${MATS[k].col}">${MATS[k].kind==='ingot'?'▰':MATS[k].ic} ${MATS[k].n} <b>${matN(k)}</b></span>`).join(''):'<span>пусто</span>';
   const d=this.build('lstill',`
@@ -106,7 +102,7 @@ UI.lstill=function(tab){
         <button data-tab="lingot" class="${tab==='lingot'?'on':''}">▰ Слитки</button>
         <button data-tab="less" class="${tab==='less'?'on':''}">💧 Эссенции</button>
         <button data-tab="bag" class="${tab==='bag'?'on':''}">📦 Склад</button></div>
-      ${tab==='bag'?`<div class="cost" style="gap:6px">${matsHtml}</div><div class="sect">Куб</div>${upHtml}
+      ${tab==='bag'?`<div class="cost" style="gap:6px">${matsHtml}</div><p class="tiny" style="margin-top:8px">Улучшить куб (змеевики и скорость) — в Кузнице Зари, вкладка «Прокачки».</p>
         <p class="tiny" style="margin-top:8px">Слитки перегоняются из 3 руды. Эссенции — из слитков одного биома; они понадобятся мастерам Кузницы Зари. Слитки и эссенции покупают на Цветочной ярмарке.</p>`
         :list.map(row).join('')}
     </div>
@@ -117,7 +113,6 @@ UI.lstill=function(tab){
   d.querySelectorAll('[data-qf]').forEach(b=>b.onclick=()=>{const id=b.getAttribute('data-qf'),r=SMELT_BY[id],mx=maxN(r),n=Math.min(mx,qtyVal('l'+id,mx));
     if(n>0&&lstillQueue(id,n)){SFX.buy();vib(15);UI.toast('⚗ В куб: '+MATS[r.out].n+' ×'+n);if(UI._qty)delete UI._qty['l'+id];saveGame();UI.lstill();}else{UI.toast('Не хватает');SFX.uiBack();}});
   d.querySelectorAll('[data-cancel]').forEach(b=>b.onclick=()=>{lstillCancel(+b.getAttribute('data-cancel'));SFX.uiBack();saveGame();UI.lstill();});
-  if(d.querySelector('#lsUp'))d.querySelector('#lsUp').onclick=()=>{const U2=LSTILL_UPG[lstill().lvl|0];if(!U2||!pay(U2)){SFX.uiBack();return;}lstill().lvl++;SFX.buy();vib(30);UI.toast('⚗ Куб улучшен');saveGame();UI.lstill('bag');};
   d.querySelector('#lsBack').onclick=()=>{SFX.uiBack();clearInterval(UI._lsTimer);UI.close();};
   clearInterval(UI._lsTimer);
   UI._lsTimer=setInterval(()=>{
@@ -128,9 +123,11 @@ UI.lstill=function(tab){
 };
 
 /* ---------- Доска пропавших: заказы жителей ---------- */
-const LIL_FOLK=[['Лиза Пряникова','её'],['Тимоша Зефиров','его'],['Агата Лунная','её'],['Сеня Медок','его'],['Вера Пуговкина','её'],
-  ['Миша Карамелькин','его'],['Нюта Сонина','её'],['Рома Колокольчиков','его'],['Поля Розова','её'],['Гриша Ватрушкин','его'],['Даша Ленточкина','её'],['Федя Леденцов','его']];
-function lilFem(c){const f=LIL_FOLK.find(q=>q[0]===c.who);return !!f&&f[1]==='её';}
+const LIL_FOLK=[['Лили Лавендер','её'],['Тедди Дримвуд','его'],['Мэйбл Санрайз','её'],['Перси Ханикомб','его'],['Долли Порселин','её'],
+  ['Оливер Дэйбрейк','его'],['Холли Лаллаби','её'],['Бенни Мармелейд','его'],['Рози Брайар','её'],['Арчи Роузторн','его'],['Кэнди Мунбим','её'],['Финн Мирроуотер','его']];
+/* женщины из старых заказов (имена до переименования) */
+const LIL_FOLK_OLDF=['Лиза Пряникова','Агата Лунная','Вера Пуговкина','Нюта Сонина','Поля Розова','Даша Ленточкина'];
+function lilFem(c){const f=LIL_FOLK.find(q=>q[0]===c.who);return f?f[1]==='её':LIL_FOLK_OLDF.indexOf(c.who)>=0;}
 function lilBiomeOf(d){return BIOMES[10+(d<250?0:d<550?1:d<850?2:d<1150?3:d<1450?4:d<1750?5:6)].n;}
 /* житель, которого ещё нет на доске (если заняты все — любой) */
 function lilPickFolk(){const L=(player.lcontracts&&player.lcontracts.list)||[],fr=LIL_FOLK.filter(q=>!L.some(c=>c.who===q[0]));const a=fr.length?fr:LIL_FOLK;return a[Math.floor(Math.random()*a.length)];}

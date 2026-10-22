@@ -110,7 +110,7 @@ function lilacReqs(){
     {ok:(P.digSpeedLvl||0)>=DIG_SPEED_HMAX,t:'⚡ Адская скорость копания',v:(P.digSpeedLvl||0)+'/'+DIG_SPEED_HMAX},
     {ok:!!P.drillBought&&P.drillLvl>=10,t:'🛠️ Мощность бура',v:(P.drillBought?P.drillLvl:0)+'/10'},
     {ok:(F.lvl||0)>=3,t:'🔥 Мехи и горны Печи',v:(F.lvl||0)+'/3'},
-    {ok:bots>=BOT_MAX,t:'🤖 Роботы-сортировщики',v:bots+'/'+BOT_MAX},
+    {ok:bots>=BOT_HELL_MAX,t:'🤖 Роботы-сортировщики',v:Math.min(bots,BOT_HELL_MAX)+'/'+BOT_HELL_MAX},
     {ok:!!P.prog.lilacKey,t:'🗝 Ключ Лиловых небес',v:P.prog.lilacKey?'есть':'Архидемон, Трон Преисподней',key:1},
     {ok:P.money>=LILAC_COST.c||cheats.infMoney,t:'💰 40 000 000 монет',v:fmt(P.money)+' / '+fmt(LILAC_COST.c),key:1},
     {ok:(P.souls||0)>=LILAC_COST.s,t:'👻 6 666 душ',v:fmt(P.souls||0)+' / '+fmt(LILAC_COST.s),key:1}

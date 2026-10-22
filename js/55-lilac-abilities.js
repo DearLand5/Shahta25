@@ -219,9 +219,9 @@ function lilAbTick(dt){
 
 /* ---------- кнопки на экране ---------- */
 function abBtns(){
-  const j=getBtnRect('joy'),r=Math.round(24*Math.min(1.3,Math.max(0.85,view.scale||1)));
-  const land=view.W>view.H*1.15,y=j.y-j.r*1.45-r-8;
-  return [{x:j.x-r-4,y,r},{x:j.x+r+4,y,r}];
+  const c=getBtnRect('abil'),r=c.r;                         /* середина между кнопками; позицию и размер задаёт раскладка */
+  const x=clamp(c.x,2*r+8,view.W-2*r-8),y=clamp(c.y,r+4,view.H-r-4);
+  return [{x:x-r-4,y,r,a:c.a},{x:x+r+4,y,r,a:c.a}];
 }
 function lilAbHit(x,y){if(!abOn())return -1;const B=abBtns();for(let i=0;i<2;i++){if(Math.hypot(x-B[i].x,y-B[i].y)<B[i].r+6)return i;}return -1;}
 function lilAbPress(i){LAB.press[i]={t:performance.now(),done:0};const id=abP().slot[i];if(id!=='thread')abUse(i,false);}
@@ -232,18 +232,19 @@ function lilAbDraw(){
   if(!P.slot[0]&&!P.slot[1])return;
   /* полоска Эфира над кнопками */
   const x0=B[0].x-B[0].r,w=B[1].x+B[1].r-x0,yb=B[0].y-B[0].r-12;
-  ctx.globalAlpha=0.95;hudPlate(x0-4,yb-5,w+8,10);
+  ctx.globalAlpha=Math.min(1,B[0].a*1.03);hudPlate(x0-4,yb-5,w+8,10);
   ctx.fillStyle='rgba(0,0,0,.45)';roundRect(ctx,x0,yb-2,w,4,2);ctx.fill();
   const eg=ctx.createLinearGradient(x0,0,x0+w,0);eg.addColorStop(0,'#7a4ab8');eg.addColorStop(1,'#e0c8ff');ctx.fillStyle=eg;roundRect(ctx,x0,yb-2,Math.max(4,w*LAB.eth/abEthMax()),4,2);ctx.fill();
   for(let i=0;i<2;i++){
     const b=B[i],id=P.slot[i],pr=!!LAB.press[i];
-    ctx.globalAlpha=0.92;
+    ctx.globalAlpha=b.a;
     ctrlDisc(b.x,b.y+(pr?2:0),b.r,pr,'iron',id==='shadow'&&LAB.sh?'red':null);
     if(!id){ctx.fillStyle='rgba(243,230,207,.5)';ctx.font='700 '+Math.round(b.r*0.7)+'px '+HUDF;ctx.textAlign='center';ctx.fillText('+',b.x,b.y+b.r*0.25);continue;}
     const d=AB_BY[id],L=Math.max(0,abLv(id)-1),cost=id==='thread'&&!LAB.marks.length?15:d.cost[L],cd=LAB.cd[id]||0,ok=LAB.eth>=cost&&cd<=0;
-    ctx.globalAlpha=ok?1:0.5;
+    const k=Math.min(1,b.a/0.92);                             /* при прозрачности по умолчанию значок и надписи полностью яркие */
+    ctx.globalAlpha=k*(ok?1:0.5);
     ctx.save();ctx.translate(b.x,b.y+(pr?2:0));abIcon(ctx,id,b.r*0.62);ctx.restore();
-    ctx.globalAlpha=1;
+    ctx.globalAlpha=k;
     if(cd>0){const f=cd/d.cd[L];ctx.fillStyle='rgba(10,4,16,.55)';ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.arc(b.x,b.y,b.r-3,-Math.PI/2,-Math.PI/2+TAU*f);ctx.closePath();ctx.fill();
       ctx.fillStyle='#f0e0ff';ctx.font='800 '+Math.round(b.r*0.5)+'px '+HUDF;ctx.textAlign='center';ctx.fillText(Math.ceil(cd),b.x,b.y+b.r*0.18);}
     /* активная способность — светящееся кольцо */

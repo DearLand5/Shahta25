@@ -267,8 +267,8 @@ function buildSaveData(){
       rit:JSON.parse(JSON.stringify(player.rit||{})),altarXp:player.altarXp||0,soulBuy:player.soulBuy||0,wingT:player.wingT||0,
       stats:JSON.parse(JSON.stringify(player.stats||{})),bestiary:JSON.parse(JSON.stringify(player.bestiary||{})),
       crates:JSON.parse(JSON.stringify(player.crates||[])),crateSeq:player.crateSeq||0,
-      sorter:(()=>{const S=bot();return {owned:!!S.owned,placed:!!S.placed,input:S.input||null,moved:S.moved||0,spdLv:S.spdLv|0,capLv:S.capLv|0,
-        units:S.units.map(u=>({id:u.id,name:u.name,skin:u.skin,placed:!!u.placed,x:Math.round(u.x||0),face:u.face||1,moved:u.moved|0,carry:u.carry?JSON.parse(JSON.stringify(u.carry)):null}))};})()
+      sorter:(()=>{const S=bot();return {owned:!!S.owned,placed:!!S.placed,input:S.input||null,inputs:Object.assign({},S.inputs),moved:S.moved||0,spdLv:S.spdLv|0,capLv:S.capLv|0,
+        units:S.units.map(u=>({id:u.id,name:u.name,skin:u.skin,placed:!!u.placed,dim:u.dim,x:Math.round(u.x||0),face:u.face||1,moved:u.moved|0,carry:u.carry?JSON.parse(JSON.stringify(u.carry)):null}))};})()
     },
     lobbyX:lobbyPlayer.x,
     mine:(G.scene==='mine'&&!(player.hp<=0))?{x:Math.round(player.x),y:Math.round(player.y),dim:G.dim}:(G.resumeMine?{x:Math.round(G.resumeMine.x),y:Math.round(G.resumeMine.y),dim:G.resumeMine.dim}:null)
@@ -331,8 +331,8 @@ function applySaveData(d){
       player.rit=obj(p.rit);player.altarXp=Math.max(0,p.altarXp||0);player.soulBuy=Math.max(0,p.soulBuy||0);player.wingT=p.wingT||0;
       player.stats=obj(p.stats);player.bestiary=obj(p.bestiary);
       player.crates=Array.isArray(p.crates)?p.crates.filter(c=>c&&typeof c==='object').map(c=>({id:String(c.id||('c'+Math.random().toString(36).slice(2))),name:String(c.name||'Ящик').slice(0,24),inv:obj(c.inv),mats:obj(c.mats)})):[];player.crateSeq=Math.max(0,p.crateSeq|0);
-      {const q=obj(p.sorter);player.sorter={owned:!!q.owned,placed:!!q.placed,x:+q.x||300,input:typeof q.input==='string'?q.input:null,face:q.face||1,moved:q.moved|0,spdLv:clamp(q.spdLv|0,0,5),capLv:clamp(q.capLv|0,0,5),carry:(q.carry&&typeof q.carry==='object')?q.carry:null};
-        if(Array.isArray(q.units))player.sorter.units=q.units.slice(0,BOT_MAX).filter(u=>u&&typeof u==='object').map((u,i)=>({id:typeof u.id==='string'?u.id:'b'+(i+1),name:String(u.name||BOT_NAMES[i]||'Робот').slice(0,16),skin:botSkin(u.skin).id,placed:!!u.placed,x:+u.x||300,face:u.face||1,moved:u.moved|0,carry:(u.carry&&typeof u.carry==='object')?u.carry:null,job:null}));
+      {const q=obj(p.sorter);player.sorter={inputs:(()=>{const r={},o=obj(q.inputs);for(const d of [0,1,2])if(typeof o[d]==='string')r[d]=o[d];return r;})(),owned:!!q.owned,placed:!!q.placed,x:+q.x||300,input:typeof q.input==='string'?q.input:null,face:q.face||1,moved:q.moved|0,spdLv:clamp(q.spdLv|0,0,5),capLv:clamp(q.capLv|0,0,5),carry:(q.carry&&typeof q.carry==='object')?q.carry:null};
+        if(Array.isArray(q.units))player.sorter.units=q.units.slice(0,BOT_MAX).filter(u=>u&&typeof u==='object').map((u,i)=>({id:typeof u.id==='string'?u.id:'b'+(i+1),name:String(u.name||BOT_NAMES[i]||'Робот').slice(0,16),skin:botSkin(u.skin).id,placed:!!u.placed,dim:(u.dim===0||u.dim===2)?u.dim:1,x:+u.x||300,face:u.face||1,moved:u.moved|0,carry:(u.carry&&typeof u.carry==='object')?u.carry:null,job:null}));
         bot();}
       if(p.gasMask&&!player.hitems.resp)player.hitems.resp=1;
       if(p.furn&&Array.isArray(p.furn.q)){player.furn={q:p.furn.q.filter(j=>SMELT_BY[j.r]&&j.n>0),lvl:clamp(p.furn.lvl|0,0,3),ts:p.furn.ts||Date.now()};

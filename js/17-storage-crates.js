@@ -12,7 +12,7 @@ function newCrate(){player.crateSeq=(player.crateSeq||0)+1;return {id:'c'+Date.n
 function crateAtTile(tx,ty){if(G.scene!=='mine'&&G.scene!=='menu')return null;for(const c of worldCrates())if(c.where==='mine'&&c.x===tx&&c.y===ty)return c;return null;}
 function crateCount(c){let k=0,n=0;for(const i in c.inv)if(c.inv[i]>0){k++;n+=c.inv[i];}for(const i in c.mats)if(c.mats[i]>0){k++;n+=c.mats[i];}return {kinds:k,total:n};}
 /* ---------- точная установка в лобби: прицел (смещение от игрока), призрак-схема, проверка места ---------- */
-function lobbyPlacing(){if(G.scene!=='lobby'||UI.modal)return null;if(G.placeItem==='crate'&&packedCrates().length)return 'crate';if(G.placeItem==='sorter'&&G.dim===1&&botUnplaced())return 'sorter';return null;}
+function lobbyPlacing(){if(G.scene!=='lobby'||UI.modal)return null;if(G.placeItem==='crate'&&packedCrates().length)return 'crate';if(G.placeItem==='sorter'&&botUnplaced())return 'sorter';return null;}
 function lobbyAimMax(){return Math.max(80,view.W/(2*view.scale)-24);}
 function lobbyPlaceX(){const lp=lobbyPlayer,def=(lp.facing||1)*(G.placeItem==='sorter'?50:46);
   const dx=G.lobbyAim?G.lobbyAim.dx:def;return Math.round(clamp(lp.x+dx,60,LOBBY_W-60));}
@@ -20,6 +20,7 @@ function setLobbyAim(wx){const lp=lobbyPlayer,m=lobbyAimMax();G.lobbyAim={dx:cla
 function lobbyPlaceCheck(kind,x){
   if(kind==='crate'){for(const c of worldCrates())if(c.where==='lobby'&&Math.abs(c.x-x)<36)return 'Слишком близко к ящику «'+c.name+'»';}
   if(x<=60||x>=LOBBY_W-60)return 'Край лобби';
+  for(const b of buildings)if(Math.abs(b.x-x)<70)return 'Слишком близко ко входу: «'+b.name+'»';   /* ящик и робот не стоят у дверей зданий */
   return '';
 }
 function drawLobbyPlaceGhost(g){

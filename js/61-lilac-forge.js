@@ -43,6 +43,9 @@ const LFU=[
   {id:'torch',ic:'🔦',n:'Фонарь Зари',min:8,max:12,cur:()=>player.torchLvl,
    cost:lv=>{const i=lv-8;return {c:[3,7,14,26][i]*1000000,m:{[LI([37,42,46,51][i])]:4,[LG_ESS[i]]:2}};},
    apply:()=>{player.torchLvl++;},desc:lv=>'Свет шахтёра ярче, и Рассудок тает на '+Math.round((0.2+Math.max(0,lv-5)*0.03)*100)+'% медленнее'+(lv<12?' → '+Math.round((0.2+Math.max(0,lv-4)*0.03)*100)+'%':''),lock:'Сначала Адский фонарь 8'},
+  {id:'still',ic:'⚗',n:'Змеевики Перегонного куба',min:0,max:LSTILL_UPG.length,cur:()=>lstill().lvl|0,
+   cost:lv=>LSTILL_UPG[lv],apply:()=>{lstill().lvl++;},
+   desc:lv=>'Скорость ×'+FURN_SPEED[lv]+', змеевиков '+FURN_LINES[lv]+(lv<LSTILL_UPG.length?' → ×'+FURN_SPEED[lv+1]+', '+FURN_LINES[lv+1]:'')},
   {id:'eth',ic:'✨',n:'Эфирная чаша',min:0,max:5,cur:()=>lfuLv('eth'),
    cost:lv=>({c:[2,5,10,18,30][lv]*1000000,m:{[LG_ESS[lv]]:2+lv},d:2+lv*2}),
    apply:()=>{lfuP().eth=lfuLv('eth')+1;},desc:lv=>'Запас Эфира '+(AB_ETHER+lv*20)+(lv<5?' → '+(AB_ETHER+lv*20+20):'')},
@@ -75,17 +78,23 @@ function lfuSupList(){
     player.barricadeBought?{id:'bar',ic:'🧱',n:'Баррикады ×'+BARR_PACK,d:'У тебя: '+player.barricades,c:Math.round(hellSupUnit('bar')*BARR_PACK)}:null
   ].filter(Boolean);
 }
-const lfuRow=(ic,body,btn)=>`<div class="lgRow"><div class="lbIco">${ic}</div><div class="txt">${body}</div>${btn}</div>`;
+const lfuRow=(ic,body,btn)=>`<div class="lgRow">${ic}<div class="txt">${body}</div>${btn}</div>`;
 function lfuUpgHtml(){
   return LFU.map(u=>{const lv=u.cur(),max=lv>=u.max,low=lv<u.min,r=!max&&!low?u.cost(lv):null;
-    return lfuRow(u.ic,`<b>${u.n} · ${lv}/${u.max}</b><div class="tiny">${low?'<span style="color:#ffb0b0">'+(u.lock||'')+'</span>':u.desc(lv)}</div>${r?`<div class="cost">${lgChips(r)}</div>`:''}`,
+    return lfuRow(uiUpgIcon(u.id,'l',lv),`<b>${u.n} · ${lv}/${u.max}</b><div class="tiny">${low?'<span style="color:#ffb0b0">'+(u.lock||'')+'</span>':u.desc(lv)}</div>${r?`<div class="cost">${lgChips(r)}</div>`:''}`,
       max?'<span class="tiny">MAX</span>':low?'':`<button class="btn small" data-lfu="${u.id}" ${lgCanPay(r)?'':'disabled'}>Улучшить</button>`);}).join('')
-    +`<p class="tiny muted" style="margin-top:6px">Прокачки Зари продолжают прокачки Ада — сначала доведи их до предела в Кузнице Ада. Перегонный куб улучшается в самом кубе.</p>`;
+    +`<p class="tiny muted" style="margin-top:6px">Прокачки Зари продолжают прокачки Ада — сначала доведи их до предела в Кузнице Ада. Змеевики Перегонного куба улучшаются здесь же — выше в списке.</p>`;
+}
+/* роботы-кладовщики 4–6 (первые три — в Кузнице Ада) */
+function lfuBotHtml(){
+  const n=botUnits().length,hell=n>=BOT_HELL_MAX,max=n>=BOT_MAX,r=hell&&!max?BOT_LIL_COST[n-BOT_HELL_MAX]:null;
+  return `<div class="sect" style="margin-top:0">Роботы-кладовщики</div>`+lfuRow(uiIconHtml('robot'),`<b>Робот-кладовщик · ${n}/${BOT_MAX}</b><div class="tiny">${hell?'Ещё один помощник: работает в лобби любого измерения, разносит ресурсы по ящикам.':'<span style="color:#ffb0b0">Сначала три робота в Кузнице Ада</span>'}</div>${r?`<div class="cost">${lgChips(r)}</div>`:''}`,
+    max?'<span class="tiny">MAX</span>':hell?`<button class="btn small" data-lbot="1" ${lgCanPay(r)?'':'disabled'}>Создать</button>`:'');
 }
 function lfuShopHtml(){
   const sup=lfuSupList();UI._lfuSup=sup;
-  return `<div class="sect" style="margin-top:0">Припасы</div>`+sup.map(x=>lfuRow(x.ic,`<b>${x.n}</b><div class="tiny">${x.d}</div>`,`<button class="btn small" data-lsup="${x.id}" ${player.money>=x.c?'':'disabled'}>${fmt(x.c)} 💰</button>`)).join('')
-    +`<div class="sect">Расходники Зари</div>`+LCONS.map(c=>lfuRow(c.ic,`<b>${c.n}</b> <span class="tiny">· есть ${(player.hitems&&player.hitems[c.id])||0}</span><div class="tiny">${c.desc}</div><div class="cost">${costChips(c.cost)}</div>`,
+  return lfuBotHtml()+`<div class="sect">Припасы</div>`+sup.map(x=>lfuRow(uiSupIcon(x.id),`<b>${x.n}</b><div class="tiny">${x.d}</div>`,`<button class="btn small" data-lsup="${x.id}" ${player.money>=x.c?'':'disabled'}>${fmt(x.c)} 💰</button>`)).join('')
+    +`<div class="sect">Расходники Зари</div>`+LCONS.map(c=>lfuRow(uiConsIcon(c.id),`<b>${c.n}</b> <span class="tiny">· есть ${(player.hitems&&player.hitems[c.id])||0}</span><div class="tiny">${c.desc}</div><div class="cost">${costChips(c.cost)}</div>`,
       `<button class="btn small" data-lcons="${c.id}" ${canPay(c.cost)?'':'disabled'}>Создать</button>`)).join('');
 }
 function lfuBind(d,done){
@@ -95,6 +104,9 @@ function lfuBind(d,done){
     if(x.id==='lad')player.ladders+=20;else if(x.id==='med')player.potions+=3;else if(x.id==='gra')player.grappleAmmo+=20;
     else if(x.id==='amm')player.gunAmmo+=curGun().pack;else if(x.id==='dri')player.drills+=5;else if(x.id==='bar')player.barricades+=BARR_PACK;
     SFX.buy();vib(20);validateSelection();saveGame();UI.lforge('shop');});
+  d.querySelectorAll('[data-lbot]').forEach(b=>b.onclick=()=>{const S=bot(),n=S.units.length;if(n<BOT_HELL_MAX||n>=BOT_MAX||!lgPay(BOT_LIL_COST[n-BOT_HELL_MAX]))return;
+    const U=newBotUnit(n),used=new Set(S.units.map(u=>u.name));if(used.has(U.name))U.name=BOT_NAMES.find(q=>!used.has(q))||U.name;U.dim=2;S.units.push(U);bot();
+    G.placeItem='sorter';SFX.buy();vib(30);validateSelection();saveGame();UI.toast('🤖 Робот «'+U.name+'» готов — поставь его в лобби любого измерения');UI.lforge('shop');});
   d.querySelectorAll('[data-lcons]').forEach(b=>b.onclick=()=>{const c=LCONS.find(q=>q.id===b.getAttribute('data-lcons'));if(!pay(c.cost))return;
     if(!player.hitems)player.hitems={};player.hitems[c.id]=(player.hitems[c.id]||0)+c.pack;SFX.buy();vib(20);UI.toast(c.ic+' '+c.n);validateSelection();saveGame();UI.lforge('shop');});
 }

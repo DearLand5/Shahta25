@@ -521,3 +521,10 @@ button.lbkItem{pointer-events:auto;cursor:pointer}
 .lhint .lhTx{display:flex;flex-direction:column;gap:2px;font-size:13px;line-height:1.3}
 .lhint .lhTx b{font-family:var(--font-head);font-weight:400;color:#e8c0ff;font-size:14px}
 body.cutscene .lhint{display:none!important}
+
+/* ===== значки предметов и прокачек (62-icons): одинаковая плита 56×56 во всех измерениях ===== */
+.uiic{width:56px;height:56px;flex:0 0 56px;display:block;border-radius:12px;border:1px solid rgba(255,226,180,.28);
+  box-shadow:0 2px 5px rgba(0,0,0,.45);background:#1c1610;-webkit-user-drag:none;user-select:none;pointer-events:none}
+.hell .uiic{border-color:rgba(255,150,100,.38);background:#25130f}
+.lilac .uiic{border-color:rgba(220,190,255,.34);background:#1a1226}
+.lgRow .uiic{margin:0}

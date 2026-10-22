@@ -250,7 +250,7 @@ function getPlaceItems(){
     desc:'Ставится перед тобой или туда, куда тапнул. Прочность '+BARR[player.barricadeLvl-1].hp+'. Мобы её ломают. Выкопай — вернётся в запас.'});
   if((player.hitems&&player.hitems.hbombs)>0)a.push({id:'hbomb',icon:'💣',name:'Адская бомба',count:player.hitems.hbombs,desc:'Тап — направление, «Ставить» — бросок. Взрыв 3 блока, 1200 урона.'});
   if((player.hitems&&player.hitems.icegren)>0)a.push({id:'icegren',icon:'❄️',name:'Ледяная граната',count:player.hitems.icegren,desc:'Замораживает лаву и жидкости вокруг, сковывает врагов.'});
-  {const un=botUnits().filter(u=>!u.placed);if(un.length)a.push({id:'sorter',icon:'🤖',name:'Робот-кладовщик «'+un[0].name+'»',count:un.length,desc:'Ставится в лобби Ада: зажми палец и веди — выбери место, «Ставить» — поставить. Разносит ресурсы из ящика-приёмника по ящикам.'});}
+  {const un=botUnits().filter(u=>!u.placed);if(un.length)a.push({id:'sorter',icon:'🤖',name:'Робот-кладовщик «'+un[0].name+'»',count:un.length,desc:'Ставится в лобби любого измерения (Земля, Ад, Лиловые небеса): зажми палец и веди — выбери место, «Ставить» — поставить. Разносит ресурсы из ящика-приёмника по ящикам.'});}
   if(packedCrates().length>0)a.push({id:'crate',icon:'📦',name:'Ящик для хранения',count:packedCrates().length,
     desc:'Ставится на пол в шахте или в лобби. Тапни по ящику рядом — откроется хранилище.'});
   if(player.drillBought)a.push({id:'drill',icon:'🛠️',name:'Бур ур. '+player.drillLvl,count:player.drills,
@@ -416,7 +416,7 @@ function usePlace(){
   if(G.scene!=='mine')return;
   validateSelection();
   if(G.placeItem==='crate'){placeCrate();return;}
-  if(G.placeItem==='sorter'){UI.toast('Робота можно поставить только в лобби Ада');return;}
+  if(G.placeItem==='sorter'){UI.toast('Робота можно поставить только в лобби');return;}
   if(G.placeItem==='hbomb'){if(player.hitems.hbombs>0){player.hitems.hbombs--;throwItem('bomb');validateSelection();}return;}
   if(G.placeItem==='icegren'){if(player.hitems.icegren>0){player.hitems.icegren--;throwItem('ice');validateSelection();}return;}
   if(G.placeItem==='drill'){launchDrill();return;}

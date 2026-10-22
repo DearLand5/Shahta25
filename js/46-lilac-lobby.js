@@ -89,7 +89,7 @@ function renderLilacLobby(){
   for(let x=Math.floor(x0w/14)*14;x<x1w;x+=14){const h0=llbRand(x*0.31+5),sw=Math.sin(t*1.6+x*0.06)*2;
     ctx.strokeStyle=mx('#4a9a6e','#1e3a2a');ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x+sw,-8-h0*6);ctx.stroke();
     if(h0<0.3){ctx.fillStyle=fc[Math.floor(h0*40)%4];ctx.beginPath();ctx.arc(x+sw,-10-h0*6,2.4,0,TAU);ctx.fill();ctx.fillStyle=mx('#ffe070','#4a3020');ctx.beginPath();ctx.arc(x+sw,-10-h0*6,0.9,0,TAU);ctx.fill();}}
-  drawLobbyCrates(ctx);
+  drawLobbyCrates(ctx);drawLobbyBot(ctx);
   if(G.scene==='lobby')drawLobbyPlaceGhost(ctx);
   if(!G.cutHide)drawPlayerSprite(ctx,lobbyPlayer.x,lobbyPlayer.y,lobbyPlayer.animState,lobbyPlayer.anim,lobbyPlayer.facing,{tool:null,armor:player.armorLvl,pickLvl:player.pickLvl,torch:player.torchLvl,groundY:0});
   if(!G.cutHide)lgLobbyPet(ctx);

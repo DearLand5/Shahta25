@@ -451,6 +451,8 @@ const UI={
         <div class="setting"><span>Ставить</span><input type="range" id="tPlace" min="0.1" max="1" step="0.05" value="${c.place.a}"></div>
         <div class="setting"><span>Стрелять</span><input type="range" id="tShoot" min="0.1" max="1" step="0.05" value="${c.shoot.a}"></div>
         <div class="setting"><span>Предметы</span><input type="range" id="tItems" min="0.1" max="1" step="0.05" value="${c.items.a}"></div>
+        <div class="setting"><span>Слоты</span><input type="range" id="tQbar" min="0.1" max="1" step="0.05" value="${c.qbar.a}"></div>
+        <div class="setting"><span>Способности</span><input type="range" id="tAbil" min="0.1" max="1" step="0.05" value="${c.abil.a}"></div>
         <div class="setting"><span>Пауза</span><input type="range" id="tPause" min="0.1" max="1" step="0.05" value="${c.pause.a}"></div></div>`;
     }else{
       const mi=Save.info(SAVE_KEY_M),ai=Save.info(SAVE_KEY);
@@ -545,7 +547,7 @@ const UI={
     }
     d.querySelectorAll('[data-mobpreset]').forEach(btn=>btn.onclick=()=>{settings.mobRate=parseFloat(btn.getAttribute('data-mobpreset'));SFX.ui();saveSettings();UI.settings();});
     const bindTrans=(key,id)=>{const el=$(id);if(!el)return;el.oninput=e=>{ensureControls();settings.controls[key].a=+e.target.value;settings.controlsCustomized=true;saveSettings();};};
-    bindTrans('joy','tJoy');bindTrans('jump','tJump');bindTrans('place','tPlace');bindTrans('shoot','tShoot');bindTrans('items','tItems');bindTrans('pause','tPause');
+    bindTrans('joy','tJoy');bindTrans('jump','tJump');bindTrans('place','tPlace');bindTrans('shoot','tShoot');bindTrans('items','tItems');bindTrans('qbar','tQbar');bindTrans('abil','tAbil');bindTrans('pause','tPause');
     const cheatInp=$('cheatCode'),cheatBtn=$('cheatApply');
     if(cheatInp&&cheatBtn){
       const tryUnlock=()=>{
@@ -604,10 +606,12 @@ const UI={
         const c=settings.controls[key];
         const r=Math.max(18, getControlRadius(c.r));
         const el=circles[key];
-        el.style.left=((c.cx*W)-r)+'px';
+        const rw=key==='abil'?2*r+4:r;                     /* способности — две кнопки в ряд: «таблетка» вдвое шире */
+        el.style.left=((c.cx*W)-rw)+'px';
         el.style.top=((c.cy*H)-r)+'px';
-        el.style.width=(r*2)+'px';
+        el.style.width=(rw*2)+'px';
         el.style.height=(r*2)+'px';
+        if(key==='abil')el.style.borderRadius=r+'px';
         el.style.opacity=String(c.a);
         el.style.fontSize=Math.max(9,Math.min(14,r*0.42))+'px';
         el.classList.toggle('sel',key===selected);
@@ -678,7 +682,8 @@ const UI={
       e.preventDefault();
       const W=area.clientWidth,H=area.clientHeight;
       const key=t.key;
-      settings.controls[key].cx=clamp(t.startCx+(e.clientX-t.startX)/W,0.03,0.97);
+      const mx=key==='abil'?Math.min(0.45,(2*getControlRadius(settings.controls.abil.r)+8)/W):0.03;   /* пара кнопок шире — не даём уйти за край */
+      settings.controls[key].cx=clamp(t.startCx+(e.clientX-t.startX)/W,mx,1-mx);
       settings.controls[key].cy=clamp(t.startCy+(e.clientY-t.startY)/H,0.03,0.97);
       settings.controlsCustomized=true;
       renderCircles();placeSizeBox();
@@ -1026,17 +1031,17 @@ const UI={
         <h3>Кузница и лавка</h3>
         <div class="bal"><span>Баланс</span><b style="color:#ffd98a">${fmt(player.money)} 💰</b></div>
         ${hellPricesOn()?'<p class="tiny" style="margin:-4px 0 8px;color:#ffb48a">🌀 Портал открыт: расходники (лестницы, аптечки, снаряды, патроны, буры, баррикады) стоят столько же, сколько в Аду</p>':''}
-        <div class="item"><div class="ico" style="background:linear-gradient(135deg,#9aa6b0,#5a6470);display:flex;align-items:center;justify-content:center;font-size:16px">⛏</div>
+        <div class="item">${uiIconHtml('pick:'+(nextPick||curPick).lv)}
           <div class="txt"><div class="nm">${curPick.name} ${nextPick?'→ '+nextPick.name:''}</div>
           <div class="ds">Скорость ×${curPick.speed.toFixed(2)}${nextPick?' → ×'+nextPick.speed.toFixed(2):''}${nextPick?'<br>Откроет руду: '+oreUnlockText(nextPick.lv):''}</div></div>
           ${nextPick?`<button class="btn small" id="bPick" ${player.money<nextPick.cost?'disabled':''}>${fmt(nextPick.cost)} 💰</button>`:'<span class="tiny">MAX</span>'}
         </div>
-        <div class="item"><div class="ico" style="background:linear-gradient(135deg,#e0e8f0,#7a8a9a);display:flex;align-items:center;justify-content:center;font-size:16px">⚔️</div>
+        <div class="item">${uiIconHtml('sword:'+(nextSword||curSword).lv)}
           <div class="txt"><div class="nm">Оружие: ${curSword.name}${nextSword?' → '+nextSword.name:''}</div>
           <div class="ds">Урон ${curSword.dmg}${nextSword?' → '+nextSword.dmg:''}</div></div>
           ${nextSword?`<button class="btn small" id="bSword" ${player.money<nextSword.cost?'disabled':''}>${fmt(nextSword.cost)} 💰</button>`:'<span class="tiny">MAX</span>'}
         </div>
-        <div class="item"><div class="ico" style="background:linear-gradient(135deg,#6fa8e0,#2a4a80);display:flex;align-items:center;justify-content:center;font-size:16px">🛡</div>
+        <div class="item">${uiIconHtml('armor:'+(nextArmor||curArmor).lv)}
           <div class="txt"><div class="nm">Броня: ${curArmor.name}${nextArmor?' → '+nextArmor.name:''}</div>
           <div class="ds">HP ${curArmor.hp} · Защита ${Math.round(curArmor.red*100)}%</div></div>
           ${nextArmor?`<button class="btn small" id="bArmor" ${player.money<nextArmor.cost?'disabled':''}>${fmt(nextArmor.cost)} 💰</button>`:'<span class="tiny">MAX</span>'}
@@ -1044,34 +1049,34 @@ const UI={
 
         <div style="margin:14px 0 6px;color:#e0b86a;font-size:12px;letter-spacing:1px;text-transform:uppercase;border-top:1px solid rgba(255,255,255,.1);padding-top:10px">Инструменты</div>
 
-        <div class="item"><div class="ico" style="background:linear-gradient(135deg,#8fa8c8,#2a4a68)"></div>
-          <div class="txt"><div class="nm">🪝 Пушка-крюк</div>
+        <div class="item">${uiIconHtml('hook')}
+          <div class="txt"><div class="nm">Пушка-крюк</div>
           <div class="ds">${player.grappleUnlocked?('Разблокировано · снарядов: '+player.grappleAmmo):'Дальность '+GRAPPLE_RANGE+' блоков, подтягивает, можно качаться и лазать по верёвке'}</div></div>
           ${player.grappleUnlocked?'<span class="pill" style="background:rgba(120,200,255,.2);color:#7fcaff">✓</span>':`<button class="btn small" id="bGrapple" ${player.money<GRAPPLE_COST?'disabled':''}>${fmt(GRAPPLE_COST)} 💰</button>`}
         </div>
         ${player.grappleUnlocked?`
-        <div class="item"><div class="ico" style="background:linear-gradient(135deg,#c8a878,#7a5a30)"></div>
-          <div class="txt"><div class="nm">🚀 Снаряды ×${AMMO_PACK}</div>
+        <div class="item">${uiIconHtml('hookammo')}
+          <div class="txt"><div class="nm">Снаряды крюка ×${AMMO_PACK}</div>
           <div class="ds">У вас: ${player.grappleAmmo} шт</div></div>
           <button class="btn small" id="bAmmo" ${player.money<C_AMMO?'disabled':''}>${fmt(C_AMMO)} 💰</button>
         </div>`:''}
-        <div class="item"><div class="ico" style="background:linear-gradient(135deg,#ffe9a8,#f0a33c)"></div>
-          <div class="txt"><div class="nm">🔦 Факел (ур. ${player.torchLvl}/5)</div>
+        <div class="item">${uiIconHtml('torch')}
+          <div class="txt"><div class="nm">Факел (ур. ${player.torchLvl}/5)</div>
           <div class="ds">Радиус света +${player.torchLvl*42}% · глубже темнее: для Бездны нужен ур. 4+</div></div>
           ${player.torchLvl>=5?'<span class="tiny">MAX</span>':`<button class="btn small" id="bTorch" ${player.money<torchCost?'disabled':''}>${fmt(torchCost)} 💰</button>`}
         </div>
-        <div class="item"><div class="ico" style="background:linear-gradient(135deg,#5ee06a,#1f7a52)"></div>
-          <div class="txt"><div class="nm">🧪 Аптечка</div>
+        <div class="item">${uiIconHtml('potion')}
+          <div class="txt"><div class="nm">Аптечка</div>
           <div class="ds">У вас: ${player.potions} шт · +30% HP. Выберите в «Предметах», лечение — кнопкой «Стрелять»</div></div>
           <button class="btn small" id="bPotion" ${player.money<C_POT?'disabled':''}>${fmt(C_POT)} 💰</button>
         </div>
-        <div class="item"><div class="ico" style="background:linear-gradient(135deg,#a05ce0,#5a2a90)"></div>
-          <div class="txt"><div class="nm">🥾 Амортизаторы (ур. ${player.fallProtLvl}/3)</div>
+        <div class="item">${uiIconHtml('boots')}
+          <div class="txt"><div class="nm">Амортизаторы (ур. ${player.fallProtLvl}/3)</div>
           <div class="ds">Урон от падения: −${player.fallProtLvl*20}%</div></div>
           ${player.fallProtLvl>=3?'<span class="tiny">MAX</span>':`<button class="btn small" id="bFall" ${player.money<fallCost?'disabled':''}>${fmt(fallCost)} 💰</button>`}
         </div>
-        <div class="item"><div class="ico" style="background:linear-gradient(135deg,#e0a860,#7a4a20)"></div>
-          <div class="txt"><div class="nm">🪜 Лестницы ×10</div>
+        <div class="item">${uiIconHtml('ladder')}
+          <div class="txt"><div class="nm">Лестницы ×10</div>
           <div class="ds">У вас: ${player.ladders} шт</div></div>
           <button class="btn small" id="bLad" ${player.money<C_LAD?'disabled':''}>${fmt(C_LAD)} 💰</button>
         </div>
@@ -1081,13 +1086,13 @@ const UI={
           const cg=curGun(),ng=(GUNS[player.gunLvl]&&!GUNS[player.gunLvl].hell&&!GUNS[player.gunLvl].lil)?GUNS[player.gunLvl]:null;
           const dmgTxt=g=>'Урон '+g.dmg+(g.pellets>1?'×'+g.pellets:'');
           return `
-        <div class="item"><div class="ico" style="background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:16px">${(ng||cg).icon}</div>
+        <div class="item">${uiIconHtml('gun:'+(ng||cg).id)}
           <div class="txt"><div class="nm">Огнестрел: ${cg?cg.name:'нет'}${ng?' → '+ng.name:''}</div>
           <div class="ds">${cg?dmgTxt(cg):'Автоприцел на мобов'}${ng?(cg?' → ':' · ')+dmgTxt(ng)+' · '+ng.desc:''}</div></div>
           ${ng?`<button class="btn small" id="bGunUp" ${player.money<ng.cost?'disabled':''}>${fmt(ng.cost)} 💰</button>`:'<span class="tiny">MAX</span>'}
         </div>
-        ${cg?`<div class="item"><div class="ico" style="background:linear-gradient(135deg,#ffb060,#a05010)"></div>
-          <div class="txt"><div class="nm">🔸 Патроны ×${cg.pack}</div>
+        ${cg?`<div class="item">${uiIconHtml('gunammo','#c8683a')}
+          <div class="txt"><div class="nm">Патроны ×${cg.pack}</div>
           <div class="ds">У вас: ${player.gunAmmo} · цена зависит от уровня оружия</div></div>
           <button class="btn small" id="bGunAmmo" ${player.money<C_GUNAMMO?'disabled':''}>${fmt(C_GUNAMMO)} 💰</button>
         </div>`:''}`;
@@ -1095,50 +1100,50 @@ const UI={
 
         <div style="margin:14px 0 6px;color:#e0b86a;font-size:12px;letter-spacing:1px;text-transform:uppercase;border-top:1px solid rgba(255,255,255,.1);padding-top:10px">Копание</div>
 
-        <div class="item"><div class="ico" style="background:linear-gradient(135deg,#ffd98a,#f0a33c)"></div>
-          <div class="txt"><div class="nm">⚡ Скорость копания (ур. ${player.digSpeedLvl||0}/${DIG_SPEED_MAX})</div>
+        <div class="item">${uiIconHtml('speed')}
+          <div class="txt"><div class="nm">Скорость копания (ур. ${player.digSpeedLvl||0}/${DIG_SPEED_MAX})</div>
           <div class="ds">${(player.digSpeedLvl||0)>=DIG_SPEED_MAX?'Максимум: с киркой VI копаешь почти мгновенно':'Ускоряет копание любой киркой. На максимуме — почти мгновенно'}</div></div>
           ${(player.digSpeedLvl||0)>=DIG_SPEED_MAX?'<span class="tiny">MAX</span>':`<button class="btn small" id="bSpd" ${player.money<spCost?'disabled':''}>${fmt(spCost)} 💰</button>`}
         </div>
         ${!player.drillBought?`
-        <div class="item"><div class="ico" style="background:linear-gradient(135deg,#ffd98a,#c8781a)"></div>
-          <div class="txt"><div class="nm">🛠️ Бур</div>
+        <div class="item">${uiIconHtml('drill')}
+          <div class="txt"><div class="nm">Бур</div>
           <div class="ds">Пробивает туннель в направлении тапа. После покупки откроются снаряды и улучшения</div></div>
           <button class="btn small" id="bDrillBuy" ${player.money<DRILL_BUY_COST?'disabled':''}>${fmt(DRILL_BUY_COST)} 💰</button>
         </div>`:`
-        <div class="item"><div class="ico" style="background:linear-gradient(135deg,#ffd98a,#c8781a)"></div>
-          <div class="txt"><div class="nm">🛠️ Бур (ур. ${player.drillLvl}/6)</div>
+        <div class="item">${uiIconHtml('drill')}
+          <div class="txt"><div class="nm">Бур (ур. ${player.drillLvl}/6)</div>
           <div class="ds">Мощность ${drillPower()} · ширина ${drillWidth()}${player.drillLvl<6?' → мощность '+DRILL_POWER[player.drillLvl]:''}</div></div>
           ${player.drillLvl>=6?'<span class="tiny">MAX</span>':`<button class="btn small" id="bDrillUp" ${player.money<DRILL_LVL_COST[player.drillLvl]?'disabled':''}>${fmt(DRILL_LVL_COST[player.drillLvl])} 💰</button>`}
         </div>
-        <div class="item"><div class="ico" style="background:linear-gradient(135deg,#ffb060,#a05010)"></div>
-          <div class="txt"><div class="nm">🧰 Буры ×5</div>
+        <div class="item">${uiIconHtml('drills')}
+          <div class="txt"><div class="nm">Буры ×5</div>
           <div class="ds">У вас: ${player.drills} шт · одноразовые · цена растёт с уровнем бура</div></div>
           <button class="btn small" id="bDrills" ${player.money<C_DRILLS?'disabled':''}>${fmt(C_DRILLS)} 💰</button>
         </div>`}
         ${!player.barricadeBought?`
-        <div class="item"><div class="ico" style="background:linear-gradient(135deg,#a8743e,#4a2c14);display:flex;align-items:center;justify-content:center;font-size:15px">🧱</div>
+        <div class="item">${uiIconHtml('barr',BARR[0].col)}
           <div class="txt"><div class="nm">Баррикады</div>
           <div class="ds">Защитные блоки: ставятся кнопкой «Ставить», мобы тратят время, чтобы их сломать. Комплект ×${BARR_PACK}</div></div>
           <button class="btn small" id="bBarrBuy" ${player.money<BARR_BUY?'disabled':''}>${fmt(BARR_BUY)} 💰</button>
         </div>`:`
-        <div class="item"><div class="ico" style="background:linear-gradient(135deg,#a8743e,#4a2c14);display:flex;align-items:center;justify-content:center;font-size:15px">🧱</div>
+        <div class="item">${uiIconHtml('barr',BARR[player.barricadeLvl-1].col)}
           <div class="txt"><div class="nm">Баррикада: ${BARR[player.barricadeLvl-1].name.toLowerCase()} (ур. ${player.barricadeLvl}/4)</div>
           <div class="ds">Прочность ${BARR[player.barricadeLvl-1].hp}${player.barricadeLvl<4?' → '+BARR[player.barricadeLvl].name.toLowerCase()+' '+BARR[player.barricadeLvl].hp:''}</div></div>
           ${player.barricadeLvl>=4?'<span class="tiny">MAX</span>':`<button class="btn small" id="bBarrUp" ${player.money<BARR_UP_COST[player.barricadeLvl]?'disabled':''}>${fmt(BARR_UP_COST[player.barricadeLvl])} 💰</button>`}
         </div>
-        <div class="item"><div class="ico" style="background:linear-gradient(135deg,#c89060,#6a4018)"></div>
-          <div class="txt"><div class="nm">🧱 Баррикады ×${BARR_PACK}</div>
+        <div class="item">${uiIconHtml('barrpack',BARR[player.barricadeLvl-1].col)}
+          <div class="txt"><div class="nm">Баррикады ×${BARR_PACK}</div>
           <div class="ds">У вас: ${player.barricades} шт · новые ставятся текущего уровня</div></div>
           <button class="btn small" id="bBarrPack" ${player.money<C_BARR?'disabled':''}>${fmt(C_BARR)} 💰</button>
         </div>`}
-        <div class="item"><div class="ico" style="background:linear-gradient(135deg,#5ce0a0,#1f7a52)"></div>
-          <div class="txt"><div class="nm">🎒 Слоты рюкзака (${player.slots}/20)</div>
+        <div class="item">${uiIconHtml('slots')}
+          <div class="txt"><div class="nm">Слоты рюкзака (${player.slots}/20)</div>
           <div class="ds">Сколько видов руды помещается. Новый вид при полном рюкзаке уходит скупщику за ½ цены</div></div>
           ${player.slots>=20?'<span class="tiny">MAX</span>':`<button class="btn small" id="bSlot" ${player.money<slotCost?'disabled':''}>${fmt(slotCost)} 💰</button>`}
         </div>
-        <div class="item"><div class="ico" style="background:linear-gradient(135deg,#c8a060,#5a3a10)"></div>
-          <div class="txt"><div class="nm">📦 Вместимость стопки (${stackCap()} шт)</div>
+        <div class="item">${uiIconHtml('stack')}
+          <div class="txt"><div class="nm">Вместимость стопки (${stackCap()} шт)</div>
           <div class="ds">Сколько штук одной руды помещается. Излишек — за ½ цены</div></div>
           ${(player.stackLvl||0)>=8?'<span class="tiny">MAX</span>':`<button class="btn small" id="bStack" ${player.money<Math.round(900*Math.pow(2.3,player.stackLvl||0))?'disabled':''}>${fmt(Math.round(900*Math.pow(2.3,player.stackLvl||0)))} 💰</button>`}
         </div>
@@ -1271,9 +1276,9 @@ const UI={
     const tierName=['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI'];
     const gear=(kind,arr,cur,label,stat)=>{
       const n=gearNext(kind),c=arr[clamp(cur-1,0,arr.length-1)];
-      if(!n)return `<div class="item"><div class="txt"><div class="nm">${label}: ${c?c.name:'—'}</div><div class="ds">Максимум</div></div><span class="tiny">MAX</span></div>`;
+      if(!n)return `<div class="item">${uiIconHtml(kind==='gun'?'gun:'+(c?c.id:'pistol'):kind+':'+(c?c.lv:1))}<div class="txt"><div class="nm">${label}: ${c?c.name:'—'}</div><div class="ds">Максимум</div></div><span class="tiny">MAX</span></div>`;
       const nx=arr[n.lv-1];
-      return `<div class="item" style="flex-wrap:wrap"><div class="ico" style="background:rgba(255,140,60,.15);display:flex;align-items:center;justify-content:center;font-size:15px">${kind==='pick'?'⛏':kind==='sword'?'⚔️':kind==='armor'?'🛡':(nx.icon||'🔫')}</div>
+      return `<div class="item" style="flex-wrap:wrap">${uiIconHtml(kind==='gun'?'gun:'+nx.id:kind+':'+nx.lv)}
         <div class="txt"><div class="nm">${nx.name}</div><div class="ds">${stat(c,nx)}${!n.ready?' · <b style="color:#ff9a8a">сначала ур. VI на Земле</b>':''}</div>
         <div class="cost">${costChips(n.r)}</div></div>
         <button class="btn small" data-gear="${kind}" ${n.ready&&canPay(n.r)?'':'disabled'}>Ковать</button></div>`;};
@@ -1286,29 +1291,29 @@ const UI={
         +`<div class="sect">Линейка огнестрела Ада</div>`+GUNS.filter(g=>g.hell).map(g=>`<div class="chk ${player.gunLvl>=g.lv?'ok':'no'}">${g.icon} ${g.name}<b>${player.gunLvl>=g.lv?'есть':'ур. '+g.lv}</b></div>`).join('');
     }else if(tab==='upg'){
       body=HUPG.map(u=>{const lv=u.cur();
-        if(u.id==='drill'&&!player.drillBought||u.id==='barr'&&!player.barricadeBought)return `<div class="item"><div class="txt"><div class="nm">${u.ic} ${u.n}</div><div class="ds">Сначала купи на Земле</div></div></div>`;
+        if(u.id==='drill'&&!player.drillBought||u.id==='barr'&&!player.barricadeBought)return `<div class="item">${uiUpgIcon(u.id,'h',0)}<div class="txt"><div class="nm">${u.n}</div><div class="ds">Сначала купи на Земле</div></div></div>`;
         const lockLow=lv<u.min,max=lv>=u.max;
-        return `<div class="item" style="flex-wrap:wrap"><div class="ico" style="background:rgba(255,140,60,.15);display:flex;align-items:center;justify-content:center;font-size:15px">${u.ic}</div>
+        return `<div class="item" style="flex-wrap:wrap">${uiUpgIcon(u.id,'h',lv)}
           <div class="txt"><div class="nm">${u.n} · ${lv}/${u.max}</div><div class="ds">${lockLow?'Сначала прокачай на Земле до '+u.min:u.desc(lv)}</div>
           ${!max&&!lockLow?`<div class="cost">${costChips(u.cost(lv))}</div>`:''}</div>
           ${max?'<span class="tiny">MAX</span>':`<button class="btn small" data-upg="${u.id}" ${!lockLow&&canPay(u.cost(lv))?'':'disabled'}>Улучшить</button>`}</div>`;}).join('');
     }else if(tab==='items'){
       body=HITEMS.map(it=>{const lv=itemLv(it.id),max=lv>=it.max;
-        return `<div class="item" style="flex-wrap:wrap"><div class="ico" style="background:rgba(255,140,60,.15);display:flex;align-items:center;justify-content:center;font-size:15px">${it.ic}</div>
+        return `<div class="item" style="flex-wrap:wrap">${uiIconHtml(it.id)}
           <div class="txt"><div class="nm">${it.n}${it.max>1?' · '+lv+'/'+it.max:''}</div><div class="ds">${it.desc(lv)}</div>${!max?`<div class="cost">${costChips(it.cost(lv))}</div>`:''}</div>
           ${max?'<span class="pill" style="background:rgba(120,255,160,.15);color:#7dffb0">✓</span>':`<button class="btn small" data-item="${it.id}" ${canPay(it.cost(lv))?'':'disabled'}>${lv?'Улучшить':'Создать'}</button>`}</div>`;}).join('')
-        +`<div class="sect">Расходники</div>`+HCONS.map(c=>`<div class="item" style="flex-wrap:wrap"><div class="ico" style="background:rgba(255,140,60,.15);display:flex;align-items:center;justify-content:center;font-size:15px">${c.ic}</div>
+        +`<div class="sect">Расходники</div>`+HCONS.map(c=>`<div class="item" style="flex-wrap:wrap">${uiConsIcon(c.id)}
           <div class="txt"><div class="nm">${c.n} <span class="tiny">· есть ${(player.hitems&&player.hitems[c.id])||0}</span></div><div class="ds">${c.desc}</div><div class="cost">${costChips(c.cost)}</div></div>
           <button class="btn small" data-cons="${c.id}" ${canPay(c.cost)?'':'disabled'}>Создать</button></div>`).join('')
-        +`<div class="item" style="flex-wrap:wrap"><div class="ico" style="background:rgba(120,200,255,.15);display:flex;align-items:center;justify-content:center;font-size:15px">🧊</div>
+        +`<div class="item" style="flex-wrap:wrap">${uiIconHtml('icepot')}
           <div class="txt"><div class="nm">Ледяное зелье ×2 <span class="tiny">· есть ${player.icePotions}</span></div><div class="ds">Сбрасывает Жар и охлаждает на 25 с</div><div class="cost">${costChips({c:40000,m:{i27:1}})}</div></div>
           <button class="btn small" id="hgIce" ${canPay({c:40000,m:{i27:1}})?'':'disabled'}>Создать</button></div>`
-        +`<div class="sect">Хранение</div><div class="item" style="flex-wrap:wrap"><div class="ico" style="background:rgba(200,144,74,.2);display:flex;align-items:center;justify-content:center;font-size:15px">📦</div>
+        +`<div class="sect">Хранение</div><div class="item" style="flex-wrap:wrap">${uiIconHtml('crate')}
           <div class="txt"><div class="nm">Ящик для хранения <span class="tiny">· с собой ${packedCrates().length} · всего ${crateTotal()}/${CRATE_MAX}</span></div><div class="ds">Хранит любую руду и материалы без ограничений. Ставится в лобби и в шахте («Ставить»), переименовывается, разбирается вместе с содержимым. Ящики в шахте видны на мини-карте.</div><div class="cost">${costChips(CRATE_COST)}</div></div>
           <button class="btn small" id="hgCrate" ${canPay(CRATE_COST)&&crateTotal()<CRATE_MAX?'':'disabled'}>Создать</button></div>`
-        +`<div class="item" style="flex-wrap:wrap"><div class="ico" style="background:rgba(127,240,255,.15);display:flex;align-items:center;justify-content:center;font-size:15px">🤖</div>
-          <div class="txt"><div class="nm">Робот-кладовщик <span class="cnt">${botUnits().length}/${BOT_MAX}</span></div><div class="ds">Ставится в лобби Ада. Назначь ящик-приёмник и фильтры ящиков — роботы сами разнесут всё по местам (по ${botLoad()} шт за ходку) и делят работу между собой. Имя, скин и прокачки — в меню робота (тапни по нему).</div>${botUnits().length<BOT_MAX?`<div class="cost">${costChips(BOT_COST)}</div>`:''}</div>
-          ${botUnits().length>=BOT_MAX?'<span class="pill" style="background:rgba(120,255,160,.15);color:#7dffb0">MAX</span>':`<button class="btn small" id="hgBot" ${canPay(BOT_COST)?'':'disabled'}>Создать</button>`}</div>`;
+        +`<div class="item" style="flex-wrap:wrap">${uiIconHtml('robot')}
+          <div class="txt"><div class="nm">Робот-кладовщик <span class="cnt">${Math.min(botUnits().length,BOT_HELL_MAX)}/${BOT_HELL_MAX}</span></div><div class="ds">Работает в лобби любого измерения (в меню робота выбери, где). Ещё три таких робота делаются в Кузнице Зари. Назначь ящик-приёмник и фильтры ящиков — роботы сами разнесут всё по местам (по ${botLoad()} шт за ходку) и делят работу между собой. Имя, скин и прокачки — в меню робота (тапни по нему).</div>${botUnits().length<BOT_HELL_MAX?`<div class="cost">${costChips(BOT_COST)}</div>`:''}</div>
+          ${botUnits().length>=BOT_HELL_MAX?'<span class="pill" style="background:rgba(120,255,160,.15);color:#7dffb0">MAX</span>':`<button class="btn small" id="hgBot" ${canPay(BOT_COST)?'':'disabled'}>Создать</button>`}</div>`;
     }else{
       const sup=[
         {id:'lad',ic:'🪜',n:'Лестницы ×20',d:'У вас: '+player.ladders,c:Math.round(hellSupUnit('lad')*20)},
@@ -1319,7 +1324,7 @@ const UI={
         player.barricadeBought?{id:'bar',ic:'🧱',n:'Баррикады ×'+BARR_PACK,d:'У вас: '+player.barricades,c:Math.round(hellSupUnit('bar')*BARR_PACK)}:null
       ].filter(Boolean);
       UI._hgSup=sup;
-      body=sup.map(x=>`<div class="item"><div class="ico" style="background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:16px">${x.ic}</div>
+      body=sup.map(x=>`<div class="item">${uiSupIcon(x.id)}
         <div class="txt"><div class="nm">${x.n}</div><div class="ds">${x.d}</div>${x.m?`<div class="cost">${costChips({c:x.c,m:x.m})}</div>`:''}</div>
         <button class="btn small" data-sup="${x.id}" ${canPay({c:x.c,m:x.m})?'':'disabled'}>${x.m?'Создать':fmt(x.c)+' 💰'}</button></div>`).join('');
     }
@@ -1345,7 +1350,7 @@ const UI={
       if(lv>=it.max||!pay(it.cost(lv)))return;if(!player.hitems)player.hitems={};player.hitems[it.id]=lv+1;done(it.ic+' '+it.n+(it.max>1?' ур. '+(lv+1):''));});
     d.querySelectorAll('[data-cons]').forEach(b=>b.onclick=()=>{const c=HCONS.find(q=>q.id===b.getAttribute('data-cons'));if(!pay(c.cost))return;
       if(!player.hitems)player.hitems={};player.hitems[c.id]=(player.hitems[c.id]||0)+c.pack;done(c.ic+' '+c.n);});
-    if(d.querySelector('#hgBot'))d.querySelector('#hgBot').onclick=()=>{const S=bot();if(S.units.length>=BOT_MAX||!pay(BOT_COST))return;const U=newBotUnit(S.units.length);
+    if(d.querySelector('#hgBot'))d.querySelector('#hgBot').onclick=()=>{const S=bot();if(S.units.length>=BOT_HELL_MAX||!pay(BOT_COST))return;const U=newBotUnit(S.units.length);
       const used=new Set(S.units.map(u=>u.name));if(used.has(U.name))U.name=BOT_NAMES.find(n=>!used.has(n))||U.name;S.units.push(U);bot();G.placeItem='sorter';SFX.buy();vib(30);validateSelection();saveGame();
       UI.toast('🤖 '+U.name+' собран! В лобби Ада выбери его в «Предметах» и нажми «Ставить»');UI.hforge('items');};
     if(d.querySelector('#hgCrate'))d.querySelector('#hgCrate').onclick=()=>{if(crateTotal()>=CRATE_MAX||!pay(CRATE_COST))return;packedCrates().push(newCrate());G.placeItem='crate';SFX.buy();vib(20);validateSelection();saveGame();UI.toast('📦 Ящик готов — выбери его в «Предметах» и нажми «Ставить»');UI.hforge('items');};
@@ -1752,14 +1757,14 @@ const UI={
   },
   /* настройка робота-кладовщика */
   sorter(uid){
-    const S=bot(),L=lobbyCrates(),inp=L.find(c=>c.id===S.input);
+    const S=bot(),L=lobbyCrates(),inp=L.find(c=>c.id===botInId());
     if(uid)UI._botSel=uid;const U=botById(UI._botSel)||S.units.find(u=>u.placed)||S.units[0];if(!U){UI.clear();return;}UI._botSel=U.id;
     const st=U.state==='work'?(U.carry?'Несёт '+(U.carry.kind==='o'?ORES[U.carry.id].name:MATS[U.carry.id].n)+' ×'+U.carry.n+' → «'+escHtml((crateById(U.carry.to)||{}).name||'?')+'»':'Работает'):
-      U.state==='noinput'?'Выбери ящик-приёмник ниже':U.state==='nofilter'?'В приёмнике есть ресурсы, для которых нет ящика — отметь категорию или «Всё остальное»':U.placed?'Отдыхает: в приёмнике нечего сортировать':'Не поставлен — выбери его в «Предметах» и нажми «Ставить» в лобби';
+      U.state==='noinput'?'Выбери ящик-приёмник ниже':U.state==='nofilter'?'В приёмнике есть ресурсы, для которых нет ящика — отметь категорию или «Всё остальное»':U.placed?'Отдыхает: в приёмнике нечего сортировать':'Не поставлен — выбери его в «Предметах» и нажми «Ставить» в лобби: '+BOT_DIM_NAMES[U.dim]+' (или любого другого измерения)';
     const known=new Set();for(const c of L){for(const k in c.inv)if(c.inv[k]>0)known.add('o:'+k);for(const k in c.mats)if(c.mats[k]>0)known.add('m:'+k);if(c.sf)for(const k of (c.sf.ids||[]))known.add(k);}
     for(const k in player.inv)if(player.inv[k]>0)known.add('o:'+k);for(const k in (player.mats||{}))if(player.mats[k]>0)known.add('m:'+k);
     const knownL=[...known].filter(k=>{const [a,b]=k.split(':');return a==='o'?!!ORES[b]:!!MATS[b];});
-    const others=L.filter(c=>c.id!==S.input);
+    const others=L.filter(c=>c.id!==botInId());
     const crateCard=(c)=>{const sf=c.sf||{cats:[],ids:[]},open=UI._botOpen===c.id,cc=crateCount(c);
       return `<div class="card" style="padding:9px 10px;margin:6px 0;background:rgba(255,255,255,.035)">
         <div class="row spread"><b>📦 ${escHtml(c.name)}</b><span class="tiny">${cc.kinds} вид. · ${fmt(cc.total)} шт</span></div>
@@ -1774,7 +1779,10 @@ const UI={
         <div style="display:flex;flex-wrap:nowrap;gap:10px;align-items:center"><img id="botImg" style="width:72px;height:72px;image-rendering:auto;flex:0 0 72px;border-radius:14px;background:radial-gradient(circle at 50% 70%,rgba(127,240,255,.16),rgba(0,0,0,0) 70%)"><div style="flex:1;min-width:0">
           <h3 style="margin:0;border:none;padding:0">🤖 Робот-кладовщик</h3>
           <div class="row" style="gap:6px;margin-top:6px;flex-wrap:nowrap"><input id="botName" class="crName" maxlength="16" value="${escHtml(U.name)}" aria-label="Имя робота"><button class="btn small" id="botRen" style="min-width:48px">✏️</button></div>
-          <p class="tiny" style="margin-top:4px;line-height:1.4">Берёт ресурсы из <b>ящика-приёмника</b> и относит их в ящики лобби по фильтрам. Роботы делят работу между собой. Перенёс: ${fmt(U.moved||0)} шт</p></div></div>
+          <p class="tiny" style="margin-top:4px;line-height:1.4">Берёт ресурсы из <b>ящика-приёмника</b> и относит их в ящики лобби по фильтрам (у каждого лобби свой приёмник). Роботы делят работу между собой. Перенёс: ${fmt(U.moved||0)} шт</p></div></div>
+        <div class="cheatSection" style="text-align:left">🌍 Где работает</div>
+        <div class="tabs" style="margin:6px 0 4px">${BOT_DIM_NAMES.map((n,i)=>`<button data-bdim="${i}" class="${U.dim===i?'on':''}">${n}</button>`).join('')}</div>
+        <p class="tiny" style="margin:0 0 4px;line-height:1.4">${U.placed&&U.dim!==G.dim?'Сейчас стоит в лобби: '+BOT_DIM_NAMES[U.dim]+'. ':''}Робот работает только в лобби своего измерения и берёт ящики этого лобби. Выбери другое — он вернётся в рюкзак, и его нужно поставить там («Ставить»).</p>
         <div class="cheatSection" style="text-align:left">🎨 Скин (бесплатно)</div>
         <div class="skinGrid">${BOT_SKINS.map(k=>`<button class="skinBtn ${U.skin===k.id?'on':''}" data-bskin="${k.id}"><img data-skimg="${k.id}" alt=""><span>${k.n}</span></button>`).join('')}</div>
         <div class="cheatSection" style="text-align:left">⚙️ Прокачки (действуют на всех роботов)</div>
@@ -1788,7 +1796,7 @@ const UI={
           ${max?'<span class="pill" style="background:rgba(120,255,160,.15);color:#7dffb0">MAX</span>':`<button class="btn small" data-bup="${k}" ${canPay(c)?'':'disabled'}>Улучшить</button>`}</div>`;}).join('')}
         <div class="tiny" style="margin:8px 0 2px;padding:7px 9px;border-radius:9px;background:rgba(127,240,255,.08);color:#bfefff;line-height:1.4">${st}${S.moved?'<br>Всего перенесено: '+fmt(S.moved)+' шт':''}</div>
         <div class="cheatSection" style="text-align:left">📥 Ящик-приёмник (сюда складывай всё)</div>
-        ${L.length?`<div style="display:flex;flex-wrap:wrap;gap:5px">${L.map(c=>`<button class="btn small ${c.id===S.input?'':'alt'}" data-binp="${c.id}" style="font-size:12px;min-width:0;padding:6px 10px">${c.id===S.input?'✓ ':''}${escHtml(c.name)}</button>`).join('')}</div>`
+        ${L.length?`<div style="display:flex;flex-wrap:wrap;gap:5px">${L.map(c=>`<button class="btn small ${c.id===botInId()?'':'alt'}" data-binp="${c.id}" style="font-size:12px;min-width:0;padding:6px 10px">${c.id===botInId()?'✓ ':''}${escHtml(c.name)}</button>`).join('')}</div>`
           :'<p class="muted">В лобби нет ящиков. Поставь хотя бы два: приёмник и склад.</p>'}
         <div class="cheatSection" style="text-align:left">🗂 Что класть в остальные ящики</div>
         ${inp?(others.length?others.map(crateCard).join(''):'<p class="muted">Поставь в лобби ещё ящики — и отметь, что в них класть.</p>'):'<p class="muted">Сначала выбери приёмник.</p>'}
@@ -1802,19 +1810,20 @@ const UI={
     try{d.querySelector('#botImg').src=botPic(Object.assign({},U,{capLv:S.capLv,spdLv:S.spdLv,carry:U.carry}),144,2.7);
       d.querySelectorAll('[data-skimg]').forEach(im=>{im.src=botPic({skin:im.dataset.skimg,face:1,capLv:0,spdLv:0},80,1.6);});}catch(e){}
     d.querySelectorAll('[data-bsel]').forEach(b=>b.onclick=()=>{SFX.ui();UI.sorter(b.getAttribute('data-bsel'));});
+    d.querySelectorAll('[data-bdim]').forEach(b=>b.onclick=()=>{const t=+b.getAttribute('data-bdim');if(t===U.dim)return;botDropCarry(U);U.placed=false;U.job=null;U.dim=t;bot();G.placeItem='sorter';validateSelection();saveGame();SFX.ui();UI.clear();UI.toast('🤖 '+U.name+' теперь работает в лобби: '+BOT_DIM_NAMES[t]+(t===G.dim?' — выбери место и нажми «Ставить»':' — поставь его там'));});
     d.querySelectorAll('[data-bskin]').forEach(b=>b.onclick=()=>{U.skin=botSkin(b.getAttribute('data-bskin')).id;SFX.ui();vib(10);saveGame();UI.sorter();});
     d.querySelector('#botRen').onclick=()=>{const v=String(d.querySelector('#botName').value||'').replace(/\s+/g,' ').trim().slice(0,16);if(!v){UI.toast('Имя не может быть пустым');return;}U.name=v;SFX.ui();saveGame();UI.toast('🤖 Теперь его зовут «'+v+'»');UI.sorter();};
     d.querySelector('#botName').onkeydown=(e)=>{if(e.key==='Enter')d.querySelector('#botRen').click();};
     const re=()=>{saveGame();UI.sorter();};
     d.querySelectorAll('[data-bup]').forEach(b=>b.onclick=()=>{const k=b.getAttribute('data-bup'),lv=(k==='spd'?S.spdLv:S.capLv)|0;if(lv>=5||!pay(BOT_UPG[k][lv]))return;
       if(k==='spd')S.spdLv=lv+1;else S.capLv=lv+1;SFX.buy();vib(25);UI.toast(k==='spd'?'⚡ Болтик стал быстрее':'📦 Болтик берёт больше');re();});
-    d.querySelectorAll('[data-binp]').forEach(b=>b.onclick=()=>{S.input=b.getAttribute('data-binp');for(const u of S.units)u.job=null;SFX.ui();re();});
+    d.querySelectorAll('[data-binp]').forEach(b=>b.onclick=()=>{botSetIn(b.getAttribute('data-binp'));for(const u of S.units)u.job=null;SFX.ui();re();});
     d.querySelectorAll('[data-bcat]').forEach(b=>b.onclick=()=>{const [cid,k]=b.getAttribute('data-bcat').split('|'),c=crateById(cid);if(!c)return;if(!c.sf)c.sf={cats:[],ids:[]};
       const i=c.sf.cats.indexOf(k);if(i>=0)c.sf.cats.splice(i,1);else c.sf.cats.push(k);SFX.ui();re();});
     d.querySelectorAll('[data-bopen]').forEach(b=>b.onclick=()=>{const id=b.getAttribute('data-bopen');UI._botOpen=UI._botOpen===id?null:id;SFX.ui();UI.sorter();});
     d.querySelectorAll('[data-bid]').forEach(b=>b.onclick=()=>{const v=b.getAttribute('data-bid'),cid=v.split('|')[0],k=v.slice(cid.length+1),c=crateById(cid);if(!c)return;if(!c.sf)c.sf={cats:[],ids:[]};
       const i=c.sf.ids.indexOf(k);if(i>=0)c.sf.ids.splice(i,1);else c.sf.ids.push(k);SFX.ui();re();});
-    d.querySelector('#bPick').onclick=()=>{if(U.carry){const inp2=crateById(S.input)||lobbyCrates()[0];if(inp2){const box=U.carry.kind==='o'?inp2.inv:inp2.mats;box[U.carry.id]=(box[U.carry.id]||0)+U.carry.n;}U.carry=null;}
+    d.querySelector('#bPick').onclick=()=>{botDropCarry(U);
       U.placed=false;U.job=null;bot();G.placeItem='sorter';validateSelection();saveGame();UI.clear();UI.toast('🤖 '+U.name+' у тебя — выбери место и нажми «Ставить»');};
     d.querySelector('#bClose').onclick=()=>{SFX.uiBack();UI.clear();};
   },

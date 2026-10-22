@@ -44,6 +44,12 @@ function vib(ms){
 /* ============================================================
    УПРАВЛЕНИЕ — раскладки кнопок
    ============================================================ */
+/* кнопки способностей (Лиловые небеса): две кнопки Q/E рядом, точка — середина между ними;
+   по умолчанию стоят над джойстиком j (запись раскладки с полями cx, cy, r) */
+function abilDefault(j,W,H){
+  const sc=Math.min(1.5,Math.max(0.8,view.scale||1)),jr=j.r*sc,r=24*sc;
+  return {cx:j.cx,cy:(j.cy*H-jr*1.45-r-8)/H,r:24,a:0.92};
+}
 function getDefaultControls(){
   const W=view.W||360, H=view.H||640;
   const sc=Math.min(1.5,Math.max(0.8,view.scale||1));
@@ -63,6 +69,7 @@ function getDefaultControls(){
   const qr=24*sc,qs=2*qr+10;
   const qX=land?jcx-3*qs:W-10-qr;
   const qY=land?shootY-mr-14-qr:itemsY-sm*sc-12-qr-3*qs;
+  const joyC={cx:joyPad/W,cy:(H-joyPad-30)/H,r:joyR};
   return {
     joy:    {cx:joyPad/W,  cy:(H-joyPad-30)/H, r:joyR, a:0.55},
     jump:   {cx:jcx/W,     cy:jcy/H,           r:big,  a:1.00},
@@ -70,7 +77,8 @@ function getDefaultControls(){
     shoot:  {cx:shootX/W,  cy:shootY/H,        r:med,  a:1.00},
     items:  {cx:itemsX/W,  cy:itemsY/H,        r:sm,   a:0.90},
     qbar:   {cx:qX/W,      cy:qY/H,            r:24,   a:0.92},
-    pause:  {cx:(W-30)/W,  cy:30/H,            r:22,   a:0.85}
+    pause:  {cx:(W-30)/W,  cy:30/H,            r:22,   a:0.85},
+    abil:   abilDefault(joyC,W,H)
   };
 }
 function ensureControls(){
@@ -79,6 +87,10 @@ function ensureControls(){
     return;
   }
   const def=getDefaultControls();
+  /* старые настройки без способностей: кнопки остаются над джойстиком, где бы он ни стоял */
+  const jj=settings.controls.joy;
+  if(!settings.controls.abil && jj && typeof jj.cx==='number' && typeof jj.cy==='number' && typeof jj.r==='number')
+    def.abil=abilDefault(jj,view.W||360,view.H||640);
   for(const k in def){
     if(!settings.controls[k] || typeof settings.controls[k]!=='object'){
       settings.controls[k]=Object.assign({},def[k]);
@@ -112,6 +124,7 @@ const CONTROL_LABELS={
   shoot:'Стрелять',
   items:'Предметы',
   qbar:'Слоты',
-  pause:'Пауза'
+  pause:'Пауза',
+  abil:'Способности'
 };
-const CONTROL_ORDER=['joy','jump','place','shoot','items','qbar','pause'];
+const CONTROL_ORDER=['joy','jump','place','shoot','items','qbar','pause','abil'];

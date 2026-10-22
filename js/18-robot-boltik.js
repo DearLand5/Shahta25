@@ -12,8 +12,16 @@ const BOT_UPG={
 function botSpd(){return BOT_SPD[clamp(bot().spdLv|0,0,5)];}
 function botLoad(){return BOT_CAP[clamp(bot().capLv|0,0,5)];}
 const BOT_CATS=[['hore','🔥 Руда Ада'],['eore','🌍 Руда Земли'],['ingot','▰ Слитки'],['alloy','⬢ Сплавы'],['comp','⚙️ Компоненты'],['part','🦴 Части мобов'],['rest','✳ Всё остальное']];
-/* общее состояние (приёмник, прокачки — одни на всех роботов) + список роботов S.units (до BOT_MAX) */
-const BOT_MAX=3,BOT_NAMES=['Болтик','Гаечка','Шуруп'];
+/* общее состояние (прокачки — одни на всех роботов; ящик-приёмник свой в лобби каждого измерения S.inputs[dim])
+   + список роботов S.units (до BOT_MAX). Первые 3 делаются в Кузнице Ада (BOT_HELL_MAX), ещё 3 — в Кузнице Зари.
+   У каждого робота есть измерение u.dim (0 Земля, 1 Ад, 2 Лиловые небеса): он стоит и работает только в лобби своего измерения */
+const BOT_MAX=6,BOT_HELL_MAX=3,BOT_NAMES=['Болтик','Гаечка','Шуруп','Винтик','Заклёпка','Шестерёнка'];
+const BOT_DIM_NAMES=['Земля','Ад','Лиловые небеса'];
+/* цена роботов 4–6 в Кузнице Зари: слитки и эссенции Зари, Сны и монеты */
+const BOT_LIL_COST=[
+  {c:5000000,m:{i38:4,eChime:2,mech:4},d:3},
+  {c:10000000,m:{i44:4,eHoney:3,mech:6},d:6},
+  {c:18000000,m:{i51:4,eToy:4,mech:8},d:10}];
 const BOT_SKINS=[
   {id:'brass',n:'Латунь',b:['#e8b86a','#c8904a','#7a5226'],pan:'#3a2a1a',riv:'#f0d090',arm:['#8a6232','#6a4a28'],h:['#f8d898','#a87a3e'],vis:'#7ff0ff'},
   {id:'steel',n:'Сталь',b:['#d0dce8','#8c9cae','#4a5868'],pan:'#1a2230',riv:'#eef4fa',arm:['#6a7888','#4a5664'],h:['#f2f6fa','#7a8a9a'],vis:'#7ff0ff'},
@@ -24,14 +32,26 @@ const BOT_SKINS=[
   {id:'bone',n:'Кость',b:['#f6eedc','#d0c4a8','#8a7c64'],pan:'#2a2420',riv:'#ffffff',arm:['#b8aa90','#8a7c64'],h:['#fffaf0','#c0b090'],vis:'#9ad8ff'},
   {id:'candy',n:'Карамель',b:['#ffa8d8','#e05aa0','#8a2a60'],pan:'#3a1030',riv:'#ffffff',arm:['#c84a90','#9a3070'],h:['#ffd8ee','#d060a0'],vis:'#7ff0ff'}];
 function botSkin(id){return BOT_SKINS.find(k=>k.id===id)||BOT_SKINS[0];}
-function newBotUnit(i){return {id:'b'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36),name:BOT_NAMES[i]||('Робот '+(i+1)),skin:BOT_SKINS[i%3].id,placed:false,x:300,face:1,moved:0,carry:null,job:null};}
+function newBotUnit(i){return {id:'b'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36),name:BOT_NAMES[i]||('Робот '+(i+1)),skin:BOT_SKINS[i%3].id,placed:false,dim:1,x:300,face:1,moved:0,carry:null,job:null};}
 function bot(){if(!player.sorter||typeof player.sorter!=='object')player.sorter={owned:false,placed:false};const S=player.sorter;
   if(!Array.isArray(S.units)){S.units=[];if(S.owned){const u=newBotUnit(0);u.id='b1';u.placed=!!S.placed;u.x=S.x||300;u.face=S.face||1;u.carry=S.carry||null;u.moved=S.moved|0;S.units.push(u);}S.carry=null;}
+  if(!S.inputs||typeof S.inputs!=='object')S.inputs={};
+  if(typeof S.input==='string'&&!S.inputs[1])S.inputs[1]=S.input;   /* старый сейв: приёмник был один — в лобби Ада */
+  for(const u of S.units)if(u.dim!==0&&u.dim!==1&&u.dim!==2)u.dim=1;
+  S.input=S.inputs[1]||null;
   S.owned=S.units.length>0;S.placed=S.units.some(u=>u.placed);return S;}
+/* ящик-приёмник в лобби измерения d (по умолчанию текущего) */
+function botInId(d){return bot().inputs[d==null?G.dim:d]||null;}
+function botSetIn(id,d){const S=bot();S.inputs[d==null?G.dim:d]=id;S.input=S.inputs[1]||null;}
+/* ящики лобби измерения d: у других измерений они лежат в упакованном мире */
+function botCratesOf(d){if(d===G.dim)return lobbyCrates();const w=DIMWORLD[d];return ((w&&w.wf&&w.wf.crates)||[]).filter(c=>c.where==='lobby');}
+/* робот снимает груз: возвращает в приёмник своего измерения (если ящика нет — в любой ящик лобби) */
+function botDropCarry(U){if(!U.carry)return;const L=botCratesOf(U.dim),c=L.find(q=>q.id===botInId(U.dim))||L[0];
+  if(c){const box=U.carry.kind==='o'?c.inv:c.mats;box[U.carry.id]=(box[U.carry.id]||0)+U.carry.n;}U.carry=null;}
 function botUnits(){return bot().units;}
 function botById(id){return bot().units.find(u=>u.id===id)||null;}
-function botUnplaced(){return bot().units.find(u=>!u.placed)||null;}
-function botActive(){return G.dim===1&&bot().units.some(u=>u.placed);}
+function botUnplaced(){const L=bot().units.filter(u=>!u.placed);return L.find(u=>u.dim===G.dim)||L[0]||null;}
+function botActive(){return bot().units.some(u=>u.placed&&u.dim===G.dim);}
 function resCat(kind,id){if(kind==='o')return ORES[id]&&ORES[id].dim===1?'hore':'eore';const M=MATS[id];return M?M.kind:'part';}
 function lobbyCrates(){return worldCrates().filter(c=>c.where==='lobby');}
 /* куда отнести: точный выбор > категория > «всё остальное» */
@@ -55,8 +75,8 @@ function sorterTick(dt){
   if(!botActive())return;
   const S=bot();
   for(const c of lobbyCrates())if(c._openT>0)c._openT-=dt;
-  const inp=lobbyCrates().find(c=>c.id===S.input);
-  const placed=S.units.filter(u=>u.placed);
+  const inp=lobbyCrates().find(c=>c.id===botInId());
+  const placed=S.units.filter(u=>u.placed&&u.dim===G.dim);
   placed.forEach((U,idx)=>{
     const claims=new Set();for(const o of placed)if(o!==U&&o.job&&(o.job.ph==='toIn'||o.job.ph==='grab'))claims.add(o.job.kind+':'+o.job.id);
     botUnitTick(U,idx,inp,claims,dt);});
@@ -85,9 +105,9 @@ function botUnitTick(U,idx,inp,claims,dt){
 }
 function placeBot(){
   const U=botUnplaced();if(!U)return;
-  if(G.dim!==1||G.scene!=='lobby'){UI.toast('Робота можно поставить только в лобби Ада');SFX.uiBack();return;}
+  if(G.scene!=='lobby'){UI.toast('Робота можно поставить только в лобби');SFX.uiBack();return;}
   const x=lobbyPlaceX(),why=lobbyPlaceCheck('sorter',x);if(why){UI.toast(why);SFX.uiBack();return;}
-  U.placed=true;U.x=Math.round(x);U.face=x>=lobbyPlayer.x?-1:1;U.job=null;bot();
+  U.placed=true;U.dim=G.dim;U.x=Math.round(x);U.face=x>=lobbyPlayer.x?-1:1;U.job=null;bot();
   G.lobbyAim=null;
   burst(U.x,-14,14,'#9fe8ff',130,2.6);SFX.portal&&SFX.portal();vib(20);validateSelection();saveGame();UI.toast('🤖 '+U.name+' готов к работе — тапни по нему, чтобы настроить');
 }
@@ -155,11 +175,11 @@ function drawBot(g,x,y,S,t,near){
     g.font='700 8.5px system-ui,sans-serif';g.fillStyle='rgba(220,240,255,.8)';g.fillText('тапни по роботу, чтобы настроить',x,y-104);g.restore();}
 }
 function botStatusShort(S){return S.state==='work'?(S.carry?'несёт '+(S.carry.kind==='o'?ORES[S.carry.id].name:MATS[S.carry.id].n):'работает'):S.state==='noinput'?'нет приёмника':S.state==='nofilter'?'не знает, куда нести':'отдыхает';}
-function drawLobbyBot(g){if(G.dim!==1)return;const S=bot();let nearU=null,nd=130;
-  for(const U of S.units){if(!U.placed)continue;const d=Math.abs(lobbyPlayer.x-U.x);if(d<nd){nd=d;nearU=U;}}
-  for(const U of S.units){if(!U.placed)continue;U.capLv=S.capLv;U.spdLv=S.spdLv;drawBot(g,U.x,0,U,G.time+(U.id.length*0.37),G.scene!=='cutscene'&&U===nearU);}}
-function botTap(wx,wy){if(G.dim!==1||G.scene!=='lobby')return false;let hit=null,hd=21;
-  for(const U of botUnits()){if(!U.placed)continue;const d=Math.abs(wx-U.x);if(d<hd&&wy>-44&&wy<6){hd=d;hit=U;}}
+function drawLobbyBot(g){const S=bot();let nearU=null,nd=130;
+  for(const U of S.units){if(!U.placed||U.dim!==G.dim)continue;const d=Math.abs(lobbyPlayer.x-U.x);if(d<nd){nd=d;nearU=U;}}
+  for(const U of S.units){if(!U.placed||U.dim!==G.dim)continue;U.capLv=S.capLv;U.spdLv=S.spdLv;drawBot(g,U.x,0,U,G.time+(U.id.length*0.37),G.scene!=='cutscene'&&U===nearU);}}
+function botTap(wx,wy){if(G.scene!=='lobby')return false;let hit=null,hd=21;
+  for(const U of botUnits()){if(!U.placed||U.dim!==G.dim)continue;const d=Math.abs(wx-U.x);if(d<hd&&wy>-44&&wy<6){hd=d;hit=U;}}
   if(!hit)return false;if(Math.abs(lobbyPlayer.x-hit.x)>170){UI.toast('Подойди ближе к роботу «'+hit.name+'»');return true;}SFX.ui();UI.sorter(hit.id);return true;}
 const MOB_CAP=30;
 function mobRate(){const r=settings.mobRate;return (typeof r==='number'&&r>=0)?r:1;}
