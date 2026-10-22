@@ -88,7 +88,9 @@ LM_MODEL.lbutterfly=function(g,m,FY,t,T,st,k,wv,ph){
   const fl=Math.sin(t*fast+m.phase),fl2=Math.sin(t*fast+m.phase-0.7);
   const dvA=dive?Math.atan2(m.dvy===undefined?0.7:m.dvy,Math.abs(m.dvx===undefined?1:m.dvx)||1):0;
   const tilt=dive?0.45+dvA*0.5:st==='swoopw'?-0.3*k:(wu>0?-(T?0.2:0.12)*k:Math.sin(t*1.7)*0.05);
-  g.save();g.translate(0,-wu*(st==='swoopw'?0:2.2));g.rotate(tilt);
+  /* тело покачивается: подъём на взмахе, плавное парение; в быстром полёте наклон вперёд, лапки и брюшко отстают */
+  const lean=clamp((m.vx||0)*(m.facing||1)/90,-1,1),sw1=Math.sin(t*2.1+m.phase*3);
+  g.save();g.translate(0,-wu*(st==='swoopw'?0:2.2)+Math.sin(t*3.1+m.phase*5)*0.8-fl*0.7*(dive?0.3:1));g.rotate(tilt+lean*0.1);
   /* углы крыльев: взмах; в замахе подняты и дрожат, в броске отведены назад */
   const upA=(T?0.1:-0.1)+fl*0.42,wA=wu>0?-0.66+Math.sin(t*34)*0.07*wu:dive?0.55+fl*0.12:upA;
   const sc=wu>0?1+(T?0.17:0.1)*wu:dive?0.8:1;
@@ -105,15 +107,16 @@ LM_MODEL.lbutterfly=function(g,m,FY,t,T,st,k,wv,ph){
     /* ближние крылья (−x) */
     for(const hind of [1,0]){g.save();g.translate(-2,-3.2+(hind?1.6:0));g.scale(-sc*lmMeadowWS,sc*lmMeadowWS);g.rotate(nearA*(hind?0.75:1)+(hind?0.5:0));lmMeadowWingI(g,hind,false,t);g.restore();}
     /* ножки */
-    g.strokeStyle='#c8789e';g.lineWidth=0.7;g.lineCap='round';for(const [x0,x1,y1] of [[-1.4,-3,14.6],[1.4,1.2,15.4]]){g.beginPath();g.moveTo(x0,10);g.quadraticCurveTo((x0+x1)/2-0.6,12.6,x1,y1);g.stroke();g.fillStyle='#ff9cc8';g.beginPath();g.arc(x1,y1,0.7,0,TAU);g.fill();}
+    g.strokeStyle='#c8789e';g.lineWidth=0.7;g.lineCap='round';for(const [x0,x1,y1] of [[-1.4,-3,14.6],[1.4,1.2,15.4]]){const lg=Math.sin(t*2.6+x0*2+m.phase)*0.7-lean*2.4+fl2*0.5,xe=x1+lg,ye=y1-Math.abs(lean)*0.8;g.beginPath();g.moveTo(x0,10);g.quadraticCurveTo((x0+xe)/2-0.6+lg*0.5,12.6,xe,ye);g.stroke();g.fillStyle='#ff9cc8';g.beginPath();g.arc(xe,ye,0.7,0,TAU);g.fill();}
     /* брюшко: радужные кольца */
+    g.save();g.translate(-0.4,1);g.rotate(sw1*0.06-lean*0.08+fl2*0.03);g.translate(0.4,-1);
     g.beginPath();g.ellipse(-0.6,6.4,3.3,7.2,0.1,0,TAU);lmMeadowSoft(g,'#ffcce2',-1.5,3,8);
     g.save();g.clip();
     const bc=['#ffa8d0','#d0b0ff','#a8d8ff','#fff0a0','#ffa8d0'];
     for(let i=0;i<5;i++){g.fillStyle=bc[i];g.globalAlpha=0.85;g.fillRect(-5,1.6+i*2.5,9,1.5);}g.globalAlpha=1;
     g.fillStyle='rgba(255,255,255,.5)';g.fillRect(-2.6,0,0.9,15);
     g.fillStyle='rgba(120,60,160,.28)';g.beginPath();g.ellipse(1.4,8,2.2,8,0,0,TAU);g.fill();
-    g.restore();
+    g.restore();g.restore();
     /* грудка: пушистый воротник */
     lmFluff(g,0.2,-3,4.8,4.2,9,0.2,3.7);lmMeadowSoft(g,'#ffe2ee',-1,-5,5.5);
     lmFur(g,[[-2.4,-5,-0.9,-0.7],[0,-6.6,0.2,-1.4],[2.6,-5.4,1,-1],[-3.2,-2,-1.2,0.4],[3.2,-1.6,1.2,0.6],[-1,-0.6,-0.2,1.1],[1.4,-0.2,0.4,1.1]],'rgba(255,170,205,.75)',0.5);
@@ -296,9 +299,16 @@ function lmMeadowMothT(g,m,t,st,k,wu,dive,nearA,sc,fl){
 
 /* ---- Ромашка-глазунья ---- */
 /* поза: наклон головы, приседание, удар — общие для обоих обликов */
-function lmMeadowDaisyPose(m,t,st,k){
-  const walk=Math.abs(m.vx)>6,root=st==='root'?k:0,seed=st==='seed'?k:0,hit=m.atkT>0?Math.sin((1-m.atkT/0.24)*Math.PI):0;
-  return {walk,root,seed,hit,sw:walk?Math.sin(m.anim*9):0,lean:root*2.4-seed*2+hit*3.2,drop:root*2.4+hit*1.2-seed*0.4,idle:Math.sin(t*1.6+m.phase)};
+function lmMeadowDaisyPose(m,t,st,k,T){
+  const mk=m.mk||0,root=st==='root'?k:0,seed=st==='seed'?k:0,hit=m.atkT>0?Math.sin((1-m.atkT/0.24)*Math.PI):0,ph=m.phase||0;
+  const busy=1-Math.min(1,root+seed+hit*2),calm=busy*(1-mk);   /* calm — полный покой: можно жестикулировать */
+  /* дыхание: в Истине два разных ритма — вдох неровный, с подёргиванием */
+  const bth=T?lmBreath(t,ph,1.9)*0.6+lmBreath(t*1.37+1.3,ph,2.9)*0.4:lmBreath(t,ph,2.2);
+  const gp=lmGait(m,14);
+  return {mk,walk:mk>0.05,root,seed,hit,calm,bth,gp,sw:Math.sin(gp)*mk,bob:lmBob(m,14,1.1),
+    lean:root*2.4-seed*2+hit*3.2+mk*1.3,drop:root*2.4+hit*1.2-seed*0.4+bth*0.5,idle:Math.sin(t*1.6+ph),
+    look:Math.sin(t*0.7+ph*5)*0.5+Math.sin(t*1.9+ph*3)*0.2,fg:lmFidget(t,ph,4.2)*calm,fg2:lmFidget(t+1.9,ph,5.6)*calm,
+    tw:T?lmTwitch(t,ph,0.8):0,tw2:T?lmTwitch(t+2.1,ph,1.1):0};
 }
 /* лист-рука: остроконечный лист со средней жилкой; ang — угол от +x вниз */
 function lmMeadowLeaf(g,x,y,ang,L,W,col,vein){
@@ -330,39 +340,42 @@ function lmMeadowPetals(g,cx,cy,n,rot,r0,L,w,wob,t,droop){
     g.moveTo(r0,-w*0.4);g.bezierCurveTo(ln*0.35,-w*1.12,ln*0.9,-w*0.95,ln,-w*0.12);g.quadraticCurveTo(ln*1.03,0,ln,w*0.12);g.bezierCurveTo(ln*0.9,w*0.95,ln*0.35,w*1.12,r0,w*0.4);g.closePath();g.restore();}
 }
 LM_MODEL.ldaisy=function(g,m,FY,t,T,st,k,wv,ph){
-  const P=lmMeadowDaisyPose(m,t,st,k);
+  const P=lmMeadowDaisyPose(m,t,st,k,T);
+  /* дыхание: тело растёт от линии земли, ступни не отрываются */
+  g.save();g.translate(0,FY);g.scale(1-P.bth*0.012,1+P.bth*0.03);g.translate(0,-FY);
   if(!T)lmMeadowDaisyI(g,m,FY,t,st,k,P);else lmMeadowDaisyT(g,m,FY,t,st,k,P);
+  g.restore();
 };
 function lmMeadowDaisyI(g,m,FY,t,st,k,P){
-  const G1='#58b840',GD='#2e7a30',GL='#8ae060',hx=1.2+P.lean,hy=FY-28.4+P.drop,sw=P.sw;
-  const hipY=FY-10.6-P.root*1.2;
+  const G1='#58b840',GD='#2e7a30',GL='#8ae060',hx=1.2+P.lean+P.look*0.4,hy=FY-28.4+P.drop+P.bob,sw=P.sw;
+  const hipY=FY-10.6-P.root*1.2+P.bob*0.6;
   /* дальняя нога и дальняя рука-лист (темнее, позади) */
-  {const s=lmStep(m,Math.PI,3.6),fx=-1.2+s[0]+P.lean*0.2,fy=FY-0.8+s[1];
+  {const s=lmFoot(m,Math.PI,14,3),fx=-1.2+s[0]+P.lean*0.2,fy=FY-0.8+s[1];
    const e=lmMeadowLimb2(g,-1.6,hipY,fx,fy,5.9,5.9,false,1.8,shadeHex(G1,-0.3),'#0a3018');lmMeadowFoot(g,e[0],e[1],shadeHex(GD,-0.1),4);}
-  lmMeadowLeaf(g,-0.6,FY-18.2,P.root?Math.PI-1.1:(Math.PI-0.6+sw*0.4+P.idle*0.08),9,3.4,shadeHex(G1,-0.32),'rgba(255,255,255,.3)');
+  lmMeadowLeaf(g,-0.6,FY-18.2,P.root?Math.PI-1.1:(Math.PI-0.6-sw*0.45+P.idle*0.1+P.fg2*0.3),9,3.4,shadeHex(G1,-0.32),'rgba(255,255,255,.3)');
   /* стебель */
   const nx=hx-0.4,ny=hy+7.8;
   lmMeadowStem(g,0,hipY+0.6,sw*0.9-0.6+P.lean*0.2,(hipY+ny)/2,nx,ny,3.8,3,G1,'#0e4a22');
   /* листик-юбка на стебле и светлая жилка */
   g.strokeStyle='rgba(190,255,150,.55)';g.lineWidth=0.5;g.lineCap='round';g.beginPath();g.moveTo(-0.9,hipY-0.4);g.quadraticCurveTo(sw*0.8-1.4,(hipY+ny)/2,nx-1,ny+0.6);g.stroke();
   /* ближняя нога */
-  {const s=lmStep(m,0,3.6),fx=3.4+s[0]+P.lean*0.2,fy=FY-0.8+s[1];
+  {const s=lmFoot(m,0,14,3),fx=3.4+s[0]+P.lean*0.2,fy=FY-0.8+s[1]-P.fg2*1.3*Math.abs(Math.sin(t*9));
    const e=lmMeadowLimb2(g,2,hipY,fx,fy,5.9,5.9,false,2,G1,'#0a3018');lmMeadowFoot(g,e[0],e[1],GD,4.6);
    if(P.root>0){/* корни прорастают из ступней в землю */
      g.strokeStyle='#6aa83a';g.lineWidth=0.8;g.lineCap='round';for(const [sx,dir] of [[e[0]-0.4,-1],[e[0]+1.6,1],[e[0]+3.4,1.4],[-1.4,-1.2]]){g.beginPath();g.moveTo(sx,FY-0.2);g.quadraticCurveTo(sx+dir*2*P.root,FY+2.6*P.root,sx+dir*4.4*P.root,FY+3.4*P.root);g.stroke();}}}
   /* ближняя рука-лист: качается, замахивается на «seed», бьёт при ударе */
-  const nearArm=()=>{const aN=P.seed>0?0.6-P.seed*1.5:P.hit>0?0.6-P.hit*0.9:P.root>0?1.1+Math.sin(t*30)*0.05:0.6-sw*0.4+P.idle*0.07;
+  const nearArm=()=>{const aN=P.seed>0?0.6-P.seed*1.5:P.hit>0?0.6-P.hit*0.9:P.root>0?1.1+Math.sin(t*30)*0.05:0.6+sw*0.5+P.idle*0.1-P.fg*(0.9+Math.sin(t*11)*0.25);
   lmMeadowLeaf(g,0.8,FY-18.2,aN,10,3.8,G1,'rgba(255,255,255,.4)');
   if(P.seed>0.3){/* зёрнышко в листе */g.fillStyle='#c8a040';g.beginPath();g.ellipse(0.8+Math.cos(aN)*8.6,FY-18.2+Math.sin(aN)*8.6,1.3,0.8,aN,0,TAU);g.fill();}};
   if(!(P.seed>0))nearArm();
   /* голова-цветок */
-  g.save();g.translate(hx,hy);g.rotate(P.idle*0.05+P.lean*0.05-P.seed*0.1);
+  g.save();g.translate(hx,hy);g.rotate(P.idle*0.06+P.look*0.05+P.lean*0.05-P.seed*0.1+Math.sin(P.gp*2)*0.025*P.mk);
   /* задний ряд лепестков — темнее, глубже */
   const gp=(c0,c1)=>{const gr=g.createRadialGradient(0,0,4,0,0,12.4);gr.addColorStop(0,c0);gr.addColorStop(0.55,c1);gr.addColorStop(1,'#fffefa');return gr;};
-  lmMeadowPetals(g,0,0,10,0.24+t*0.04,3,12.2,3.9,1,t);g.fillStyle=gp('#d8b8d8','#f0dce8');g.fill();g.strokeStyle='#bc98c0';g.lineWidth=0.6;g.lineJoin='round';g.stroke();
-  g.save();lmMeadowPetals(g,0,0,10,0.24+t*0.04,3,12.2,3.9,1,t);g.clip();g.fillStyle='rgba(120,70,150,.18)';g.beginPath();g.arc(0,0,11,0,TAU);g.arc(-1.4,-1.8,9.6,0,TAU,true);g.fill();g.restore();
+  lmMeadowPetals(g,0,0,10,0.24+t*0.04,3,12.2*(1+P.bth*0.035),3.9,2.2,t);g.fillStyle=gp('#d8b8d8','#f0dce8');g.fill();g.strokeStyle='#bc98c0';g.lineWidth=0.6;g.lineJoin='round';g.stroke();
+  g.save();lmMeadowPetals(g,0,0,10,0.24+t*0.04,3,12.2*(1+P.bth*0.035),3.9,2.2,t);g.clip();g.fillStyle='rgba(120,70,150,.18)';g.beginPath();g.arc(0,0,11,0,TAU);g.arc(-1.4,-1.8,9.6,0,TAU,true);g.fill();g.restore();
   /* передний ряд */
-  lmMeadowPetals(g,0,0,10,0.24+Math.PI/10+t*0.05,3,11.4,3.8,1.4,t+1);g.fillStyle=gp('#ecd2e8','#fff6f8');g.fill();g.strokeStyle='#cfaed0';g.lineWidth=0.6;g.stroke();
+  lmMeadowPetals(g,0,0,10,0.24+Math.PI/10+t*0.05,3,11.4*(1+P.bth*0.035),3.8,3,t+1);g.fillStyle=gp('#ecd2e8','#fff6f8');g.fill();g.strokeStyle='#cfaed0';g.lineWidth=0.6;g.stroke();
   /* прожилки лепестков и блики */
   g.strokeStyle='rgba(205,170,200,.7)';g.lineWidth=0.35;for(let i=0;i<10;i++){const a=0.24+Math.PI/10+t*0.05+i/10*TAU;g.beginPath();g.moveTo(Math.cos(a)*6.4,Math.sin(a)*6.4);g.lineTo(Math.cos(a)*10,Math.sin(a)*10);g.stroke();}
   g.strokeStyle='rgba(255,255,255,.9)';g.lineWidth=0.7;g.lineCap='round';for(let i=0;i<10;i++){const a=0.24+Math.PI/10+t*0.05+i/10*TAU;if(Math.sin(a)<-0.2&&Math.cos(a)<0.4){g.beginPath();g.arc(0,0,9.2,a-0.2,a+0.1);g.stroke();}}
@@ -372,7 +385,7 @@ function lmMeadowDaisyI(g,m,FY,t,st,k,P){
   g.strokeStyle='rgba(255,245,170,.7)';g.lineWidth=0.6;g.beginPath();g.arc(0.6,0.2,4.9,Math.PI*1.05,Math.PI*1.55);g.stroke();
   g.fillStyle='rgba(200,110,30,.55)';for(let i=0;i<10;i++){const a=i/10*TAU+0.3;g.beginPath();g.arc(0.6+Math.cos(a)*5.5,0.2+Math.sin(a)*5.5,0.28,0,TAU);g.fill();}
   /* выражение */
-  const fx=1.4+P.lean*0.08,bl=(Math.sin(m.anim*1.1+m.phase*7)>0.985);
+  const fx=1.4+P.lean*0.08+P.look*0.5,bl=(Math.sin(m.anim*1.1+m.phase*7)>0.985);
   g.strokeStyle='#5a2a10';g.lineWidth=0.85;g.lineCap='round';
   if(P.root>0.1){/* сердитые щурые глаза и стиснутые зубы */
     g.beginPath();g.moveTo(fx-3.8,-2.6);g.lineTo(fx-1.2,-1.2);g.moveTo(fx+4.2,-2.6);g.lineTo(fx+1.8,-1.2);g.stroke();
@@ -386,7 +399,7 @@ function lmMeadowDaisyI(g,m,FY,t,st,k,P){
       g.lineWidth=0.4;g.beginPath();g.moveTo(fx-4.1,-1.1);g.lineTo(fx-4.9,-1.7);g.moveTo(fx+4.5,-1.1);g.lineTo(fx+5.3,-1.7);g.stroke();}
     /* рот: улыбка; на «seed» — круглый рот, плюющий семечки */
     if(P.seed>0.1){g.fillStyle='#6a2010';g.beginPath();g.ellipse(fx+0.4,2.6,1.5+P.seed*0.7,1.3+P.seed*1.4,0,0,TAU);g.fill();g.strokeStyle='#5a2a10';g.lineWidth=0.5;g.stroke();}
-    else{g.fillStyle='#7a2a14';g.beginPath();g.moveTo(fx-2.8,1.2);g.quadraticCurveTo(fx+0.4,2,fx+3.6,1.2);g.quadraticCurveTo(fx+3,4.8,fx+0.4,4.9);g.quadraticCurveTo(fx-2.2,4.8,fx-2.8,1.2);g.closePath();g.fill();
+    else{g.fillStyle='#7a2a14';g.beginPath();g.moveTo(fx-2.8,1.2);g.quadraticCurveTo(fx+0.4,2,fx+3.6,1.2);g.quadraticCurveTo(fx+3,4.8+P.fg2*1.2,fx+0.4,4.9+P.fg2*1.4);g.quadraticCurveTo(fx-2.2,4.8+P.fg2*1.2,fx-2.8,1.2);g.closePath();g.fill();
       g.save();g.clip();g.fillStyle='#ff8a8a';g.beginPath();g.ellipse(fx+0.5,4.9,2,1.3,0,0,TAU);g.fill();g.fillStyle='#fff7e8';g.fillRect(fx-2.8,0.9,6.8,1.1);g.restore();
       g.strokeStyle='#5a2a10';g.lineWidth=0.5;g.beginPath();g.moveTo(fx-2.8,1.2);g.quadraticCurveTo(fx+0.4,2,fx+3.6,1.2);g.stroke();}
   }
@@ -399,9 +412,9 @@ function lmMeadowDaisyI(g,m,FY,t,st,k,P){
   if(P.root>0)mobGlow(g,1,FY,10+P.root*8,'#9aff6a',0.4*P.root);
 }
 /* когтистые пальцы-корешки: n кривых загнутых когтей от точки x,y по направлению ang */
-function lmMeadowTwigClaws(g,x,y,ang,n,len,col,t,spread){
+function lmMeadowTwigClaws(g,x,y,ang,n,len,col,t,spread,jit){
   g.strokeStyle=col;g.lineCap='round';g.lineJoin='round';
-  for(let i=0;i<n;i++){const u=n===1?0:(i/(n-1)-0.5),a=ang+u*(spread||1.5)+Math.sin(t*3+i*1.4)*0.05,l=len*(1-Math.abs(u)*0.3),cx=Math.cos(a),cy=Math.sin(a);
+  for(let i=0;i<n;i++){const u=n===1?0:(i/(n-1)-0.5),a=ang+u*(spread||1.5)+Math.sin(t*3+i*1.4)*0.05+(jit?Math.sin(t*5.1+i*2.3)*0.1+lmTwitch(t,i*0.29,1.6)*0.45:0),l=len*(1-Math.abs(u)*0.3),cx=Math.cos(a),cy=Math.sin(a);
     g.lineWidth=0.95;g.beginPath();g.moveTo(x,y);g.quadraticCurveTo(x+cx*l*0.6-cy*0.8*u*2,y+cy*l*0.6+cx*0.8*u*2,x+cx*l+cy*0.5,y+cy*l-cx*0.5+0.6);g.stroke();
     g.fillStyle=shadeHex(col,0.25);g.beginPath();g.arc(x+cx*l*0.45,y+cy*l*0.45,0.5,0,TAU);g.fill();}
 }
@@ -425,7 +438,7 @@ function lmMeadowBigEye(g,m,x,y,r,P,t){
   g.beginPath();g.arc(0,0,r,0,TAU);
   const gr=g.createRadialGradient(-r*0.35,-r*0.4,r*0.1,0,0,r*1.05);gr.addColorStop(0,'#fbf2e2');gr.addColorStop(0.55,'#e4d0b8');gr.addColorStop(0.85,'#b88c78');gr.addColorStop(1,'#6a3030');g.fillStyle=gr;g.fill();
   g.save();g.clip();
-  const lx=(m.lookX||0)*m.facing*r*0.32,ly=(m.lookY||0)*r*0.28;
+  const lx=(m.lookX||0)*m.facing*r*0.32+(P.look*0.5+P.tw2*0.9)*r*0.22,ly=(m.lookY||0)*r*0.28+P.tw*r*0.16;
   /* жилки сходятся к радужке */
   g.strokeStyle='rgba(170,16,28,.8)';g.lineWidth=0.4;
   for(let i=0;i<11;i++){const a=i/11*TAU+0.3,x0=Math.cos(a)*r*1.05,y0=Math.sin(a)*r*1.05,x1=lx+Math.cos(a+0.2)*r*0.5,y1=ly+Math.sin(a+0.2)*r*0.5;
@@ -450,45 +463,45 @@ function lmMeadowBigEye(g,m,x,y,r,P,t){
   g.restore();
 }
 function lmMeadowDaisyT(g,m,FY,t,st,k,P){
-  const BK='#5e4c34',BD='#2a1e12',hx=1.2+P.lean,hy=FY-28.4+P.drop,sw=P.sw,hipY=FY-10.6-P.root*1.2;
+  const BK='#5e4c34',BD='#2a1e12',hx=1.2+P.lean+P.look*0.5+P.tw*0.9,hy=FY-28.4+P.drop+P.bob+Math.abs(P.tw2)*0.8,sw=P.sw,hipY=FY-10.6-P.root*1.2+P.bob*0.6;
   const claw='#a89878';
   /* дальняя нога: узловатый корень */
-  {const s=lmStep(m,Math.PI,3.6),fx=-2.2+s[0],fy=FY-0.8+s[1];
-   const e=lmMeadowLimb2(g,-1.6,hipY,fx,fy,6,6.2,false,1.9,shadeHex(BK,-0.35),'#0a0604');lmMeadowTwigClaws(g,e[0],e[1],0.5,4,3.8,shadeHex(claw,-0.4),t,2.2);}
+  {const s=lmFoot(m,Math.PI,14,3.2),fx=-2.2+s[0]+P.tw2*P.mk*1.2,fy=FY-0.8+s[1];
+   const e=lmMeadowLimb2(g,-1.6,hipY,fx,fy,6,6.2,false,1.9,shadeHex(BK,-0.35),'#0a0604');lmMeadowTwigClaws(g,e[0],e[1],0.5,4,3.8,shadeHex(claw,-0.4),t,2.2,1);}
   /* дальняя рука: длинная, висит, когти почти у земли */
-  {const tx=-7.6+sw*1.5-P.seed*2,ty=P.root>0?FY-0.8:FY-9+Math.sin(t*1.8)*0.8;
-   const e=lmMeadowLimb2(g,-0.4,FY-19,tx,ty,7,7.6,true,1.6,shadeHex(BK,-0.35),'#0a0604');lmMeadowTwigClaws(g,e[0],e[1],1.5,4,4.4,shadeHex(claw,-0.4),t,1.9);
+  {const tx=-7.6+sw*2.2-P.seed*2+P.tw2*1.6,ty=P.root>0?FY-0.8:FY-9+Math.sin(t*1.8)*0.8+Math.sin(t*2.9+1)*0.5+P.tw*1.2;
+   const e=lmMeadowLimb2(g,-0.4,FY-19,tx,ty,7,7.6,true,1.6,shadeHex(BK,-0.35),'#0a0604');lmMeadowTwigClaws(g,e[0],e[1],1.5,4,4.4,shadeHex(claw,-0.4),t,1.9,1);
    /* остаток Иллюзии: лоскут зелёного листа, повисший на запястье */
    g.save();g.translate(e[2],e[3]);g.rotate(0.9);g.fillStyle='#4a6a30';g.beginPath();g.moveTo(0,0);g.quadraticCurveTo(2.4,-1.8,5,0.4);g.lineTo(3.8,1);g.lineTo(4.4,2.4);g.lineTo(2,1.4);g.lineTo(1,2.2);g.closePath();g.fill();g.strokeStyle='#1c2a10';g.lineWidth=0.4;g.stroke();g.restore();}
   /* стебель: корявый, в шипах и ране-пасти */
-  const nx=hx-0.4,ny=hy+7.6,cxs=sw*0.9-1.2+P.lean*0.3,cys=(hipY+ny)/2;
+  const nx=hx-0.4,ny=hy+7.6,cxs=sw*0.9-1.2+P.lean*0.3+P.tw*0.8,cys=(hipY+ny)/2;
   const SS=lmMeadowStem(g,0,hipY+0.6,cxs,cys,nx,ny,4.2,3.4,'#4e5030','#14100a');
   g.save();g.beginPath();g.moveTo(SS.L[0][0],SS.L[0][1]);for(const q of SS.L)g.lineTo(q[0],q[1]);for(let i=SS.R.length-1;i>=0;i--)g.lineTo(SS.R[i][0],SS.R[i][1]);g.closePath();g.clip();
   g.strokeStyle='rgba(20,14,8,.7)';g.lineWidth=0.4;for(let i=0;i<5;i++){const q=SS.L[1+i];g.beginPath();g.moveTo(q[0]+0.6,q[1]);g.lineTo(q[0]+1.4+i%2,q[1]-1.6);g.moveTo(SS.R[2+i][0]-0.5,SS.R[2+i][1]);g.lineTo(SS.R[2+i][0]-1.2,SS.R[2+i][1]+1.5);g.stroke();}
   g.fillStyle='#8a1a22';g.beginPath();g.ellipse(SS.L[3][0]+1.2,SS.L[3][1],0.5,2.4,0.1,0,TAU);g.fill();g.beginPath();g.ellipse(SS.R[6][0]-1,SS.R[6][1]+0.6,0.4,1.8,0,0,TAU);g.fill();
   /* вертикальная рана-пасть с иглами зубов */
-  const mp=SS.L[4],mq=SS.R[4],mxm=(mp[0]+mq[0])/2,mym=(mp[1]+mq[1])/2,open=0.55+P.root*0.4+P.hit*0.4+Math.sin(t*2.2)*0.1;
+  const mp=SS.L[4],mq=SS.R[4],mxm=(mp[0]+mq[0])/2,mym=(mp[1]+mq[1])/2,open=0.55+P.root*0.4+P.hit*0.4+Math.sin(t*2.2)*0.1+Math.sin(t*5.3)*0.08+Math.abs(P.tw)*0.5;
   g.fillStyle='#2a0408';g.beginPath();g.ellipse(mxm+0.3,mym,0.5+open*0.9,2.8,0.08,0,TAU);g.fill();
   g.fillStyle='#e8dcc0';for(let i=0;i<4;i++){const yy=mym-2+i*1.1;g.beginPath();g.moveTo(mxm-1.1,yy);g.lineTo(mxm-0.1,yy+0.5);g.lineTo(mxm-1.1,yy+0.9);g.fill();g.beginPath();g.moveTo(mxm+1.7,yy+0.4);g.lineTo(mxm+0.7,yy+0.9);g.lineTo(mxm+1.7,yy+1.3);g.fill();}
   g.restore();
   /* шипы по краям стебля */
   for(const [i,sd] of [[2,-1],[3,1],[5,-1],[6,1],[7,-1]]){const q=sd<0?SS.L[i]:SS.R[i];lmMeadowThorn(g,q[0],q[1],sd<0?Math.PI+0.5:-0.5,2.6,0.7,'#b8a880');}
   /* ближняя нога */
-  {const s=lmStep(m,0,3.6),fx=3.6+s[0],fy=FY-0.8+s[1];
+  {const s=lmFoot(m,0,14,3.2),fx=3.6+s[0]-P.tw*P.mk*1.2,fy=FY-0.8+s[1];
    const e=lmMeadowLimb2(g,2,hipY,fx,fy,6,6.2,false,2.2,BK,'#0a0604');lmMeadowThorn(g,e[2]-0.4,e[3]-0.6,-1.6,2.4,0.6,'#b8a880');lmMeadowTwigClaws(g,e[0],e[1],0.4,4,4.2,claw,t,2.3);
    if(P.root>0){g.strokeStyle='#4a2a1a';g.lineWidth=1.1;g.lineCap='round';for(const [sx,dir] of [[e[0]-0.4,-1],[e[0]+1.6,1],[e[0]+3.4,1.4],[-1.4,-1.2],[-3,-1.6]]){g.beginPath();g.moveTo(sx,FY-0.2);g.quadraticCurveTo(sx+dir*2*P.root,FY+2.6*P.root,sx+dir*5*P.root,FY+3.4*P.root);g.stroke();}
      mobGlow(g,e[0],FY,9+P.root*5,'#ff3a2a',0.35*P.root);}}
   /* ближняя рука: замах — вверх, удар — вперёд, корни — вонзается в землю */
-  const nearArm=()=>{const tx=P.seed>0?9+P.seed*3:P.hit>0?13+P.hit*3:P.root>0?7.4:8.8+sw*1.5,ty=P.seed>0?FY-18-P.seed*10:P.hit>0?FY-16:P.root>0?FY-0.8:FY-8.4+Math.sin(t*1.9+1)*0.8;
+  const nearArm=()=>{const tx=P.seed>0?9+P.seed*3:P.hit>0?13+P.hit*3:P.root>0?7.4:8.8-sw*2.2+P.fg*2+P.tw2*1.4,ty=P.seed>0?FY-18-P.seed*10:P.hit>0?FY-16:P.root>0?FY-0.8:FY-8.4+Math.sin(t*1.9+1)*0.8+Math.sin(t*3.3)*0.5-P.fg*5-P.tw2*1.6;
    const e=lmMeadowLimb2(g,0.8,FY-18.4,tx,ty,7,7.6,false,1.9,BK,'#0a0604');
-   lmMeadowThorn(g,e[2]+0.2,e[3]-1,-1.2,2.6,0.6,'#b8a880');lmMeadowTwigClaws(g,e[0],e[1],P.seed>0?-1.4:P.hit>0?0:1.5,5,5,claw,t,2);
+   lmMeadowThorn(g,e[2]+0.2,e[3]-1,-1.2,2.6,0.6,'#b8a880');lmMeadowTwigClaws(g,e[0],e[1],P.seed>0?-1.4:P.hit>0?0:1.5,5,5,claw,t,2,1);
    if(P.seed>0.3){g.fillStyle='#c8a040';g.beginPath();g.ellipse(e[0],e[1]-1.2,1.4,0.9,0.4,0,TAU);g.fill();}};
   if(!(P.seed>0))nearArm();
   /* голова-цветок */
-  g.save();g.translate(hx,hy);g.rotate(P.idle*0.05+P.lean*0.05-P.seed*0.1);
+  g.save();g.translate(hx,hy);g.rotate(P.idle*0.06+P.look*0.05+P.lean*0.05-P.seed*0.1+P.tw*0.16+Math.sin(P.gp*2)*0.03*P.mk);
   const fl=P.root;
   /* задний ряд: тёмные, скрюченные */
-  lmMeadowPetalsT(g,0,0,10,0.3+Math.sin(t*0.6)*0.03,3,12.4,4.8,3.4,1.3,fl);
+  lmMeadowPetalsT(g,0,0,10,0.3+Math.sin(t*0.6)*0.03+P.tw2*0.05,3,12.4*(1+P.bth*0.03),4.8,3.4,1.3,fl);
   {const gr=g.createRadialGradient(0,0,3,0,0,12);gr.addColorStop(0,'#2a0c12');gr.addColorStop(0.6,'#5a2a30');gr.addColorStop(1,'#3a181e');g.fillStyle=gr;g.fill();g.strokeStyle='#14060a';g.lineWidth=0.7;g.lineJoin='round';g.stroke();}
   /* передний ряд: мясистые, с венами; пара лепестков — грязные остатки белых */
   const fr=i=>!(i===5||i===7);
@@ -504,7 +517,7 @@ function lmMeadowDaisyT(g,m,FY,t,st,k,P){
     g.lineWidth=0.35;for(const da of [-0.22,0.22]){g.beginPath();g.moveTo(Math.cos(a)*8,Math.sin(a)*8);g.lineTo(Math.cos(a+da)*10.2,Math.sin(a+da)*10.2);g.stroke();}
     g.strokeStyle='rgba(230,130,140,.3)';g.lineWidth=0.3;g.beginPath();g.moveTo(Math.cos(a-0.05)*6.6,Math.sin(a-0.05)*6.6);g.lineTo(Math.cos(a-0.05)*10,Math.sin(a-0.05)*10);g.stroke();}
   /* вторые и третьи глаза в основании лепестков */
-  lmMeadowAlmond(g,m,-7.2,6.4,1.9,1.3,0.8,P.root*0.8,0.8);
+  lmMeadowAlmond(g,m,-7.2,6.4,1.9,1.3,0.8-Math.abs(P.tw2)*0.5,P.root*0.8,0.8);
   lmMeadowAlmond(g,m,8.2,-5,1.6,1.1,0.7,P.root*0.8,-0.7);
   /* диск-остаток улыбки: болезненно-жёлтый с трещинами и шрамом-ухмылкой на швах */
   g.beginPath();g.arc(0.5,0.1,7.6,0,TAU);mobPath(g,'#8a7430',-1.5,-2,8);
